@@ -1,0 +1,150 @@
+// src/services/wallet.service.js
+import { ethers } from "ethers";
+import { db } from "../../db/index.js";
+import {
+  setAllWalletsToCache,
+  getWalletsByUser,
+  setWalletsToCache,
+  delWalletFromCache,
+  getAllWalletsCache,
+} from "../../cache/wallet.cache.js";
+import { collectUsersWallets } from "./wallet.utils.js";
+
+/** Hard cap per user for the public OSS build (no tiered subscriptions). */
+const MAX_WALLETS_PER_USER = Number(process.env.MAX_WALLETS_PER_USER) || 50;
+
+function normalizeAddress(address) {
+  return address.trim().toLowerCase();
+}
+
+export async function addUserWallet(telegramId, address, label = null) {
+  const count = await db.wallets.countByUserId(telegramId);
+  if (count >= MAX_WALLETS_PER_USER) {
+    throw new Error("WALLET_LIMIT_REACHED");
+  }
+
+  // 🔐 Проверка адреса
+  if (!ethers.isAddress(address)) {
+    throw new Error("INVALID_ADDRESS");
+  }
+
+  const normalizedAddress = normalizeAddress(address);
+
+  // 🔁 Проверка на существование
+  const exists = await db.wallets.walletExists(telegramId, normalizedAddress);
+  if (exists) {
+    throw new Error("WALLET_ALREADY_EXISTS");
+  }
+
+  const wallet = await db.wallets.create({
+    user_id: telegramId,
+    address: normalizedAddress,
+    label,
+  });
+  let mapWallet = await getWalletsByUser(telegramId);
+  mapWallet.set(normalizedAddress, wallet);
+
+  setWalletsToCache(telegramId, mapWallet);
+
+  return wallet;
+}
+
+export async function removeUserWallet(telegramId, walletId) {
+  const removed = await db.wallets.deleteUserWallet(telegramId, walletId);
+
+  if (!removed) {
+    throw new Error("WALLET_NOT_FOUND");
+  }
+  delWalletFromCache(telegramId, walletId);
+  return removed;
+}
+
+export async function getUserWallets(telegramId) {
+  // 1️⃣ Пытаемся взять из кеша
+  let walletsMap = await getWalletsByUser(telegramId);
+
+  if (walletsMap && walletsMap.size > 0) {
+    return walletsMap;
+  }
+
+  // 2️⃣ Cache miss → идем в БД
+  const walletsFromDb = await db.wallets.findByUserId(telegramId);
+
+  const result = new Map();
+
+  for (const wallet of walletsFromDb) {
+    result.set(wallet.address, wallet);
+  }
+
+  // 3️⃣ Записываем в кеш
+  if (result.size > 0) {
+    await setWalletsToCache(telegramId, result);
+  }
+
+  return result;
+}
+
+export async function getUserWallet(telegramId, address) {
+  const normalizedAddress = normalizeAddress(address);
+
+  // 1️⃣ пробуем из кеша
+  let walletsMap = await getWalletsByUser(telegramId);
+
+  if (walletsMap && walletsMap.size > 0) {
+    const wallet = walletsMap.get(normalizedAddress);
+    if (wallet) return wallet;
+  }
+
+  // 2️⃣ cache miss → идем в БД
+  const walletExists = await db.wallets.walletExists(
+    telegramId,
+    normalizedAddress,
+  );
+
+  if (!walletExists) return null;
+
+  const walletFromDb = await db.wallets.findByUserAndAddress(
+    telegramId,
+    normalizedAddress,
+  );
+  if (!walletFromDb) return null;
+
+  // 3️⃣ обновляем кеш (чтобы не было частичного кеша)
+  if (!walletsMap || walletsMap.size === 0) {
+    walletsMap = new Map();
+  }
+
+  walletsMap.set(normalizedAddress, walletFromDb);
+  await setWalletsToCache(telegramId, walletsMap);
+
+  return walletFromDb;
+}
+
+export async function getAllWallets() {
+  // 1️⃣ Пробуем кеш
+  let wallets = await getAllWalletsCache();
+
+  if (wallets && wallets.size > 0) {
+    return wallets;
+  }
+
+  setAllWalletsToCache(wallets);
+
+  // 2️⃣ Cache miss → DB
+  const walletsArray = Object.values(await db.wallets.findAll());
+  const walletsUsers = collectUsersWallets(walletsArray);
+
+  // 3️⃣ Записываем в кеш
+  if (walletsUsers.size > 0) {
+    await setAllWalletsToCache(walletsUsers);
+  }
+
+  return walletsUsers;
+}
+
+export async function loadWalletsToCache() {
+  const walletsArray = Object.values(await db.wallets.findAll());
+  const walletsUsers = collectUsersWallets(walletsArray);
+  await setAllWalletsToCache(walletsUsers);
+  console.log("✅ Cached wallets:", walletsArray.length);
+}
