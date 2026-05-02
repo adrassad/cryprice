@@ -1,0 +1,17 @@
+# Пример: Postgres и опционально сервисы для локальной разработки.
+# Скопируйте в `docker-compose.yml`, настройте порты и переменные.
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: cryprice
+      POSTGRES_PASSWORD: cryprice
+      POSTGRES_DB: cryprice
+    ports:
+      - "5432:5432"
+    volumes:
+      - cryprice_pg_data:/var/lib/postgresql/data
+
+volumes:
+  cryprice_pg_data:

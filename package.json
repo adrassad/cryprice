@@ -1,0 +1,7 @@
+{
+  "name": "cryprice",
+  "private": true,
+  "workspaces": [
+    "packages/*"
+  ]
+}
