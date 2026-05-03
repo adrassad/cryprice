@@ -1,0 +1,29 @@
+# Dependencies
+node_modules/
+
+# Build
+dist/
+dist-ssr/
+*.local
+
+# Environment (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Logs & cache
+*.log
+npm-debug.log*
+.pnpm-debug.log*
+.vite/
+.cache/
+node_modules/.tmp/
+
+# OS / IDE
+.DS_Store
+.idea/
+*.swp
+*.swo
+
+# Test / coverage
+coverage/
