@@ -1,0 +1,59 @@
+name: crypto_tracker_app
+description: "Crypto tracker price."
+publish_to: "none"
+
+version: 1.0.0+1
+
+environment:
+  sdk: ^3.7.2
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_bloc: ^9.1.1
+  cupertino_icons: ^1.0.8
+  dio: ^5.8.0+1
+  get_it: ^8.0.3
+  shared_preferences: ^2.5.3
+  flutter_localizations:
+    sdk: flutter
+  flutter_gen: ^5.10.0
+  # 6.3.3+ uses Flutter's AssetManifest API; older 6.2.x loads removed AssetManifest.json and breaks on current Flutter (web).
+  google_fonts: ^6.3.3
+  google_sign_in: ^6.2.1
+  google_sign_in_web: ^0.12.4
+  flutter_secure_storage: ^9.2.2
+  url_launcher: ^6.3.1
+
+dev_dependencies:
+  dio_adapter: ^2.1.2
+  flutter_test:
+    sdk: flutter
+  mockito: ^5.4.6
+  build_runner: ^2.4.7
+  flutter_lints: ^5.0.0
+  http_mock_adapter: ^0.6.0
+  test: any
+  flutter_launcher_icons: ^0.14.3
+  mocktail: ^1.0.4
+  bloc_test: ^10.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true
+  assets:
+    - assets/gifs/loading.gif
+
+flutter_launcher_icons:
+  android: true
+  ios: true
+  web:
+    generate: true
+    image_path: "assets/icon.png"
+  macos:
+    generate: true
+    image_path: "assets/icon.png"
+  windows:
+    generate: true
+    image_path: "assets/icon.png"
+  image_path: "assets/icon.png"

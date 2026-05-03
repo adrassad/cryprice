@@ -1,0 +1,90 @@
+{
+  "@@locale": "en",
+  "appTitle": "Crypto Price",
+  "switchLanguage": "Switch to Russian",
+  "switchTheme": "Switch Theme",
+  "getPrice": "Get Price",
+  "count": "Count",
+  "coin1": "Coin 1",
+  "coin2": "Coin 2",
+  "enterTicker": "Please enter a tickers and count.",
+  "error_fetch_failed": "Failed to fetch price",
+  "error_no_internet": "No internet connection",
+  "error_unknown": "Unknown error occurred",
+  "resultsSectionCexTitle": "CEX prices",
+  "resultsSectionCexSubtitle": "Exchanges, indices, and off-chain API — one GET with ticker as last path segment",
+  "resultsSectionDexTitle": "DEX prices",
+  "resultsSectionDexSubtitle": "On-chain: one GET per symbol; last path segment is ticker, body lists all networks",
+  "resultsSectionDexEmpty": "No on-chain quotes for this symbol.",
+  "priceTypeCex": "CEX",
+  "priceTypeAggregated": "Index / API",
+  "priceTypeOffchain": "Off-chain",
+  "priceTypeOnchain": "On-chain",
+  "unknownNetwork": "Unknown network",
+  "labelNetwork": "Network",
+  "labelSymbol": "Symbol",
+  "labelCollected": "Collected",
+  "labelPair": "Pair",
+  "labelUpdated": "Updated",
+  "sourceCryprice": "CRYPRICE",
+  "typeDex": "DEX",
+  "labelTokenAddress": "Contract",
+  "statusFallback": "Fallback",
+  "statusStale": "Stale",
+  "emDash": "—",
+  "resultsContextNetwork": "Net: {name}",
+  "@resultsContextNetwork": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsContextAddress": "Addr: {addr}",
+  "@resultsContextAddress": {
+    "placeholders": {
+      "addr": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsSymbolLine": "Symbol: {value}",
+  "@resultsSymbolLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsNetworkLine": "Network: {value}",
+  "@resultsNetworkLine": {
+    "placeholders": {
+      "value": {
+        "type": "String"
+      }
+    }
+  },
+  "resultsDexErrorLine": "{source} — {network}\n{error}",
+  "@resultsDexErrorLine": {
+    "placeholders": {
+      "source": { "type": "String" },
+      "network": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "resultsCexErrorLine": "{provider}: ❌ {error}",
+  "@resultsCexErrorLine": {
+    "placeholders": {
+      "provider": { "type": "String" },
+      "error": { "type": "String" }
+    }
+  },
+  "copiedToClipboard": "Copied to clipboard",
+  "labelPrice": "Price",
+  "authScreenTitle": "Sign in",
+  "authScreenSubtitle": "Sign in to continue. Your session is stored on this device.",
+  "signIn": "Sign in",
+  "signOut": "Log out",
+  "signInWithGoogle": "Continue with Google",
+  "googleSignInWebTryAgain": "Try again"
+}
