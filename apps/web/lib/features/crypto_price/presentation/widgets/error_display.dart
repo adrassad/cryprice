@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_app/gen_l10n/app_localizations.dart';
+import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
 class ErrorDisplay extends StatelessWidget {

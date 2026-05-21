@@ -1,6 +1,6 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/conversion/user_pair_conversion_result.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/conversion/user_pair_quote_converter.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/conversion/user_pair_conversion_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/conversion/user_pair_quote_converter.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 import 'package:test/test.dart';
 
 PriceResult _cexRow({

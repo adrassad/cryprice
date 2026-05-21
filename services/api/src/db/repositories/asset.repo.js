@@ -98,4 +98,13 @@ export class AssetRepository extends BaseRepository {
     );
     return res.rows;
   }
+
+  async findByIds(ids) {
+    if (!ids?.length) return [];
+    const res = await this.db.query(
+      `SELECT * FROM assets WHERE id = ANY($1::bigint[])`,
+      [ids],
+    );
+    return res.rows;
+  }
 }

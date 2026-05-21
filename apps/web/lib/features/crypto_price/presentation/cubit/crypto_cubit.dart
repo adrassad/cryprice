@@ -1,9 +1,9 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/conversion/price_row_display_enricher.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/exceptions/crypto_exception.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/usecases/get_crypto_price_usecase.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/utils/display_count_parser.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/widgets/price_fetch_debug_panel.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/conversion/price_row_display_enricher.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/exceptions/crypto_exception.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/usecases/get_crypto_price_usecase.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/utils/display_count_parser.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/price_fetch_debug_panel.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 abstract class TitleState {}

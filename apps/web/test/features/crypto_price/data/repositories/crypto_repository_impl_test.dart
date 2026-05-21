@@ -1,7 +1,7 @@
-import 'package:crypto_tracker_app/features/crypto_price/data/datasources/backend/offchain_onchain_prices_client.dart';
-import 'package:crypto_tracker_app/features/crypto_price/data/repositories/crypto_repository_impl.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/datasources/backend/offchain_onchain_prices_client.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/repositories/crypto_repository_impl.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 
@@ -17,6 +17,24 @@ BackendPathTrace _trace(String path, bool on) => BackendPathTrace(
       statusCode: 200,
       rawDataRuntimeType: 'Map',
     );
+
+TracedPriceRows _emptyTraced(String path, bool on) =>
+    TracedPriceRows(<PriceResult>[], _trace(path, on));
+
+/// btc/u uses the dual non-stable fetch path (four backend calls).
+void _stubDualPathEmptyReverseLegs(
+  _MockBackend backend,
+  String t1,
+  String t2,
+  String count,
+) {
+  when(() => backend.fetchOffchainTraced(t2, t1, count)).thenAnswer(
+        (_) async => _emptyTraced('/prices/current/offchain/$t2', false),
+      );
+  when(() => backend.fetchOnchainTraced(t2, t1, count)).thenAnswer(
+        (_) async => _emptyTraced('/prices/current/onchain/$t2', true),
+      );
+}
 
 void main() {
   late _MockBackend backend;
@@ -43,9 +61,6 @@ void main() {
         _trace(_kOff, false),
       ),
     );
-    when(() => backend.fetchOffchainTraced('u', 'btc', '1')).thenAnswer(
-      (_) async => TracedPriceRows(<PriceResult>[], _trace(_kOff, false)),
-    );
     when(() => backend.fetchOnchainTraced('btc', 'u', '1')).thenAnswer(
       (_) async => TracedPriceRows(
         [
@@ -64,9 +79,7 @@ void main() {
         _trace(_kOn, true),
       ),
     );
-    when(() => backend.fetchOnchainTraced('u', 'btc', '1')).thenAnswer(
-      (_) async => TracedPriceRows(<PriceResult>[], _trace(_kOn, true)),
-    );
+    _stubDualPathEmptyReverseLegs(backend, 'btc', 'u', '1');
 
     final repo = CryptoRepositoryImpl(backend: backend);
     final r = await repo.getAllPrices('btc', 'u', '1');
@@ -98,14 +111,9 @@ void main() {
       ),
     );
     when(
-      () => backend.fetchOffchainTraced('u', 'btc', '1'),
-    ).thenAnswer((_) async => TracedPriceRows(<PriceResult>[], _trace(_kOff, false)));
-    when(
       () => backend.fetchOnchainTraced('btc', 'u', '1'),
     ).thenAnswer((_) async => TracedPriceRows(<PriceResult>[], _trace(_kOn, true)));
-    when(
-      () => backend.fetchOnchainTraced('u', 'btc', '1'),
-    ).thenAnswer((_) async => TracedPriceRows(<PriceResult>[], _trace(_kOn, true)));
+    _stubDualPathEmptyReverseLegs(backend, 'btc', 'u', '1');
 
     final repo = CryptoRepositoryImpl(backend: backend);
     final r = await repo.getAllPrices('btc', 'u', '1');
@@ -319,14 +327,6 @@ void main() {
       ),
     );
     when(
-      () => backend.fetchOffchainTraced('b', 'a', '1'),
-    ).thenAnswer(
-      (_) async => TracedPriceRows(
-        <PriceResult>[],
-        _trace('/prices/current/offchain/b', false),
-      ),
-    );
-    when(
       () => backend.fetchOnchainTraced('a', 'b', '1'),
     ).thenAnswer(
       (_) async => TracedPriceRows(
@@ -334,14 +334,7 @@ void main() {
         _trace('/prices/current/onchain/a', true),
       ),
     );
-    when(
-      () => backend.fetchOnchainTraced('b', 'a', '1'),
-    ).thenAnswer(
-      (_) async => TracedPriceRows(
-        <PriceResult>[],
-        _trace('/prices/current/onchain/b', true),
-      ),
-    );
+    _stubDualPathEmptyReverseLegs(backend, 'a', 'b', '1');
 
     final repo = CryptoRepositoryImpl(backend: backend);
     final r = await repo.getAllPrices('a', 'b', '1');

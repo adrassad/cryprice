@@ -36,8 +36,13 @@ The root `.env.example` defines `CRYPRICE_PUBLIC_API_URL` for client configurati
 | GET | `/networks` | Enabled blockchain networks |
 | POST | `/auth/google` | Google Sign-In token exchange (when configured) |
 | POST | `/auth/refresh` | JWT refresh (when configured) |
-
-Additional authenticated routes for wallet management, portfolio data, and alert configuration are implemented in the API service but require a running instance with configured credentials to explore interactively.
+| POST | `/auth/link/telegram` | Issue Telegram deep-link token for authenticated linking |
+| GET | `/users/me` | Current user profile (JWT) |
+| GET/POST/DELETE | `/wallets` | Monitored wallet addresses (JWT) |
+| GET | `/portfolio/summary` | Portfolio totals and allocation (JWT) |
+| GET | `/portfolio/positions` | DeFi positions across networks (JWT) |
+| GET | `/portfolio/report.pdf` | Server-side PDF export (JWT) |
+| GET | `/token-icons/:symbol` | Token icon metadata (public read) |
 
 ---
 

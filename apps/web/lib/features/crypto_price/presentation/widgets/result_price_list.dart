@@ -1,9 +1,9 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/conversion/price_row_display_enricher.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/widgets/cex_result_card.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/widgets/cryprice_dex_result_section.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/widgets/result_sections.dart';
-import 'package:crypto_tracker_app/gen_l10n/app_localizations.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/conversion/price_row_display_enricher.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/cex_result_card.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/cryprice_dex_result_section.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/result_sections.dart';
+import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 

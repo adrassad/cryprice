@@ -1,17 +1,21 @@
 # CryPrice — Flutter app (`apps/web`)
 
-Public, open-source Flutter client for the CryPrice API. In this monorepo it lives under **`apps/web`**.
+Public Flutter client for the CryPrice API. Package name: **`cryprice_frontend`**. In this monorepo the app lives under **`apps/web`**.
 
 ## Features
 
-- Look up current prices (off-chain venues and on-chain) against the configured backend.
-- English / Russian UI, light and dark themes.
-- Google Sign-In on web and mobile (optional; requires your OAuth client ids at build time).
-- `Bloc` / `Cubit` features, Material 3, Google Fonts.
+- **Portfolio** — multi-wallet, multi-chain visibility with backend-calculated allocation.
+- **Health Factor** — Aave V3 supplied/borrowed positions and risk classification.
+- **Profile** — Google Sign-In, authenticated Telegram linking (in-app only; no public bot CTA).
+- **PDF reports** — download server-generated portfolio snapshots.
+- **Prices** — off-chain and on-chain price lookup; Price Calculator utility.
+- English / Russian UI, light and dark themes, Material 3, BLoC/Cubit.
+
+Subscription, upgrade, and payment UI are **not** part of the public edition.
 
 ## Configuration (no secrets in the repo)
 
-Runtime API hosts are **not** hardcoded to any production URL. At **compile time** pass base URLs and OAuth client ids with `--dart-define=...` (see [`.env.example`](.env.example) and [DEVELOPMENT.md](DEVELOPMENT.md)). Defaults point at `http://127.0.0.1:3000` for local development.
+Runtime API hosts are **not** hardcoded to production URLs. Pass base URLs and OAuth client ids at **compile time** with `--dart-define=...` (see [`.env.example`](.env.example) and [DEVELOPMENT.md](DEVELOPMENT.md)). Defaults point at `http://127.0.0.1:3000` for local development.
 
 ## Getting started
 
@@ -19,6 +23,8 @@ Runtime API hosts are **not** hardcoded to any production URL. At **compile time
 cd apps/web
 flutter pub get
 flutter gen-l10n
+flutter analyze
+flutter test
 flutter run
 ```
 

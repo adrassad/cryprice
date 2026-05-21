@@ -1,6 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
-import 'package:crypto_tracker_app/features/crypto_price/domain/exceptions/crypto_exception.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/exceptions/crypto_exception.dart';
 
 abstract class BaseApiProvider {
   final Dio dio;

@@ -1,3 +1,4 @@
+//src/bot/handlers/index.js
 import { walletAddHears } from "./walletAdd.handler.js";
 import { walletDeleteHandler } from "./walletDelete.handler.js";
 import { walletRemoveHandler } from "./walletRemove.handler.js";

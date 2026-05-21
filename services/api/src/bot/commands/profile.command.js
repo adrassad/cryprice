@@ -1,12 +1,15 @@
-import { getUserProfile } from "../../services/user/user.service.js";
+import {
+  getUserByTelegramId,
+  getUserProfile,
+} from "../../services/user/user.service.js";
 import { t } from "../locales/index.js";
 import { buildProfileText } from "../utils/profile-text.js";
 
 export function profileCommand(bot) {
   bot.command("profile", async (ctx) => {
     try {
-      const userId = ctx.from.id;
-      const profile = await getUserProfile(userId);
+      const user = await getUserByTelegramId(ctx.from.id);
+      const profile = user ? await getUserProfile(user.id) : null;
 
       if (!profile) {
         return ctx.reply(t(ctx.from.language_code, "profile.notFound"));

@@ -1,14 +1,16 @@
-import 'package:crypto_tracker_app/core/di/di.dart';
-import 'package:crypto_tracker_app/core/cubit/locale_cubit.dart';
-import 'package:crypto_tracker_app/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:crypto_tracker_app/features/auth/presentation/pages/login_page.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/cubit/crypto_cubit.dart';
-import 'package:crypto_tracker_app/features/crypto_price/presentation/pages/crypto_page.dart';
-import 'package:crypto_tracker_app/features/theme/cubit/theme_cubit.dart';
+import 'package:cryprice_frontend/core/di/di.dart';
+import 'package:cryprice_frontend/core/shell/app_shell.dart';
+import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:cryprice_frontend/features/auth/presentation/pages/login_page.dart';
+import 'package:cryprice_frontend/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:cryprice_frontend/features/profile/presentation/pages/profile_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-/// Root: restores session in [main], then switches between [LoginPage] and the main [CryptoPage].
+/// Root: restores session in [main].
+///
+/// Unauthenticated → [LoginPage] only (theme, locale, Google sign-in).
+/// Authenticated → [AppShell] only (dashboard chrome + sections).
 class AppAuthGate extends StatelessWidget {
   const AppAuthGate({super.key});
 
@@ -24,23 +26,27 @@ class AppAuthGate extends StatelessWidget {
           );
         }
         if (state is AuthStateAuthenticated) {
-          return BlocProvider<TitleCubit>(
-            key: const ValueKey('title_cubit_session'),
-            create: (_) => di<TitleCubit>(),
-            child: CryptoPage(
-              onToggleLocale: () {
-                context.read<LocaleCubit>().toggleLocale();
-              },
-              onToggleTheme: () {
-                context.read<ThemeCubit>().toggleTheme();
-              },
-              onLogout: () {
-                context.read<AuthCubit>().signOut();
-              },
-            ),
+          return AppShell(
+            key: const ValueKey('app_shell_authenticated'),
+            onProfile: () {
+              Navigator.of(context).push(
+                MaterialPageRoute<void>(
+                  builder: (_) => BlocProvider<ProfileCubit>(
+                    create: (_) => di<ProfileCubit>(),
+                    child: const ProfilePage(),
+                  ),
+                ),
+              );
+            },
+            onLogin: () {
+              // Unauthenticated users never see [AppShell]; no-op for menu contract.
+            },
+            onLogout: () {
+              context.read<AuthCubit>().signOut();
+            },
           );
         }
-        return const LoginPage();
+        return const LoginPage(key: ValueKey('login_page_unauthenticated'));
       },
     );
   }

@@ -1,5 +1,5 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/constants/market_pair_rules.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/constants/market_pair_rules.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 
 enum PriceRowKind { cexPair, coingecko, dex }
 

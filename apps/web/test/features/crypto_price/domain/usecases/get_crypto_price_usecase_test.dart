@@ -1,7 +1,7 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/repositories/crypto_repository.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/usecases/get_crypto_price_usecase.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/repositories/crypto_repository.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/usecases/get_crypto_price_usecase.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 

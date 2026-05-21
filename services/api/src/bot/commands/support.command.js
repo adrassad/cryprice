@@ -7,3 +7,7 @@ export function supportCommand(bot) {
     await ctx.reply(t(ctx.from.language_code, "support_public_notice"));
   });
 }
+
+export function isActiveSupportSession() {
+  return false;
+}

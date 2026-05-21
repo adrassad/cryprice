@@ -1,11 +1,12 @@
-import 'package:crypto_tracker_app/core/di/di.dart';
-import 'package:crypto_tracker_app/features/auth/domain/gateways/google_sign_in_gateway.dart';
-import 'package:crypto_tracker_app/features/auth/domain/repositories/auth_repository.dart';
-import 'package:crypto_tracker_app/features/auth/presentation/app_auth_gate.dart';
-import 'package:crypto_tracker_app/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:crypto_tracker_app/core/cubit/locale_cubit.dart';
-import 'package:crypto_tracker_app/features/theme/cubit/theme_cubit.dart';
-import 'package:crypto_tracker_app/gen_l10n/app_localizations.dart';
+import 'package:cryprice_frontend/core/di/di.dart';
+import 'package:cryprice_frontend/core/theme/cryprice_theme.dart';
+import 'package:cryprice_frontend/features/auth/domain/gateways/google_sign_in_gateway.dart';
+import 'package:cryprice_frontend/features/auth/domain/repositories/auth_repository.dart';
+import 'package:cryprice_frontend/features/auth/presentation/app_auth_gate.dart';
+import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:cryprice_frontend/core/cubit/locale_cubit.dart';
+import 'package:cryprice_frontend/features/theme/cubit/theme_cubit.dart';
+import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -44,10 +45,10 @@ class MyApp extends StatelessWidget {
         return BlocBuilder<LocaleCubit, Locale>(
           builder: (context, locale) {
             return MaterialApp(
-              theme: ThemeData.light(),
-              darkTheme: ThemeData.dark(),
+              theme: CrypriceTheme.light(),
+              darkTheme: CrypriceTheme.dark(),
               themeMode: themeMode,
-              title: 'Crypto Price',
+              title: 'CryPrice',
               locale: locale,
               supportedLocales: const [Locale('en'), Locale('ru')],
               localizationsDelegates: const [

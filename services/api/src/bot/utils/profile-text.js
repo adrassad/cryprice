@@ -2,8 +2,13 @@
 import { t } from "../locales/index.js";
 
 export function buildProfileText(profile, languageCode) {
-  const { telegram_id, username, threshold_hf, first_name, last_name } =
-    profile;
+  const {
+    telegram_id,
+    username,
+    threshold_hf,
+    first_name,
+    last_name,
+  } = profile;
 
   const fullName =
     [first_name, last_name].filter(Boolean).join(" ") ||

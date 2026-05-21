@@ -1,24 +1,28 @@
 # CryPrice marketing site
 
-Public landing page for **CryPrice** — React, TypeScript, and Vite. Source lives in the monorepo under `apps/marketing`.
+Public landing page for **CryPrice — Multi-Chain DeFi Risk Monitoring Infrastructure**. React, TypeScript, and Vite. Source lives in the monorepo under `apps/marketing`.
 
-## Features
+This is a **sanitized public edition**: copy does not promote a standalone Telegram bot entry point. Telegram alerts are described as authenticated in-app linking after Google sign-in.
 
-- CEX + DEX price aggregation (product overview)
-- Links to the web app, monorepo, and backend packages
-- Author section and tech stack
+## Sections
+
+- Hero and trust strip
+- Architecture snapshot
+- Technical contributions
+- Milestones and public work
+- Roadmap (implemented vs planned)
+- SEO/OG/Twitter metadata (`index.html`, `siteContent.ts`)
+
+Backend links point to **`services/api`**.
 
 ## Commands
 
 ```bash
-npm install
+npm ci
 npm run dev
-```
-
-```bash
+npm run lint
 npm run build    # production bundle → dist/
 npm run preview  # serve dist locally
-npm run lint
 ```
 
 Optional URL overrides for forks or staging: copy `.env.example` to `.env` and set `VITE_PUBLIC_*` variables (see `src/siteContent.ts` for defaults).
@@ -38,3 +42,4 @@ Do not commit `.env`, API keys, analytics secrets, or private deployment URLs. U
 | ----------- | --- |
 | Monorepo    | [github.com/adrassad/cryprice](https://github.com/adrassad/cryprice) |
 | Web app     | [app.cryprice.dev](https://app.cryprice.dev) |
+| API source  | [services/api](https://github.com/adrassad/cryprice/tree/main/services/api) |

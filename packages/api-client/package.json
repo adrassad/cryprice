@@ -10,7 +10,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@cryprice/shared": "workspace:*"
+    "@cryprice/shared": "file:../shared"
   },
   "devDependencies": {
     "typescript": "^5.0.0"

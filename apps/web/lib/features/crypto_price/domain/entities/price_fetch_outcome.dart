@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 
 /// One HTTP call to `/prices/current/offchain/` or `/onchain/`.
 class BackendPathTrace {
@@ -21,7 +21,7 @@ class BackendPathTrace {
   final String path;
   /// [Dio.options.baseUrl] at request time (runtime proof).
   final String resolvedBaseUrl;
-  /// Absolute URL: base + path (e.g. `{baseUrl}/prices/current/offchain/wbtc`).
+  /// Absolute URL: base + path (e.g. https://api.cryprice.dev/prices/current/offchain/wbtc).
   final String fullRequestUrl;
   final bool isOnchainEndpoint;
   final bool httpAttempted;

@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_app/features/auth/domain/entities/auth_user.dart';
+import 'package:cryprice_frontend/features/auth/domain/entities/auth_user.dart';
 
 /// Result of [restoreSession]: whether the user is signed in and which profile to show.
 abstract class AuthRestoreResult {}

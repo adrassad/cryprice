@@ -24,11 +24,23 @@ function parsePositiveInt(raw, fallback) {
   return Number.isFinite(n) && n > 0 ? Math.floor(n) : fallback;
 }
 
+function parseTokenIconsDir() {
+  const raw = process.env.TOKEN_ICONS_DIR?.trim();
+  return raw || "./data/token-icons";
+}
+
+function parsePublicApiBaseUrl(port) {
+  const raw = process.env.PUBLIC_API_BASE_URL?.trim();
+  const base = raw || `http://localhost:${port}`;
+  return base.replace(/\/+$/, "");
+}
+
 const NODE_ENV = process.env.NODE_ENV || "development";
+const PORT_API = parsePort();
 
 export const ENV = {
   NODE_ENV,
-  PORT_API: parsePort(),
+  PORT_API,
   DATABASE_URL: process.env.DATABASE_URL,
   BOT_TOKEN: process.env.BOT_TOKEN,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
@@ -41,10 +53,8 @@ export const ENV = {
   REDIS_DB: Number(process.env.REDIS_DB) || 0,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD || undefined,
 
-  /** Comma-separated OAuth 2.0 client IDs (Web / iOS / Android) for Google Sign-In. */
   GOOGLE_CLIENT_IDS: parseGoogleClientIds(),
 
-  /** HS256 secret for API access JWT (min 32 chars recommended in production). */
   JWT_ACCESS_SECRET: process.env.JWT_ACCESS_SECRET || "",
   JWT_ACCESS_EXPIRES_SEC: parsePositiveInt(
     process.env.JWT_ACCESS_EXPIRES_SEC,
@@ -56,11 +66,25 @@ export const ENV = {
   ),
   JWT_ISSUER: process.env.JWT_ISSUER || "cryprice-api",
   JWT_AUDIENCE: process.env.JWT_AUDIENCE || "cryprice-clients",
+
+  TOKEN_ICONS_DIR: parseTokenIconsDir(),
+  PUBLIC_API_BASE_URL: parsePublicApiBaseUrl(PORT_API),
+  TOKEN_ICON_GENERATION_ENABLED: parseBoolFlag(
+    process.env.TOKEN_ICON_GENERATION_ENABLED ?? "",
+  ),
+  TOKEN_ICON_TRUST_WALLET_SYNC_ENABLED: parseBoolFlag(
+    process.env.TOKEN_ICON_TRUST_WALLET_SYNC_ENABLED ?? "",
+  ),
+  TOKEN_ICON_DOWNLOAD_TIMEOUT_MS: parsePositiveInt(
+    process.env.TOKEN_ICON_DOWNLOAD_TIMEOUT_MS,
+    10_000,
+  ),
+  TOKEN_ICON_MAX_BYTES: parsePositiveInt(
+    process.env.TOKEN_ICON_MAX_BYTES,
+    524_288,
+  ),
 };
 
-/**
- * Redis flush on startup: only when explicitly enabled and not in production.
- */
 export function shouldFlushRedisOnStart() {
   if (!parseBoolFlag(process.env.FLUSH_REDIS_ON_START ?? "")) {
     return false;

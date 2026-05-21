@@ -3,20 +3,9 @@ export default {
   common: {
     yes: "Yes",
     no: "No",
-    active: "✅ Active",
-    expired: "❌ Expired",
     notSpecified: "not specified",
   },
 
-  users: {
-    listTitle: "Select a user:",
-    pageInfo: "Page {current} of {total}",
-    prevButton: "⬅️ Back",
-    nextButton: "Next ➡️",
-    backToList: "🔙 Back to list",
-    empty: "The user list is empty.",
-    error: "❌ Failed to load users list.",
-  },
   // General
   main_menu: "🏠 Main menu",
   welcome: "👋 Hello! I'm your assistant.",
@@ -30,6 +19,7 @@ export default {
   threshold_error: "Invalid value. Enter a number, for example: 1.20",
   threshold_updated: "✅ Your Health Factor threshold has been updated:",
   action_cancel: "Action canceled.",
+  nothing_to_cancel: "Nothing to cancel.",
   threshold_value: "Пороговое значение HealthFactor: ",
 
   //profile
@@ -39,54 +29,35 @@ export default {
     telegramId: "🆔 <b>Telegram ID:</b> <code>{telegramId}</code>",
     name: "🙍 <b>Name:</b> {name}",
     username: "🔗 <b>Username:</b> {username}",
-    subscriptionTitle: "💳 <b>Subscription</b>",
-    plan: "📦 <b>Plan:</b> {plan}",
-    validUntil: "📅 <b>Valid until:</b> {date}",
-    status: "📍 <b>Status:</b> {status}",
     settingsTitle: "⚙️ <b>Settings</b>",
     threshold: "📉 <b>Health Factor threshold:</b> {value}",
-    renewHint: "💡 <i>Renew your subscription to continue monitoring.</i>",
-    freePlan: "🆓 Free",
-    proPlan: "⭐ Pro",
   },
 
-  start_welcome: `👋 Welcome!
+  start_linked_success: `✅ Bot is already activated.
 
-  🤖 <b>Aave Health Monitor</b>
+You will receive CryPrice notifications here.
+You can change your settings in your profile:
+https://app.cryprice.dev`,
 
-  I track the <b>Health Factor</b> of your wallets on AAVE (Arbitrum)
-  and alert you if liquidation risk appears ⚠️
+  start_not_linked: `👋 Welcome to CryPrice.
 
-  ---
+To activate the Telegram bot, first sign in to your account on the website and connect Telegram in your profile settings:
 
-  🚀 <b>Quick start:</b>
+https://app.cryprice.dev
 
-  1. Add your wallet → /add_wallet
-  2. Set HF threshold → /set_threshold
-  3. I’ll monitor everything 24/7 🔔
+This keeps the bot linked to your main account and prevents duplicate accounts.`,
 
-  ---
+  start_link_success: `✅ Telegram has been successfully connected to your CryPrice account.
 
-  📊 <b>What I do:</b>
+You can now receive notifications here.
+You can change your settings in your profile:
+https://app.cryprice.dev`,
 
-  • Track Health Factor
-  • Alert on liquidation risk
-  • Monitor price changes (>5%)
-  • Support multiple wallets 💼
+  start_link_failed: `❌ Failed to connect Telegram.
 
-  ---
-
-  💡 <b>Quick tip:</b>
-
-  Just type: <code>ETH</code> <code>BTC</code> <code>AVAX</code>
-
-  → and get instant price 📈
-
-  ---
-
-  📌 /help — command list
-  📌 /profile — your profile & settings
-`,
+The link may be expired or already used.
+Please create a new link in your profile settings:
+https://app.cryprice.dev`,
 
   // Telegram commands
   help_command: `ℹ️ Available commands:
@@ -104,28 +75,17 @@ export default {
   command_show_positions: "💼 Select a wallet to view positions:",
 
   // Support
-  support_enter: "✍️ Write your message to support.\n\nTo cancel send /cancel",
-  support_canceled: "❌ Message sending canceled.",
-  support_sent: "✅ Your message has been sent to support.",
-  support_sent_title: "New support request",
-  support_answer: "💬 Reply",
-  support_no_rules: "Not enough permissions",
-  support_enter_answer: "✍️ Enter your reply to the user:",
-  support_answer_support: "Support reply:",
-  support_answered_user: "✅ Reply sent to the user.",
-  support_answered_support: "✅ Your message has been sent to support.",
   support_public_notice:
-    "ℹ️ This public build does not relay messages to an operator.\nSee README.md for how to report issues or contribute.",
-  message: "Message:",
+    "💬 For support, open the CryPrice app after sign-in or use the public repository issue tracker.",
 
   // Positions and Aave
   no_active_positions: "ℹ️ No active positions in Aave.",
   positions_overview: "📊 Your current positions:",
 
   no_user: "❌ User not found",
-  wallet_limit_reached:
-    "⚠️ Wallet limit reached. Remove a wallet or set MAX_WALLETS_PER_USER higher.",
   novalid_address: "❌ Invalid address.\n\nSend a valid address or /cancel",
+  wallet_limit_reached:
+    "⚠️ Wallet limit reached. Remove an existing wallet before adding another.",
 
   // Wallets
   wallets: {
@@ -154,16 +114,6 @@ export default {
 
   // Healthfactor
   healthfactor_overview: "🛡 Your current Health Factor:",
-
-  // Support
-  support_write_message: `✍️ Write your message to support.
-      To cancel — send /cancel`,
-  support_new_message: "📩 New support message",
-  support_message_sent: "✅ Message sent to support. Thank you!",
-  support_message_error: "❌ Error sending the message.",
-  support_message_canceled: "❌ Sending canceled.",
-  support_name_user: "📛 Name:",
-  support_message: "💬 Message:",
 
   // Errors
   error_generic: "❌ An error occurred. Please try again.",

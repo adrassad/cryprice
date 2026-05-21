@@ -1,9 +1,9 @@
-import 'package:crypto_tracker_app/features/auth/data/datasources/auth_remote_datasource.dart';
-import 'package:crypto_tracker_app/features/auth/data/local/auth_token_store.dart';
-import 'package:crypto_tracker_app/features/auth/domain/entities/auth_user.dart';
-import 'package:crypto_tracker_app/features/auth/domain/exceptions/auth_api_exception.dart';
-import 'package:crypto_tracker_app/features/auth/domain/gateways/google_sign_in_gateway.dart';
-import 'package:crypto_tracker_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:cryprice_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
+import 'package:cryprice_frontend/features/auth/data/local/auth_token_store.dart';
+import 'package:cryprice_frontend/features/auth/domain/entities/auth_user.dart';
+import 'package:cryprice_frontend/features/auth/domain/exceptions/auth_api_exception.dart';
+import 'package:cryprice_frontend/features/auth/domain/gateways/google_sign_in_gateway.dart';
+import 'package:cryprice_frontend/features/auth/domain/repositories/auth_repository.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 const _kLegacySignedIn = 'auth_session_signed_in';

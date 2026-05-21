@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_app/features/crypto_price/presentation/utils/display_count_parser.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/utils/display_count_parser.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

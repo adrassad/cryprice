@@ -15,8 +15,13 @@ export async function startCrons() {
     const { scheduleAssetsCron } = await import("./assetsUpdater.cron.js");
     scheduleAssetsCron();
 
+    const { scheduleProtocolAssetCron, scheduleProtocolAssetStartupSync } =
+      await import("./protocolAssetUpdater.cron.js");
+    scheduleProtocolAssetCron();
+    scheduleProtocolAssetStartupSync();
+
     const { startPriceSyncCron, schedulePriceCron } = await import(
-      "./priceUpdater.cron.js",
+      "./priceUpdater.cron.js"
     );
     schedulePriceCron();
     await startPriceSyncCron();
@@ -24,14 +29,23 @@ export async function startCrons() {
     const { startOffchainPriceSyncCron, scheduleOffchainPriceCron } =
       await import("./offchainPriceUpdater.cron.js");
     scheduleOffchainPriceCron();
-    // Do not await: full off-chain sync (esp. CoinGecko 429 retries) must not block HTTP listen.
     void startOffchainPriceSyncCron();
 
     const { startHFSyncCron, scheduleHFCron } = await import(
-      "./HFUpdater.cron.js",
+      "./HFUpdater.cron.js"
     );
     scheduleHFCron();
     await startHFSyncCron();
+
+    const { schedulePortfolioCron, schedulePortfolioStartupSync } =
+      await import("./portfolioUpdater.cron.js");
+    schedulePortfolioCron();
+    schedulePortfolioStartupSync();
+
+    const { scheduleTokenIconCron, scheduleTokenIconStartupSync } =
+      await import("./tokenIconUpdater.cron.js");
+    scheduleTokenIconCron();
+    scheduleTokenIconStartupSync();
   })();
 
   return cronsStartPromise;

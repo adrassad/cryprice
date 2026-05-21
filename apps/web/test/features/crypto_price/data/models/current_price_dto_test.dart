@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:crypto_tracker_app/features/crypto_price/data/models/current_price_dto.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/models/current_price_dto.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

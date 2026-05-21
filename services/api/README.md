@@ -18,7 +18,10 @@ Capabilities present in **this** public repository:
 - **Repository layer and PostgreSQL client** — `src/db/` (`connection.js`, `postgres.client.js`, `repositories/`).
 - **Redis-backed cache abstractions** — `src/redis/redis.client.js`, domain caches under `src/cache/`.
 - **Cron / background jobs** — `src/cron/` (asset and price refresh jobs, Health Factor updater wiring).
-- **Telegram alerts (sanitized)** — `src/bot/` with Telegraf: alert delivery for authenticated users who linked Telegram in-app after Google sign-in; wallet scenes, HF/positions helpers, optional AI prompt handling when configured via env.
+- **Portfolio API** — authenticated portfolio summary, allocation series, positions, and PDF export (`/portfolio/*`, see [`docs/API_PORTFOLIO.md`](docs/API_PORTFOLIO.md)).
+- **Wallet and user routes** — `/wallets`, `/users/me` for authenticated wallet and profile management.
+- **Token icons** — `/token-icons` metadata service (no committed binary cache).
+- **Protocol asset sync** — scheduled refresh of protocol-linked asset metadata.
 
 Optional **Google Sign-In + JWT** session API exists under `/auth/*` when the corresponding env vars are set (see [`docs/AUTH.md`](docs/AUTH.md)).
 
@@ -68,7 +71,7 @@ flowchart TD
 ### API layer (`src/api/`)
 
 - **`server.js`** wires the Express app: routes for prices, assets, networks, health, and authentication; JSON parsing; CORS; proxy trust.
-- **`routes/`**: `health`, `assets`, `onchainPrices`, `offchainPrices`, `network`, `auth`.
+- **`routes/`**: `health`, `assets`, `onchainPrices`, `offchainPrices`, `network`, `auth`, `portfolio`, `wallets`, `users`, `tokenIcons`.
 - **`middlewares/`**: API and `/auth` rate limiting, error handling, JWT verification for protected routes.
 - **`errors/`**: typed HTTP errors for consistent responses.
 

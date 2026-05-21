@@ -4,6 +4,7 @@ import {
   refreshSession,
   logout,
   getMe,
+  createTelegramLinkToken,
 } from "../../services/auth/auth.service.js";
 import { requireAccessToken } from "../middlewares/auth.middleware.js";
 
@@ -71,6 +72,15 @@ router.get("/me", requireAccessToken, async (req, res, next) => {
   try {
     const user = await getMe(req.auth.userId);
     res.json({ user });
+  } catch (e) {
+    next(e);
+  }
+});
+
+router.post("/link/telegram", requireAccessToken, async (req, res, next) => {
+  try {
+    const out = await createTelegramLinkToken(req.auth.userId);
+    res.json(out);
   } catch (e) {
     next(e);
   }

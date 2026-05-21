@@ -1,7 +1,7 @@
-import 'package:crypto_tracker_app/features/auth/domain/entities/auth_user.dart';
-import 'package:crypto_tracker_app/features/auth/domain/exceptions/auth_api_exception.dart';
-import 'package:crypto_tracker_app/features/auth/domain/gateways/google_sign_in_gateway.dart';
-import 'package:crypto_tracker_app/features/auth/domain/repositories/auth_repository.dart';
+import 'package:cryprice_frontend/features/auth/domain/entities/auth_user.dart';
+import 'package:cryprice_frontend/features/auth/domain/exceptions/auth_api_exception.dart';
+import 'package:cryprice_frontend/features/auth/domain/gateways/google_sign_in_gateway.dart';
+import 'package:cryprice_frontend/features/auth/domain/repositories/auth_repository.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode, kIsWeb;
 import 'package:flutter_bloc/flutter_bloc.dart';
 

@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_app/core/utils/number_input_formatter.dart';
+import 'package:cryprice_frontend/core/utils/number_input_formatter.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:flutter/services.dart';

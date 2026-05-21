@@ -27,17 +27,13 @@ export class UserRepository extends BaseRepository {
         telegram_id,
         username,
         first_name,
-        last_name,
-        subscription_level,
-        subscription_end
+        last_name
       )
       VALUES (
         $1,
         $2,
         $3,
-        $4,
-        'free',
-        NULL
+        $4
       )
       ON CONFLICT (telegram_id) DO NOTHING
       RETURNING *
@@ -69,13 +65,11 @@ export class UserRepository extends BaseRepository {
         username,
         first_name,
         last_name,
-        subscription_level,
-        subscription_end,
         email,
         email_verified,
         avatar_url
       )
-      VALUES ($1, $2, $3, $4, 'free', NULL, $5, $6, $7)
+      VALUES ($1, $2, $3, $4, $5, $6, $7)
       RETURNING *
       `,
       [
@@ -112,5 +106,32 @@ export class UserRepository extends BaseRepository {
   async updateUser(id, fields) {
     const allowedFields = ["threshold_hf"];
     return super.update(id, fields, allowedFields);
+  }
+
+  async updateMeFields(userId, fields) {
+    const allowed = [
+      "threshold_hf",
+      "language",
+      "username",
+      "first_name",
+      "last_name",
+    ];
+    const keys = Object.keys(fields).filter((k) => allowed.includes(k));
+    if (!keys.length) return null;
+
+    const setClause = keys.map((key, i) => `"${key}" = $${i + 2}`).join(", ");
+    const values = [userId, ...keys.map((k) => fields[k])];
+
+    const { rows } = await this.db.query(
+      `
+      UPDATE users
+      SET ${setClause}
+      WHERE id = $1
+      RETURNING *
+      `,
+      values,
+    );
+
+    return rows[0] ?? null;
   }
 }

@@ -34,7 +34,7 @@ export async function requireAccessToken(req, res, next) {
       return;
     }
 
-    const user = await db.users.findById(payload.sub);
+    const user = await db.users.findByTelegramId(payload.sub);
     if (!user) {
       next(
         new HttpError(401, "UNAUTHORIZED", "Invalid or unknown subject."),

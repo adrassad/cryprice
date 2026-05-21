@@ -1,5 +1,5 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/repositories/crypto_repository.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/repositories/crypto_repository.dart';
 
 class GetCryptoPriceUseCase {
   final CryptoRepository repository;

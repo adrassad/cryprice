@@ -1,14 +1,19 @@
 // src/bot/handlers/walletDelete.handler.js
 import { removeUserWallet } from "../../services/wallet/wallet.service.js";
 import { t } from "../locales/index.js";
+import { getUserByTelegramId } from "../../services/user/user.service.js";
 
 export function walletDeleteHandler(bot) {
   bot.action(/^WALLET_DELETE:/, async (ctx) => {
-    const userId = ctx.from.id;
+    const user = await getUserByTelegramId(ctx.from.id);
+    if (!user) {
+      await ctx.answerCbQuery(t(ctx.from.language_code, "profile.notFound"));
+      return;
+    }
     const walletId = ctx.callbackQuery.data.split(":")[1];
 
     try {
-      await removeUserWallet(userId, walletId);
+      await removeUserWallet(user.id, walletId);
 
       await ctx.answerCbQuery(
         t(ctx.from.language_code, "wallets.wallet_deleted"),

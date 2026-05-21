@@ -6,6 +6,7 @@ import { registerHandlers } from "./handlers/index.js";
 import { registerCommands } from "./commands/index.js";
 import { removeWalletScene } from "./scenes/removeWallet.scene.js";
 import { setBot } from "./bot.instance.js";
+import { requireLinkedTelegramUser } from "./middlewares/requireLinkedTelegramUser.middleware.js";
 
 export function startBot() {
   const bot = new Telegraf(ENV.BOT_TOKEN);
@@ -13,6 +14,7 @@ export function startBot() {
   const stage = new Scenes.Stage([addWalletScene, removeWalletScene]);
 
   bot.use(session());
+  bot.use(requireLinkedTelegramUser());
   bot.use(stage.middleware());
 
   registerCommands(bot);

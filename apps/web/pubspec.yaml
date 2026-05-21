@@ -1,5 +1,5 @@
-name: crypto_tracker_app
-description: "Crypto tracker price."
+name: cryprice_frontend
+description: "CryPrice Frontend — multi-chain DeFi portfolio intelligence and risk monitoring."
 publish_to: "none"
 
 version: 1.0.0+1
@@ -24,6 +24,7 @@ dependencies:
   google_sign_in_web: ^0.12.4
   flutter_secure_storage: ^9.2.2
   url_launcher: ^6.3.1
+  web: ^1.1.1
 
 dev_dependencies:
   dio_adapter: ^2.1.2

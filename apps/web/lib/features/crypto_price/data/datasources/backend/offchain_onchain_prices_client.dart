@@ -1,11 +1,11 @@
 // HTTP for `GET /prices/current/offchain/{symbol}` and `GET /prices/current/onchain/{symbol}`.
 // One request returns all networks for that symbol (bulk map). Origin is set only from the URL path.
-import 'package:crypto_tracker_app/core/config/cryprice_backend_config.dart';
-import 'package:crypto_tracker_app/features/crypto_price/data/datasources/base_api_provider.dart';
-import 'package:crypto_tracker_app/features/crypto_price/data/models/current_price_dto.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/exceptions/crypto_exception.dart';
+import 'package:cryprice_frontend/core/config/cryprice_backend_config.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/datasources/base_api_provider.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/models/current_price_dto.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/exceptions/crypto_exception.dart';
 import 'package:dio/dio.dart';
 
 /// Parser for one backend path only — off-chain and on-chain contracts differ.
@@ -115,6 +115,27 @@ class OffchainOnchainPricesClient extends BaseApiProvider {
     return t;
   }
 
+  /// Cryprice price paths use 404 when a ticker has no rows; treat as empty, not fatal.
+  Future<Response<dynamic>> _getPricesPath(String path) async {
+    try {
+      return await dio.get<dynamic>(
+        path,
+        options: Options(
+          validateStatus: (int? status) => status != null && status < 500,
+        ),
+      );
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        throw CryptoException(CryptoErrorCode.noInternet);
+      }
+      throw CryptoException(CryptoErrorCode.fetchFailed);
+    } catch (_) {
+      throw CryptoException(CryptoErrorCode.unknown);
+    }
+  }
+
   Future<TracedPriceRows> _tracedHttpGet({
     required String path,
     required bool isOnchainEndpoint,
@@ -131,7 +152,8 @@ class OffchainOnchainPricesClient extends BaseApiProvider {
     final fullUrl = _fullRequestUrl(dio, path);
 
     try {
-      final response = await safeGet(path);
+      // 404 = no quotes for this ticker on this path; other leg may still succeed.
+      final response = await _getPricesPath(path);
       final status = response.statusCode ?? 0;
       final body = response.data;
       final rawType = _runtimeTypeName(body);
@@ -149,7 +171,7 @@ class OffchainOnchainPricesClient extends BaseApiProvider {
             statusCode: status,
             rawDataRuntimeType: rawType,
             rawDataPreview: preview,
-            error: 'non-200 status',
+            error: status == 404 ? 'not found (empty)' : 'non-200 status',
           ),
         );
       }
@@ -192,7 +214,6 @@ class OffchainOnchainPricesClient extends BaseApiProvider {
         ),
       );
     } on CryptoException {
-      // Keep network/domain errors semantic for upper layers (Cubit/UI).
       rethrow;
     } catch (e, st) {
       return TracedPriceRows(

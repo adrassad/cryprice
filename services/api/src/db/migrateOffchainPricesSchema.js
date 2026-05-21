@@ -6,7 +6,7 @@
  *
  * prepareOffchainSchemaBeforeInitDdl must run after `assets` exists and *before* the PRICES
  * transaction that creates indexes on `token` / `pair`, so existing DBs with old column sets
- * are migrated first (CREATE TABLE IF NOT EXISTS does not upgrade old tables).
+ * are migrated first (CREATE TABLE IF NOT EXISTS does not alter existing old tables).
  */
 async function tableExists(db, name) {
   const { rows } = await db.query(

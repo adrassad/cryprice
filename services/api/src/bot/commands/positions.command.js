@@ -8,12 +8,15 @@ import { getWalletPositions } from "../../services/positions/position.service.js
 import { formatPositionsOverview } from "../utils/formatPositionsOverview.js";
 import pLimit from "p-limit";
 import { t } from "../locales/index.js";
+import { getUserByTelegramId } from "../../services/user/user.service.js";
 
 const CONCURRENCY = 5;
 
 export function positionsCommand(bot) {
   bot.command("positions", async (ctx) => {
-    const userId = ctx.from.id;
+    const user = await getUserByTelegramId(ctx.from.id);
+    if (!user) return ctx.reply(t(ctx.from.language_code, "profile.notFound"));
+    const userId = user.id;
 
     const wallets = await getUserWallets(userId);
 
@@ -40,7 +43,9 @@ export function positionsCommand(bot) {
 
   bot.action(/wallet_positions:(.+)/, async (ctx) => {
     const address = ctx.match[1];
-    const userId = ctx.from.id;
+    const user = await getUserByTelegramId(ctx.from.id);
+    if (!user) return ctx.reply(t(ctx.from.language_code, "profile.notFound"));
+    const userId = user.id;
 
     await ctx.answerCbQuery(); // убираем "часики"
 

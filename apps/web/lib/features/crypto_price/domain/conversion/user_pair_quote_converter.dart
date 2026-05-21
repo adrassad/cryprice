@@ -1,7 +1,7 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/conversion/user_pair_conversion_result.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/conversion/user_pair_quote_common.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/constants/market_pair_rules.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/conversion/user_pair_conversion_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/conversion/user_pair_quote_common.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/constants/market_pair_rules.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 
 const List<String> _cexCrossQuotePriority = [
   'usdt',

@@ -4,18 +4,7 @@ export default {
   common: {
     yes: "Да",
     no: "Нет",
-    active: "✅ Активна",
-    expired: "❌ Истекла",
     notSpecified: "не указано",
-  },
-  users: {
-    listTitle: "Выберите пользователя:",
-    pageInfo: "Страница {current} из {total}",
-    prevButton: "⬅️ Назад",
-    nextButton: "Вперед ➡️",
-    backToList: "🔙 К списку",
-    empty: "Список пользователей пуст.",
-    error: "❌ Не удалось загрузить список пользователей.",
   },
   main_menu: "🏠 Главное меню",
   welcome: "👋 Привет! Я ваш помощник.",
@@ -28,6 +17,7 @@ export default {
   threshold_error: "Некорректное значение. Введите число, например: 1.20",
   threshold_updated: "✅ Ваше пороговое значение Health Factor обновлено:",
   action_cancel: "Действие отменено.",
+  nothing_to_cancel: "Нечего отменять.",
   threshold_value: "Пороговое значение HealthFactor: ",
 
   //Профиль
@@ -37,54 +27,36 @@ export default {
     telegramId: "🆔 <b>Telegram ID:</b> <code>{telegramId}</code>",
     name: "🙍 <b>Имя:</b> {name}",
     username: "🔗 <b>Username:</b> {username}",
-    subscriptionTitle: "💳 <b>Подписка</b>",
-    plan: "📦 <b>Тариф:</b> {plan}",
-    validUntil: "📅 <b>Действует до:</b> {date}",
-    status: "📍 <b>Статус:</b> {status}",
     settingsTitle: "⚙️ <b>Настройки</b>",
     threshold: "📉 <b>Порог Health Factor:</b> {value}",
-    renewHint: "💡 <i>Чтобы продолжить мониторинг, продлите подписку.</i>",
-    freePlan: "🆓 Free",
-    proPlan: "⭐ Pro",
   },
 
-  start_welcome: `👋 Добро пожаловать!
+  start_linked_success: `✅ Бот уже активирован.
 
-  🤖 <b>Aave Health Monitor</b>
+Вы будете получать уведомления CryPrice здесь.
+Настройки можно изменить в профиле:
+https://app.cryprice.dev`,
 
-  Я слежу за <b>Health Factor</b> твоих кошельков в AAVE (Arbitrum)
-  и предупреждаю, если появляется риск ликвидации ⚠️
+  start_not_linked: `👋 Добро пожаловать в CryPrice.
 
-  ---
+Чтобы активировать Telegram-бота, сначала войдите в свой аккаунт на сайте и подключите Telegram в настройках профиля:
 
-  🚀 <b>Начать просто:</b>
+https://app.cryprice.dev
 
-  1. Добавь кошелёк → /add_wallet
-  2. Установи порог HF → /set_threshold
-  3. Я буду мониторить и присылать уведомления 🔔
+Это нужно, чтобы бот был привязан к вашему основному аккаунту и не создавал дубликаты.`,
 
-  ---
+  start_link_success: `✅ Telegram успешно подключён к вашему аккаунту CryPrice.
 
-  📊 <b>Что я умею:</b>
+Теперь вы сможете получать уведомления здесь.
+Настройки можно изменить в профиле:
+https://app.cryprice.dev`,
 
-  • Отслеживаю Health Factor
-  • Уведомляю о риске ликвидации
-  • Отслеживаю изменения цен (>5%)
-  • Поддержка нескольких кошельков 💼
+  start_link_failed: `❌ Не удалось подключить Telegram.
 
-  ---
+Возможно, ссылка устарела или уже была использована.
+Пожалуйста, создайте новую ссылку в настройках профиля:
+https://app.cryprice.dev`,
 
-  💡 <b>Быстрый лайфхак:</b>
-
-  Просто напиши: <code>ETH</code> <code>BTC</code> <code>AVAX</code>
-
-  → и я покажу текущую цену 📈
-
-  ---
-
-  📌 /help — список команд
-  📌 /profile — профиль и настройки
-`,
   //Команды телеги
   help_command: `ℹ️ Доступные команды:
   /start — начать
@@ -101,29 +73,18 @@ export default {
   command_show_positions: "💼 Выберите кошелек для просмотра позиций:",
 
   // Поддержка
-  support_enter:
-    "✍️ Напишите ваше сообщение в поддержку.\n\nДля отмены отправьте /cancel",
-  support_canceled: "❌ Отправка сообщения отменена.",
-  support_sent: "✅ Ваше сообщение отправлено в поддержку.",
-  support_sent_title: "Новое обращение в поддержку",
-  support_answer: "💬 Ответить",
-  support_no_rules: "Недостаточно прав",
-  support_enter_answer: "✍️ Введите ответ пользователю:",
-  support_answer_support: "Ответ поддержки:",
-  support_answered_user: "✅ Ответ отправлен пользователю.",
-  support_answered_support: "✅ Ваше сообщение отправлено в поддержку.",
   support_public_notice:
-    "ℹ️ В этой публичной сборке сообщения оператору не пересылаются.\nСм. README.md — как сообщить об ошибке или внести вклад.",
-  message: "Сообщение:",
+    "💬 Для поддержки войдите в приложение CryPrice после авторизации или используйте issue tracker публичного репозитория.",
+
   // Позиции и Aave
   no_active_positions: "ℹ️ Нет активных позиций в Aave.",
   positions_overview: "📊 Ваши текущие позиции:",
 
   no_user: "❌ Пользователь не найден",
-  wallet_limit_reached:
-    "⚠️ Достигнут лимит кошельков. Удалите один или увеличьте MAX_WALLETS_PER_USER.",
   novalid_address:
     "❌ Невалидный адрес.\n\nОтправьте корректный адрес или /cancel",
+  wallet_limit_reached:
+    "⚠️ Достигнут лимит кошельков. Удалите существующий кошелёк, прежде чем добавлять новый.",
 
   //Кошельки
   wallets: {
@@ -151,16 +112,6 @@ export default {
   token_not_found: "🪙 Токен <b>{symbol}</b> не найден",
   // Healthfactor
   healthfactor_overview: "🛡 Ваш текущий Health Factor:",
-
-  //support
-  support_write_message: `✍️ Напишите ваше сообщение в поддержку.
-      Чтобы отменить — отправьте /cancel`,
-  support_new_message: "📩 Новое сообщение в поддержку",
-  support_message_sent: "✅ Сообщение отправлено в поддержку. Спасибо!",
-  support_message_error: "❌ Ошибка при отправке сообщения.",
-  support_message_canceled: "❌ Отправка отменена.",
-  support_name_user: "📛 Имя:",
-  support_message: "💬 Сообщение:",
 
   // Ошибки
   error_generic: "❌ Произошла ошибка. Попробуйте ещё раз.",

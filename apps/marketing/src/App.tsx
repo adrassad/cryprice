@@ -1,13 +1,22 @@
 import { useCallback, useState } from 'react'
 import {
-  ABOUT_CRYPRICE,
+  ARCHITECTURE_SNAPSHOT,
   ASSETS,
   AUTHOR,
+  DISCLAIMER,
+  FEATURES,
+  HERO,
+  HOW_IT_WORKS,
+  INFRASTRUCTURE_OVERVIEW,
   LINKS,
-  PUBLIC_API_HOST,
-  TECH_STACK_CARDS,
-  githubRepoLabel,
-  urlHostname,
+  MILESTONES,
+  PROBLEM,
+  PROJECT_LINK_CARDS,
+  PUBLIC_WORK,
+  ROADMAP,
+  SOLUTION,
+  TECHNICAL_CONTRIBUTIONS,
+  TRUST_STRIP,
 } from './siteContent'
 import './App.css'
 
@@ -99,16 +108,18 @@ export default function App() {
                 decoding="async"
               />
             </span>
-            Cryprice
+            CryPrice
           </a>
           <nav className="nav" aria-label="Primary">
-            <a href="#about-project">About project</a>
-            <a href="#about-author">About author</a>
+            <a href="#features">Features</a>
+            <a href="#how-it-works">How it works</a>
+            <a href="#roadmap">Roadmap</a>
+            <a href="#founder">Founder</a>
             <a href={LINKS.githubProfile} target="_blank" rel="noreferrer">
               GitHub
             </a>
             <a className="btn btn--primary btn--sm" href={LINKS.app}>
-              Open App
+              {HERO.primaryCta}
             </a>
           </nav>
           <button
@@ -122,11 +133,17 @@ export default function App() {
           </button>
         </div>
         <div className="mobile-nav" id="mobile-nav">
-          <a href="#about-project" onClick={closeMobileNav}>
-            About project
+          <a href="#features" onClick={closeMobileNav}>
+            Features
           </a>
-          <a href="#about-author" onClick={closeMobileNav}>
-            About author
+          <a href="#how-it-works" onClick={closeMobileNav}>
+            How it works
+          </a>
+          <a href="#roadmap" onClick={closeMobileNav}>
+            Roadmap
+          </a>
+          <a href="#founder" onClick={closeMobileNav}>
+            Founder
           </a>
           <a
             href={LINKS.githubProfile}
@@ -137,7 +154,7 @@ export default function App() {
             GitHub
           </a>
           <a className="btn btn--primary" href={LINKS.app} onClick={closeMobileNav}>
-            Open App
+            {HERO.primaryCta}
           </a>
         </div>
       </header>
@@ -145,39 +162,123 @@ export default function App() {
       <main id="top">
         <section className="hero section">
           <div className="hero-glow" aria-hidden="true" />
-          <p className="eyebrow">Personal project · full-stack</p>
-          <h1 className="hero-title">
-            Cryprice — crypto price tracking built by an independent developer
-          </h1>
-          <p className="hero-sub">
-            Compare crypto prices from CEX, DEX and aggregators, calculate
-            conversions, and explore a real full-stack Flutter + Node.js project.
-          </p>
+          <p className="eyebrow">{HERO.eyebrow}</p>
+          <h1 className="hero-title">{HERO.title}</h1>
+          <p className="hero-sub">{HERO.subheadline}</p>
           <div className="hero-cta">
             <a className="btn btn--primary" href={LINKS.app}>
-              Open App
+              {HERO.primaryCta}
             </a>
-            <a className="btn btn--ghost" href="#project-links">
-              View source code
+            <a className="btn btn--ghost" href="#problem">
+              {HERO.secondaryCta}
             </a>
           </div>
         </section>
 
-        <section className="section" id="about-project">
-          <h2 className="section-title">About Cryprice</h2>
-          <p className="section-lead">
-            Cryprice is a small, honest tool for seeing prices and doing math —
-            not a trading venue and not a protocol.
-          </p>
+        <section className="trust-strip" aria-label="Platform safety highlights">
+          <div className="trust-strip-inner">
+            <ul className="trust-strip-list">
+              {TRUST_STRIP.map((item) => (
+                <li key={item}>{item}</li>
+              ))}
+            </ul>
+          </div>
+        </section>
+
+        <section className="section" id="problem">
+          <h2 className="section-title">{PROBLEM.title}</h2>
+          <p className="section-lead">{PROBLEM.lead}</p>
           <ul className="about-list">
-            {ABOUT_CRYPRICE.map((item) => (
+            {PROBLEM.points.map((item) => (
               <li key={item}>{item}</li>
             ))}
           </ul>
         </section>
 
-        <section className="section section--card" id="about-author">
-          <h2 className="section-title">About the author</h2>
+        <section className="section" id="solution">
+          <h2 className="section-title">{SOLUTION.title}</h2>
+          <p className="section-lead">{SOLUTION.lead}</p>
+          <ul className="about-list">
+            {SOLUTION.points.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="section" id="features">
+          <h2 className="section-title">{FEATURES.title}</h2>
+          <p className="section-lead">{FEATURES.lead}</p>
+          <div className="tech-grid">
+            {FEATURES.cards.map((card) => (
+              <article key={card.title} className="tech-card">
+                <h3>{card.title}</h3>
+                <p>{card.detail}</p>
+              </article>
+            ))}
+          </div>
+          <p className="section-note">{FEATURES.scopeNote}</p>
+        </section>
+
+        <section className="section" id="how-it-works">
+          <h2 className="section-title">{HOW_IT_WORKS.title}</h2>
+          <p className="section-lead">{HOW_IT_WORKS.lead}</p>
+          <ol className="steps-list">
+            {HOW_IT_WORKS.steps.map((step, index) => (
+              <li key={step.title} className="steps-item">
+                <span className="steps-number" aria-hidden="true">
+                  {index + 1}
+                </span>
+                <div className="steps-copy">
+                  <h3>{step.title}</h3>
+                  <p>{step.detail}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
+
+        <section className="section" id="infrastructure">
+          <h2 className="section-title">Infrastructure overview</h2>
+          <p className="section-lead">{INFRASTRUCTURE_OVERVIEW.lead}</p>
+          <div
+            className="arch-flow"
+            aria-label="CryPrice architecture flow from clients through APIs and monitoring to data stores and alerts"
+          >
+            {INFRASTRUCTURE_OVERVIEW.flow.map((step, index) => (
+              <div key={step} className="arch-flow-item">
+                <span className="arch-flow-step">{step}</span>
+                {index < INFRASTRUCTURE_OVERVIEW.flow.length - 1 ? (
+                  <span className="arch-flow-arrow" aria-hidden="true">
+                    →
+                  </span>
+                ) : null}
+              </div>
+            ))}
+          </div>
+          <div className="tech-grid">
+            {INFRASTRUCTURE_OVERVIEW.cards.map((card) => (
+              <article key={card.title} className="tech-card">
+                <h3>{card.title}</h3>
+                <p>{card.detail}</p>
+              </article>
+            ))}
+          </div>
+        </section>
+
+        <section className="section" id="roadmap">
+          <h2 className="section-title">{ROADMAP.title}</h2>
+          <p className="section-lead">{ROADMAP.lead}</p>
+          <ul className="research-list">
+            {ROADMAP.items.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
+          </ul>
+        </section>
+
+        <section className="section section--card" id="founder">
+          <h2 className="section-title">{AUTHOR.sectionTitle}</h2>
+          <p className="section-lead">{AUTHOR.lead}</p>
+          <p className="section-note section-note--lead-follow">{AUTHOR.supportingCopy}</p>
           <div className="author-grid">
             <AuthorPhoto />
             <div className="author-copy">
@@ -187,6 +288,15 @@ export default function App() {
                   <span className="author-role">{AUTHOR.title}</span>
                 </h3>
                 <div className="author-socials">
+                  <a
+                    className="author-social-link"
+                    href={LINKS.githubProfile}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={`View ${AUTHOR.name} on GitHub`}
+                  >
+                    <span>GitHub</span>
+                  </a>
                   <a
                     className="author-social-link"
                     href={LINKS.xProfile}
@@ -222,60 +332,98 @@ export default function App() {
               </ul>
             </div>
           </div>
+
+          <div className="credibility-block" id="technical-contributions">
+            <h3 className="credibility-title">{TECHNICAL_CONTRIBUTIONS.title}</h3>
+            <p className="section-lead">{TECHNICAL_CONTRIBUTIONS.lead}</p>
+            <div className="tech-grid">
+              {TECHNICAL_CONTRIBUTIONS.items.map((item) => (
+                <article key={item.title} className="tech-card">
+                  <h3>{item.title}</h3>
+                  <p>{item.detail}</p>
+                </article>
+              ))}
+            </div>
+          </div>
+
+          <div className="credibility-block" id="milestones">
+            <h3 className="credibility-title">{MILESTONES.title}</h3>
+            <p className="section-lead">{MILESTONES.lead}</p>
+            <ol className="steps-list">
+              {MILESTONES.items.map((item, index) => (
+                <li
+                  key={item.title}
+                  className={`steps-item${'planned' in item && item.planned ? ' steps-item--planned' : ''}`}
+                >
+                  <span className="steps-number" aria-hidden="true">
+                    {index + 1}
+                  </span>
+                  <div className="steps-copy">
+                    <h3>{item.title}</h3>
+                    <p>{item.detail}</p>
+                  </div>
+                </li>
+              ))}
+            </ol>
+          </div>
+        </section>
+
+        <section className="section" id="public-work">
+          <h2 className="section-title">{PUBLIC_WORK.title}</h2>
+          <p className="section-lead">{PUBLIC_WORK.lead}</p>
+          <div className="public-work-links">
+            {PUBLIC_WORK.links.map((link) => (
+              <a
+                key={link.label}
+                className="author-social-link"
+                href={link.href}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {link.label}
+              </a>
+            ))}
+          </div>
+        </section>
+
+        <section className="section" id="architecture-snapshot">
+          <h2 className="section-title">{ARCHITECTURE_SNAPSHOT.title}</h2>
+          <p className="section-lead">{ARCHITECTURE_SNAPSHOT.lead}</p>
+          <div
+            className="arch-flow"
+            aria-label="CryPrice read-only monitoring data flow"
+          >
+            {ARCHITECTURE_SNAPSHOT.flow.map((step, index) => (
+              <div key={step} className="arch-flow-item">
+                <span className="arch-flow-step">{step}</span>
+                {index < ARCHITECTURE_SNAPSHOT.flow.length - 1 ? (
+                  <span className="arch-flow-arrow" aria-hidden="true">
+                    →
+                  </span>
+                ) : null}
+              </div>
+            ))}
+          </div>
         </section>
 
         <section className="section" id="project-links">
           <h2 className="section-title">Project links</h2>
           <p className="section-lead">
-            Open the app (including in-app Telegram) or browse the repositories.
+            Open the live app or review public engineering repositories and source trees.
           </p>
           <div className="link-cards">
-            <a className="link-card" href={LINKS.app}>
-              <span className="link-card-title">Open App</span>
-              <span className="link-card-url">
-                {urlHostname(LINKS.app, 'app.cryprice.dev')}
-              </span>
-            </a>
-            <a
-              className="link-card"
-              href={LINKS.monoRepo}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="link-card-title">Cryprice monorepo</span>
-              <span className="link-card-url">
-                {githubRepoLabel(LINKS.monoRepo, 'adrassad/cryprice')}
-              </span>
-            </a>
-            <a
-              className="link-card"
-              href={LINKS.webAppPath}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="link-card-title">Web app</span>
-              <span className="link-card-url">apps/web</span>
-            </a>
-            <a
-              className="link-card"
-              href={LINKS.backendPath}
-              target="_blank"
-              rel="noreferrer"
-            >
-              <span className="link-card-title">API service</span>
-              <span className="link-card-url">services/api</span>
-            </a>
-          </div>
-        </section>
-
-        <section className="section">
-          <h2 className="section-title">Tech stack</h2>
-          <div className="tech-grid">
-            {TECH_STACK_CARDS.map((card) => (
-              <article key={card.title} className="tech-card">
-                <h3>{card.title}</h3>
-                <p>{card.detail}</p>
-              </article>
+            {PROJECT_LINK_CARDS.map((card) => (
+              <a
+                key={card.title}
+                className="link-card"
+                href={card.href}
+                {...(card.external
+                  ? { target: '_blank', rel: 'noreferrer' }
+                  : {})}
+              >
+                <span className="link-card-title">{card.title}</span>
+                <span className="link-card-url">{card.url}</span>
+              </a>
             ))}
           </div>
         </section>
@@ -284,37 +432,31 @@ export default function App() {
           <h2 id="disclaimer-heading" className="visually-hidden">
             Disclaimer
           </h2>
-          <p>
-            Cryprice is an informational tool. It does not execute trades and
-            should not be considered financial advice.
-          </p>
+          <p>{DISCLAIMER}</p>
         </section>
       </main>
 
       <footer className="footer">
         <div className="footer-inner">
-          <span className="footer-brand">Cryprice</span>
+          <span className="footer-brand">CryPrice</span>
           <nav className="footer-nav" aria-label="Footer">
             <a href={LINKS.app}>Open App</a>
             <a href={LINKS.monoRepo} target="_blank" rel="noreferrer">
-              Monorepo
+              Public Repository
             </a>
             <a href={LINKS.webAppPath} target="_blank" rel="noreferrer">
-              Web app
+              Web App Source
             </a>
             <a href={LINKS.backendPath} target="_blank" rel="noreferrer">
-              Backend
+              Backend Source
             </a>
             <a href={LINKS.githubProfile} target="_blank" rel="noreferrer">
-              GitHub
+              GitHub Profile
             </a>
           </nav>
           <p className="footer-note">
-            App:{' '}
-            <span className="mono">
-              {urlHostname(LINKS.app, 'app.cryprice.dev')}
-            </span>{' '}
-            · API: <span className="mono">{PUBLIC_API_HOST}</span>
+            App: <span className="mono">app.cryprice.dev</span> · API:{' '}
+            <span className="mono">api.cryprice.dev</span>
           </p>
         </div>
       </footer>

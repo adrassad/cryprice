@@ -2,6 +2,9 @@ import { postgresClient } from "./connection.js";
 import { prepareOffchainSchemaBeforeInitDdl } from "./migrateOffchainPricesSchema.js";
 import { migrateUserAuthSchemaIfNeeded } from "./migrateUserAuthSchema.js";
 import { migrateUserInternalIdPhase1IfNeeded } from "./migrateUserInternalIdPhase1.js";
+import { migrateOnchainPriceAssetIdBigintIfNeeded } from "./migrateOnchainPriceAssetIdBigint.js";
+import { migrateAssetTokenIconsSchemaIfNeeded } from "./migrateAssetTokenIconsSchema.js";
+import { migrateAccountLinkTokensIfNeeded } from "./migrateAccountLinkTokens.js";
 
 export async function initDb() {
   //
@@ -14,8 +17,6 @@ export async function initDb() {
     first_name TEXT,
     last_name TEXT,
     language TEXT,
-    subscription_level TEXT NOT NULL DEFAULT 'free',
-    subscription_end TIMESTAMPTZ,
     is_active BOOLEAN NOT NULL DEFAULT TRUE,
     threshold_hf NUMERIC(10, 2) DEFAULT 1.2,
     email TEXT,
@@ -128,9 +129,221 @@ export async function initDb() {
     ON assets(address);
   `);
 
+  await migrateAssetTokenIconsSchemaIfNeeded(postgresClient);
+
+  //
+  // PROTOCOL ASSET TOKENS (receipt / debt / position token metadata)
+  //
+  await postgresClient.query(`
+    CREATE TABLE IF NOT EXISTS protocol_asset_tokens (
+      id BIGSERIAL PRIMARY KEY,
+
+      network_id BIGINT NOT NULL
+        REFERENCES networks(id)
+        ON DELETE CASCADE,
+
+      protocol VARCHAR(64) NOT NULL,
+
+      underlying_asset_id BIGINT NOT NULL
+        REFERENCES assets(id)
+        ON DELETE CASCADE,
+
+      token_address TEXT NOT NULL,
+
+      token_symbol TEXT NULL,
+
+      token_decimals INTEGER NULL,
+
+      token_role VARCHAR(64) NOT NULL,
+
+      price_asset_id BIGINT NULL
+        REFERENCES assets(id)
+        ON DELETE SET NULL,
+
+      market_id TEXT NULL,
+
+      external_market_address TEXT NULL,
+
+      metadata JSONB NOT NULL DEFAULT '{}'::jsonb,
+
+      is_active BOOLEAN NOT NULL DEFAULT TRUE,
+
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+      CONSTRAINT protocol_asset_tokens_network_protocol_token_unique
+        UNIQUE (network_id, protocol, token_address),
+
+      CONSTRAINT protocol_asset_tokens_network_protocol_underlying_role_unique
+        UNIQUE (network_id, protocol, underlying_asset_id, token_role)
+    );
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_protocol_asset_tokens_protocol_network
+    ON protocol_asset_tokens(protocol, network_id);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_protocol_asset_tokens_underlying_asset
+    ON protocol_asset_tokens(underlying_asset_id);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_protocol_asset_tokens_network_token
+    ON protocol_asset_tokens(network_id, token_address);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_protocol_asset_tokens_protocol_network_role
+    ON protocol_asset_tokens(protocol, network_id, token_role);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_protocol_asset_tokens_price_asset
+    ON protocol_asset_tokens(price_asset_id);
+  `);
+
+  await postgresClient.query(`
+    DROP TRIGGER IF EXISTS trg_protocol_asset_tokens_updated_at ON protocol_asset_tokens;
+  `);
+
+  await postgresClient.query(`
+    CREATE TRIGGER trg_protocol_asset_tokens_updated_at
+    BEFORE UPDATE ON protocol_asset_tokens
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+  `);
+
+  //
+  // WALLET PORTFOLIO BALANCES (on-chain snapshots per wallet/asset)
+  //
+  await postgresClient.query(`
+    CREATE TABLE IF NOT EXISTS wallet_portfolio_balances (
+      id BIGSERIAL PRIMARY KEY,
+
+      wallet_id BIGINT NOT NULL
+        REFERENCES wallets(id)
+        ON DELETE CASCADE,
+
+      asset_id BIGINT NOT NULL
+        REFERENCES assets(id)
+        ON DELETE RESTRICT,
+
+      balance_raw NUMERIC(78, 0) NOT NULL
+        CHECK (balance_raw > 0),
+
+      synced_at TIMESTAMPTZ NOT NULL,
+
+      block_number BIGINT NULL,
+
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+      CONSTRAINT wallet_portfolio_balances_wallet_asset_unique
+        UNIQUE (wallet_id, asset_id)
+    );
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_portfolio_wallet_id
+    ON wallet_portfolio_balances(wallet_id);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_portfolio_asset_id
+    ON wallet_portfolio_balances(asset_id);
+  `);
+
+  //
+  // WALLET PROTOCOL POSITION BALANCES (protocol supplied / borrowed snapshots)
+  //
+  await postgresClient.query(`
+    CREATE TABLE IF NOT EXISTS wallet_protocol_position_balances (
+      id BIGSERIAL PRIMARY KEY,
+
+      wallet_id BIGINT NOT NULL
+        REFERENCES wallets(id)
+        ON DELETE CASCADE,
+
+      network_id BIGINT NOT NULL
+        REFERENCES networks(id)
+        ON DELETE CASCADE,
+
+      protocol VARCHAR(64) NOT NULL,
+
+      protocol_asset_token_id BIGINT NOT NULL
+        REFERENCES protocol_asset_tokens(id)
+        ON DELETE CASCADE,
+
+      underlying_asset_id BIGINT NOT NULL
+        REFERENCES assets(id)
+        ON DELETE CASCADE,
+
+      price_asset_id BIGINT NULL
+        REFERENCES assets(id)
+        ON DELETE SET NULL,
+
+      position_side VARCHAR(16) NOT NULL
+        CHECK (position_side IN ('supplied', 'borrowed')),
+
+      token_role VARCHAR(64) NOT NULL,
+
+      balance_raw NUMERIC(78, 0) NOT NULL
+        CHECK (balance_raw > 0),
+
+      synced_at TIMESTAMPTZ NOT NULL,
+
+      block_number BIGINT NULL,
+
+      created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+      updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+
+      CONSTRAINT wallet_protocol_positions_wallet_token_unique
+        UNIQUE (wallet_id, protocol_asset_token_id)
+    );
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_protocol_positions_wallet_id
+    ON wallet_protocol_position_balances(wallet_id);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_protocol_positions_network_protocol
+    ON wallet_protocol_position_balances(network_id, protocol);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_protocol_positions_underlying_asset
+    ON wallet_protocol_position_balances(underlying_asset_id);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_protocol_positions_price_asset
+    ON wallet_protocol_position_balances(price_asset_id);
+  `);
+
+  await postgresClient.query(`
+    CREATE INDEX IF NOT EXISTS idx_wallet_protocol_positions_side
+    ON wallet_protocol_position_balances(position_side);
+  `);
+
+  await postgresClient.query(`
+    DROP TRIGGER IF EXISTS trg_wallet_protocol_positions_updated_at
+    ON wallet_protocol_position_balances;
+  `);
+
+  await postgresClient.query(`
+    CREATE TRIGGER trg_wallet_protocol_positions_updated_at
+    BEFORE UPDATE ON wallet_protocol_position_balances
+    FOR EACH ROW
+    EXECUTE FUNCTION update_updated_at_column();
+  `);
+
   /**
    * Must run before off-chain CREATE INDEX on `token`/`pair`.
-   * `CREATE TABLE IF NOT EXISTS` does not upgrade legacy offchain_prices rows still on `asset_id`;
+   * `CREATE TABLE IF NOT EXISTS` does not migrate legacy offchain_prices rows still on `asset_id`;
    * indexes referencing `token` would then fail with "column token does not exist".
    */
   await prepareOffchainSchemaBeforeInitDdl(postgresClient);
@@ -144,7 +357,7 @@ export async function initDb() {
     CREATE TABLE IF NOT EXISTS onchain_prices (
       id BIGSERIAL PRIMARY KEY,
       network_id INTEGER NOT NULL REFERENCES networks(id) ON DELETE CASCADE,
-      asset_id INTEGER NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+      asset_id BIGINT NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
       price_usd NUMERIC(38,18) NOT NULL CHECK (price_usd >= 0),
       collected_at TIMESTAMPTZ NOT NULL,
       created_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
@@ -155,7 +368,7 @@ export async function initDb() {
 
     CREATE TABLE IF NOT EXISTS current_onchain_prices (
       network_id INTEGER NOT NULL REFERENCES networks(id) ON DELETE CASCADE,
-      asset_id INTEGER NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
+      asset_id BIGINT NOT NULL REFERENCES assets(id) ON DELETE CASCADE,
       price_usd NUMERIC(38,18) NOT NULL CHECK (price_usd >= 0),
       calculated_at TIMESTAMPTZ NOT NULL,
       updated_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
@@ -196,6 +409,8 @@ export async function initDb() {
     COMMIT;
   `);
 
+  await migrateOnchainPriceAssetIdBigintIfNeeded(postgresClient);
+
   //
   // HEALTHFACTORS
   //
@@ -225,6 +440,7 @@ export async function initDb() {
 
   await migrateUserAuthSchemaIfNeeded(postgresClient);
   await migrateUserInternalIdPhase1IfNeeded(postgresClient);
+  await migrateAccountLinkTokensIfNeeded(postgresClient);
 
   console.log("✅ DB initialized");
 }

@@ -1,5 +1,5 @@
-import 'package:crypto_tracker_app/features/crypto_price/data/models/current_price_dto.dart';
-import 'package:crypto_tracker_app/features/crypto_price/data/models/parsers/current_price_response_parser_common.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/models/current_price_dto.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/models/parsers/current_price_response_parser_common.dart';
 
 /// `GET /prices/current/offchain/{symbol}` only — **not** [parseOnchainPerNetworkMap].
 ///

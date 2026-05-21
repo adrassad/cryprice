@@ -1,8 +1,8 @@
-import 'package:crypto_tracker_app/features/crypto_price/data/datasources/backend/offchain_onchain_prices_client.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/constants/market_pair_rules.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/repositories/crypto_repository.dart';
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_result.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/datasources/backend/offchain_onchain_prices_client.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/constants/market_pair_rules.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/repositories/crypto_repository.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 import 'package:flutter/foundation.dart';
 
 class CryptoRepositoryImpl implements CryptoRepository {

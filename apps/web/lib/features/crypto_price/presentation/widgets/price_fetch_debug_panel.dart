@@ -1,4 +1,4 @@
-import 'package:crypto_tracker_app/features/crypto_price/domain/entities/price_fetch_outcome.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
 import 'package:flutter/foundation.dart';
 
 /// Debug-only: `debugPrint` lines for local diagnosis (kDebugMode only; no UI).

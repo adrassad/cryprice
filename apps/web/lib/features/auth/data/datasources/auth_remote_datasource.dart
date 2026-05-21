@@ -1,9 +1,9 @@
-import 'package:crypto_tracker_app/core/config/auth_backend_config.dart';
-import 'package:crypto_tracker_app/features/auth/domain/entities/auth_user.dart';
-import 'package:crypto_tracker_app/features/auth/domain/exceptions/auth_api_exception.dart';
+import 'package:cryprice_frontend/core/config/auth_backend_config.dart';
+import 'package:cryprice_frontend/features/auth/domain/entities/auth_user.dart';
+import 'package:cryprice_frontend/features/auth/domain/exceptions/auth_api_exception.dart';
 import 'package:dio/dio.dart';
 
-/// Calls `/auth/*` on [authBackendBaseUrl] (see `lib/core/config/auth_backend_config.dart`).
+/// Calls `/auth/*` on [authBackendBaseUrl] (see [crypriceBackendBaseUrl] / `CRYPRICE_BACKEND_BASE_URL`).
 class AuthRemoteDataSource {
   AuthRemoteDataSource({Dio? dio, String? baseUrl})
     : _dio = dio ?? _buildDio(baseUrl ?? authBackendBaseUrl);

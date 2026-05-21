@@ -1,13 +1,14 @@
-import 'package:crypto_tracker_app/features/auth/presentation/cubit/auth_cubit.dart';
-import 'package:crypto_tracker_app/features/auth/presentation/widgets/login_google_cta.dart';
-import 'package:crypto_tracker_app/core/cubit/locale_cubit.dart';
-import 'package:crypto_tracker_app/features/theme/cubit/theme_cubit.dart';
-import 'package:crypto_tracker_app/gen_l10n/app_localizations.dart';
+import 'package:cryprice_frontend/core/shell/shell_visuals.dart';
+import 'package:cryprice_frontend/core/shell/widgets/shell_left_command_menu.dart';
+import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:cryprice_frontend/features/auth/presentation/widgets/login_google_cta.dart';
+import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
+/// Restricted unauthenticated screen: theme, locale, and Google sign-in only.
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -59,59 +60,90 @@ class _BodyState extends State<_Body> {
   @override
   Widget build(BuildContext context) {
     final AppLocalizations loc = AppLocalizations.of(context)!;
+    final Size size = MediaQuery.sizeOf(context);
+    final double hPad = size.width < 400 ? 12 : 24;
+
     return Scaffold(
       appBar: AppBar(
         elevation: 0,
         title: Text(
           loc.authScreenTitle,
-          style: GoogleFonts.montserrat(fontWeight: FontWeight.w600, fontSize: 20),
+          style: GoogleFonts.montserrat(
+            fontWeight: FontWeight.w600,
+            fontSize: size.width < 400 ? 18 : 20,
+          ),
         ),
         actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.language),
-            onPressed: () {
-              context.read<LocaleCubit>().toggleLocale();
-            },
-            tooltip: loc.switchLanguage,
-          ),
-          IconButton(
-            icon: const Icon(Icons.brightness_6),
-            onPressed: () {
-              context.read<ThemeCubit>().toggleTheme();
-            },
-            tooltip: loc.switchTheme,
+          Padding(
+            padding: const EdgeInsets.only(right: 8),
+            child: ShellVisuals.panel(
+              context: context,
+              padding: const EdgeInsets.all(6),
+              child: const ShellLeftCommandMenu(
+                layout: ShellCommandMenuLayout.horizontal,
+              ),
+            ),
           ),
         ],
       ),
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 24),
-          child: BlocBuilder<AuthCubit, AuthState>(
-            builder: (BuildContext context, AuthState state) {
-              if (state is AuthStateLoading) {
-                return const Center(child: CircularProgressIndicator());
-              }
-              return Center(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: <Widget>[
-                    Text(
-                      loc.authScreenSubtitle,
-                      textAlign: TextAlign.center,
-                      style: GoogleFonts.montserrat(fontSize: 15, height: 1.4),
+        child: LayoutBuilder(
+          builder: (BuildContext context, BoxConstraints constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: hPad, vertical: 16),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight - 32),
+                child: Center(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(
+                      maxWidth: ShellVisuals.authCardMaxWidth,
                     ),
-                    const SizedBox(height: 32),
-                    buildLoginGoogleCta(
-                      loc: loc,
-                      onPressed: () {
-                        context.read<AuthCubit>().signInWithGoogle();
-                      },
+                    child: ShellVisuals.panel(
+                      context: context,
+                      padding: EdgeInsets.symmetric(
+                        horizontal: size.width < 400 ? 16 : 28,
+                        vertical: size.width < 400 ? 24 : 36,
+                      ),
+                      child: BlocBuilder<AuthCubit, AuthState>(
+                        builder: (BuildContext context, AuthState state) {
+                          if (state is AuthStateLoading) {
+                            return const Padding(
+                              padding: EdgeInsets.symmetric(vertical: 48),
+                              child: Center(
+                                child: CircularProgressIndicator(),
+                              ),
+                            );
+                          }
+                          return Column(
+                            mainAxisSize: MainAxisSize.min,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            children: <Widget>[
+                              Text(
+                                loc.authScreenSubtitle,
+                                textAlign: TextAlign.center,
+                                style: GoogleFonts.montserrat(
+                                  fontSize: size.width < 400 ? 14 : 15,
+                                  height: 1.45,
+                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                ),
+                              ),
+                              SizedBox(height: size.width < 400 ? 24 : 32),
+                              buildLoginGoogleCta(
+                                loc: loc,
+                                onPressed: () {
+                                  context.read<AuthCubit>().signInWithGoogle();
+                                },
+                              ),
+                            ],
+                          );
+                        },
+                      ),
                     ),
-                  ],
+                  ),
                 ),
-              );
-            },
-          ),
+              ),
+            );
+          },
         ),
       ),
     );

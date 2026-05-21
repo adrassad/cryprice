@@ -76,7 +76,7 @@ test("requireAccessToken sets userId; legacy path documented in middleware", () 
   ok(
     /sub_typ === JWT_SUB_TYP_USER_ID|JWT_SUB_TYP_USER_ID.*sub_typ/.test(src),
   );
-  ok(src.includes("findById(payload.sub)"), "legacy: sub as telegram_id");
+  ok(src.includes("findByTelegramId(payload.sub)"), "legacy: sub as telegram_id");
 });
 
 test("toPublicUser includes id and telegram_id for /auth/me", () => {
@@ -110,15 +110,12 @@ test("auth route /me uses req.auth.userId", () => {
   ok(src.includes("getMe(req.auth.userId)"));
 });
 
-test("Telegram bot entrypoints unchanged: createIfNotExists / start", () => {
+test("Telegram bot start remains lookup-only (no auto-create)", () => {
   const start = readFileSync(
     join(root, "src/bot/commands/start.command.js"),
     "utf8",
   );
-  ok(start.includes("createIfNotExists"));
-  const userSvc = readFileSync(
-    join(root, "src/services/user/user.service.js"),
-    "utf8",
-  );
-  ok(userSvc.includes("db.users.create"));
+  ok(!start.includes("createIfNotExists"));
+  ok(!start.includes("getOrCreateUserByTelegramProfile"));
+  ok(start.includes("getUserByTelegramId") || start.includes("findUserByTelegramId"));
 });

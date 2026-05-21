@@ -1,7 +1,18 @@
 //src/bot/commands/start.command.js
-import { createIfNotExists } from "../../services/user/user.service.js";
+import {
+  getUserByTelegramId,
+  findUserByTelegramId,
+} from "../../services/user/user.service.js";
+import { consumeTelegramLinkToken } from "../../services/auth/auth.service.js";
 import { mainKeyboard } from "../keyboards/main.keyboard.js";
 import { t } from "../locales/index.js";
+
+async function resolveLinkedTelegramUser(telegramId) {
+  return (
+    (await getUserByTelegramId(telegramId)) ??
+    (await findUserByTelegramId(telegramId))
+  );
+}
 
 export function startCommand(bot) {
   bot.telegram.setMyCommands(
@@ -44,11 +55,45 @@ export function startCommand(bot) {
     if (ctx.scene?.current) {
       await ctx.scene.leave();
     }
-    await createIfNotExists(ctx.from);
 
-    await ctx.reply(t(ctx.from.language_code, "start_welcome"), {
+    const telegramId = ctx.from.id;
+    const text = String(ctx.message?.text ?? "");
+    const payload = text.startsWith("/start ") ? text.slice(7).trim() : "";
+
+    if (payload.startsWith("link_")) {
+      const rawToken = payload.slice("link_".length);
+      try {
+        await consumeTelegramLinkToken(rawToken, ctx.from);
+        console.log("bot /start link", { telegramId, linked: true });
+        await ctx.reply(t(ctx.from.language_code, "start_link_success"), {
+          parse_mode: "HTML",
+          ...mainKeyboard(ctx.from.language_code),
+        });
+      } catch (e) {
+        console.log("bot /start link failed", {
+          telegramId,
+          error: e?.message ?? "unknown",
+        });
+        await ctx.reply(t(ctx.from.language_code, "start_link_failed"), {
+          parse_mode: "HTML",
+        });
+      }
+      return;
+    }
+
+    const user = await resolveLinkedTelegramUser(telegramId);
+    console.log("bot /start", { telegramId, linked: Boolean(user) });
+
+    if (user) {
+      await ctx.reply(t(ctx.from.language_code, "start_linked_success"), {
+        parse_mode: "HTML",
+        ...mainKeyboard(ctx.from.language_code),
+      });
+      return;
+    }
+
+    await ctx.reply(t(ctx.from.language_code, "start_not_linked"), {
       parse_mode: "HTML",
-      ...mainKeyboard(ctx.from.language_code),
     });
   });
 }

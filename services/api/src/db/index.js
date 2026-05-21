@@ -11,6 +11,11 @@ import { CurrentOnchainPriceRepository } from "./repositories/currentOnchainPric
 import { CurrentOffchainPriceRepository } from "./repositories/currentOffchainPrices.repo.js";
 import { AuthIdentityRepository } from "./repositories/authIdentity.repo.js";
 import { RefreshTokenRepository } from "./repositories/refreshToken.repo.js";
+import { WalletPortfolioRepository } from "./repositories/walletPortfolio.repo.js";
+import { PortfolioAggregationRepository } from "./repositories/portfolioAggregation.repo.js";
+import { AccountLinkTokenRepository } from "./repositories/accountLinkToken.repo.js";
+import { ProtocolAssetTokenRepository } from "./repositories/protocolAssetToken.repo.js";
+import { WalletProtocolPositionRepository } from "./repositories/walletProtocolPosition.repo.js";
 
 export const db = {
   users: new UserRepository(postgresClient),
@@ -24,4 +29,9 @@ export const db = {
   hf: new HFRepository(postgresClient),
   authIdentities: new AuthIdentityRepository(postgresClient),
   refreshTokens: new RefreshTokenRepository(postgresClient),
+  walletPortfolio: new WalletPortfolioRepository(postgresClient),
+  portfolioAggregation: new PortfolioAggregationRepository(postgresClient),
+  accountLinkTokens: new AccountLinkTokenRepository(postgresClient),
+  protocolAssetTokens: new ProtocolAssetTokenRepository(postgresClient),
+  walletProtocolPositions: new WalletProtocolPositionRepository(postgresClient),
 };
