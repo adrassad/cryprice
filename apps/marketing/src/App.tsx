@@ -262,8 +262,8 @@ export default function App() {
               target="_blank"
               rel="noreferrer"
             >
-              <span className="link-card-title">Public backend</span>
-              <span className="link-card-url">backend-public</span>
+              <span className="link-card-title">API service</span>
+              <span className="link-card-url">services/api</span>
             </a>
           </div>
         </section>

@@ -18,7 +18,7 @@ Capabilities present in **this** public repository:
 - **Repository layer and PostgreSQL client** — `src/db/` (`connection.js`, `postgres.client.js`, `repositories/`).
 - **Redis-backed cache abstractions** — `src/redis/redis.client.js`, domain caches under `src/cache/`.
 - **Cron / background jobs** — `src/cron/` (asset and price refresh jobs, Health Factor updater wiring).
-- **Telegram bot (sanitized)** — `src/bot/` with Telegraf: user commands, wallet scenes, HF/positions helpers, optional AI prompt handling when configured via env.
+- **Telegram alerts (sanitized)** — `src/bot/` with Telegraf: alert delivery for authenticated users who linked Telegram in-app after Google sign-in; wallet scenes, HF/positions helpers, optional AI prompt handling when configured via env.
 
 Optional **Google Sign-In + JWT** session API exists under `/auth/*` when the corresponding env vars are set (see [`docs/AUTH.md`](docs/AUTH.md)).
 
@@ -60,7 +60,7 @@ flowchart TD
     Repositories --> Database[(Database)]
     Services --> Cache[(Cache)]
     Cron[Cron Jobs] --> Services
-    Bot[Telegram Bot - Public Safe Parts] --> Services
+    Alerts[Telegram Alerts - Authenticated In-App Linking] --> Services
     Config[Environment Config] --> API
     Config --> Services
 ```
@@ -77,7 +77,7 @@ flowchart TD
 - **`src/index.js`** loads environment configuration and starts the application.
 - **`app/index.js`** connects Redis, then runs bootstrap and runtime.
 - **`bootstrap.js`**: DB initialization and sequential startup hydration (networks, users, assets, prices, wallets, ABI bootstrap services).
-- **`runtime.js`**: starts cron jobs, the Telegram bot, and the HTTP server in one process.
+- **`runtime.js`**: starts cron jobs, Telegram alert delivery, and the HTTP server in one process.
 
 ### Services layer (`src/services/`)
 
@@ -116,9 +116,9 @@ A standalone **`src/db/verify/`** SQL bundle is **not** included here.
 - **`cron/index.js`** registers schedules.
 - Jobs refresh assets, on-chain/off-chain prices, and Health Factor (`*Updater.cron.js`, `priceUpdater.cron.js`, etc.). They do **not** invoke the removed broadcast alert module referenced above.
 
-### Bot layer (`src/bot/`)
+### Alert delivery layer (`src/bot/`)
 
-- **`bot.js`**, **`bot.instance.js`** — Telegraf, sessions, add/remove-wallet scenes.
+- **`bot.js`**, **`bot.instance.js`** — Telegraf instance for authenticated alert delivery and linked user flows.
 - **`commands/`**, **`handlers/`**, **`scenes/`** — user-facing flows (profile, positions, HF, threshold, `/add_wallet`, etc.).
 - **`guards/`** — rate-limit guard only in this export.
 - **`locales/`**, **`keyboards/`**, **`utils/`**, **`notification.service.js`** — UX and outbound messaging for retained flows.
@@ -149,7 +149,7 @@ npm test
 npm start
 ```
 
-`npm start` connects Redis, applies DDL/migrations from `src/db/init.js`, starts cron jobs, the Telegram bot, and the HTTP API on **`PORT_API`** (default **3000**).
+`npm start` connects Redis, applies DDL/migrations from `src/db/init.js`, starts cron jobs, Telegram alert delivery, and the HTTP API on **`PORT_API`** (default **3000**).
 
 ## REST API (selection)
 
@@ -163,9 +163,11 @@ npm start
 
 Rate limiting is applied per route groups in `src/api/server.js`.
 
-## Telegram bot
+## Telegram alerts
 
-User-facing flows include wallets (including scenes), Health Factor and positions helpers, thresholds, and optional **`ai:`** prompts when Gemini env vars are set. **`/support`** shows a **static notice** only (no operator relay in this repository).
+Telegram is used for alert delivery to users who have authenticated via Google sign-in and linked their Telegram account through the in-app flow. Supported flows include wallet management scenes, Health Factor and positions queries, thresholds, and optional **`ai:`** prompts when Gemini env vars are set. **`/support`** shows a **static notice** only (no operator relay in this repository).
+
+There is no standalone public bot entry point — linking requires an authenticated CryPrice session.
 
 ## Security
 

@@ -8,7 +8,7 @@ const LINK_DEFAULTS = {
   apiHost: 'api.cryprice.dev',
   monoRepo: 'https://github.com/adrassad/cryprice',
   webAppPath: 'https://github.com/adrassad/cryprice/tree/main/apps/web',
-  backendPath: 'https://github.com/adrassad/cryprice/tree/main/backend-public',
+  backendPath: 'https://github.com/adrassad/cryprice/tree/main/services/api',
   githubProfile: 'https://github.com/adrassad',
   linkedIn: 'https://www.linkedin.com/in/adrassad',
   xProfile: 'https://x.com/AdrasSad',
@@ -95,10 +95,11 @@ export const AUTHOR = {
 } as const
 
 export const ABOUT_CRYPRICE = [
-  'Compare prices across centralized exchanges, decentralized venues, and aggregators in one place.',
-  'Run direct, reverse, and cross-rate calculations without leaving the app.',
-  'The product also includes a Telegram bot for quick checks and alert-style workflows—it lives inside the same app experience on app.cryprice.dev, not as a separate destination.',
-  'Sign in with Google where the product needs it; the stack is a Flutter web/app frontend talking to a Node.js API.',
+  'Monitor DeFi positions across multiple wallets and chains from a single read-only dashboard.',
+  'Track Aave V3 Health Factor, supplied and borrowed positions, and protocol exposure.',
+  'Run direct, reverse, and cross-rate price calculations with the built-in Price Calculator.',
+  'Link Telegram for alerts through an authenticated in-app flow after Google sign-in — alerts are part of the CryPrice session, not a standalone public bot.',
+  'Flutter web and mobile client backed by a Node.js API with PostgreSQL and Redis.',
 ] as const
 
 export const TECH_STACK_CARDS = [
@@ -110,7 +111,7 @@ export const TECH_STACK_CARDS = [
   {
     title: 'Telegram (in-app)',
     detail:
-      'Bot flows are part of Cryprice—use them from app.cryprice.dev together with the web and mobile surfaces.',
+      'Alert delivery linked through an authenticated in-app flow after Google sign-in — not a standalone public bot entry point.',
   },
   { title: 'CEX / DEX data', detail: 'Feeds from exchanges and on-chain sources — presented clearly, not as trading advice.' },
 ] as const

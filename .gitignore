@@ -158,7 +158,7 @@ DerivedData/
 
 # =========================
 # Backend / API
-# backend-public or services/api
+# services/api
 # =========================
 logs/
 **/logs/
@@ -184,7 +184,7 @@ temp/
 # But allow intentional safe SQL examples
 !examples/**/*.sql
 !**/examples/**/*.sql
-!backend-public/examples/**/*.pgsql
+!services/api/examples/**/*.pgsql
 !**/examples/**/*.pgsql
 
 # =========================
