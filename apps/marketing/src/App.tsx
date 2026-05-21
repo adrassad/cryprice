@@ -115,7 +115,7 @@ export default function App() {
             <a href="#how-it-works">How it works</a>
             <a href="#roadmap">Roadmap</a>
             <a href="#founder">Founder</a>
-            <a href={LINKS.githubProfile} target="_blank" rel="noreferrer">
+            <a href={LINKS.monoRepo} target="_blank" rel="noreferrer">
               GitHub
             </a>
             <a className="btn btn--primary btn--sm" href={LINKS.app}>
@@ -146,7 +146,7 @@ export default function App() {
             Founder
           </a>
           <a
-            href={LINKS.githubProfile}
+            href={LINKS.monoRepo}
             target="_blank"
             rel="noreferrer"
             onClick={closeMobileNav}
