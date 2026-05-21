@@ -1,0 +1,212 @@
+# =========================
+# OS / editor / misc
+# =========================
+.DS_Store
+Thumbs.db
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*.class
+*.pyc
+.history/
+.svn/
+.atom/
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.example.json
+
+# =========================
+# Secrets / env
+# =========================
+.env
+.env.*
+!.env.example
+!.env.sample
+*.pem
+*.key
+*.crt
+*.p12
+*.pfx
+*.mobileprovision
+*.keystore
+*.jks
+*.asc
+*.gpg
+
+# =========================
+# Node / React / Vite / packages
+# apps/marketing, packages/*
+# =========================
+node_modules/
+**/node_modules/
+
+dist/
+**/dist/
+
+.cache/
+**/.cache/
+.vite/
+**/.vite/
+
+coverage/
+**/coverage/
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Keep lock files tracked intentionally.
+# package-lock.json
+# yarn.lock
+# pnpm-lock.yaml
+
+# =========================
+# Flutter / Dart
+# apps/web
+# =========================
+.dart_tool/
+**/.dart_tool/
+
+.flutter-plugins
+.flutter-plugins-dependencies
+**/.flutter-plugins
+**/.flutter-plugins-dependencies
+
+.pub-cache/
+.pub/
+**/.pub-cache/
+**/.pub/
+
+build/
+**/build/
+
+coverage/
+**/coverage/
+
+**/doc/api/
+
+# Flutter generated/local files
+**/ios/Flutter/.last_build_id
+**/ios/Flutter/flutter_export_environment.sh
+**/ios/Flutter/Generated.xcconfig
+**/macos/Flutter/flutter_export_environment.sh
+**/macos/Flutter/Generated.xcconfig
+**/linux/flutter/ephemeral/
+**/windows/flutter/ephemeral/
+**/macos/Flutter/ephemeral/
+**/ios/Flutter/ephemeral/
+
+# Flutter web generated service worker/build artifacts if generated locally
+**/web/flutter_service_worker.js
+**/web/flutter.js.map
+**/web/main.dart.js
+**/web/main.dart.js.map
+
+# Symbolication / obfuscation
+app.*.symbols
+app.*.map.json
+
+# =========================
+# Android
+# =========================
+**/android/.gradle/
+**/android/local.properties
+**/android/app/debug/
+**/android/app/profile/
+**/android/app/release/
+**/android/app/build/
+**/android/build/
+
+# Gradle
+.gradle/
+**/.gradle/
+
+# Usually keep Gradle wrapper tracked.
+# **/android/gradle/wrapper/gradle-wrapper.jar
+
+# =========================
+# iOS / macOS
+# =========================
+**/ios/Pods/
+**/ios/.symlinks/
+**/ios/Flutter/Flutter.framework
+**/ios/Flutter/Flutter.podspec
+**/ios/Runner.xcworkspace/xcuserdata/
+**/ios/Runner.xcodeproj/xcuserdata/
+**/ios/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+**/macos/Pods/
+**/macos/.symlinks/
+**/macos/Flutter/Flutter-Debug.xcconfig
+**/macos/Flutter/Flutter-Release.xcconfig
+**/macos/Runner.xcworkspace/xcuserdata/
+**/macos/Runner.xcodeproj/xcuserdata/
+**/macos/Runner.xcodeproj/project.xcworkspace/xcuserdata/
+
+# Xcode derived data / user settings
+DerivedData/
+**/DerivedData/
+*.xcuserstate
+*.xcscmblueprint
+
+# =========================
+# Backend / API
+# backend-public or services/api
+# =========================
+logs/
+**/logs/
+*.pid
+*.seed
+*.pid.lock
+
+# Runtime/generated data
+tmp/
+temp/
+**/tmp/
+**/temp/
+
+# Database dumps / backups
+*.sql
+*.dump
+*.backup
+*.bak
+*.sqlite
+*.sqlite3
+*.db
+
+# But allow intentional safe SQL examples
+!examples/**/*.sql
+!**/examples/**/*.sql
+!backend-public/examples/**/*.pgsql
+!**/examples/**/*.pgsql
+
+# =========================
+# Docker / local infra
+# =========================
+docker-compose.override.yml
+docker-compose.local.yml
+
+# =========================
+# Generated reports / local artifacts
+# =========================
+*.lcov
+*.coverage
+coverage-final.json
+
+# Optional: ignore local generated PDFs unless intentionally committed
+# *.pdf
+# !docs/assets/*.pdf
+
+# =========================
+# Project-specific
+# =========================
+migrate_working_dir/
+untranslated.txt
+devtools_options.yaml
