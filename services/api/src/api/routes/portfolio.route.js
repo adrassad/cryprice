@@ -72,8 +72,6 @@ router.get("/me", requireAccessToken, async (req, res, next) => {
 
     const data = await getUserPortfolio(req.auth.userId);
 
-    console.log("User portfolio data:", data); // Debug log
-
     const wallets = data.wallets.map(
       ({ walletId, address, label, portfolio }) => ({
         wallet_id: walletId,

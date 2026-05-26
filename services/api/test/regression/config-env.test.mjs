@@ -70,6 +70,8 @@ test("FLUSH_REDIS_ON_START is ignored when NODE_ENV=production", () => {
     BOT_TOKEN: "test-token-for-regression",
     NODE_ENV: "production",
     FLUSH_REDIS_ON_START: "true",
+    JWT_ACCESS_SECRET: "test-jwt-access-secret-at-least-32-chars",
+    CORS_ALLOWED_ORIGINS: "https://app.cryprice.dev",
     PATH: process.env.PATH || "",
   };
   const r = runEnvHelper(env);
@@ -91,4 +93,49 @@ test("FLUSH_REDIS_ON_START may apply when not production", () => {
   strictEqual(r.status, 0, r.stderr + r.stdout);
   const meta = JSON.parse(r.stdout.trim());
   strictEqual(meta.flush, true);
+});
+
+test("production startup fails when JWT_ACCESS_SECRET is missing", () => {
+  const env = {
+    ...process.env,
+    DATABASE_URL: "postgres://u:p@localhost/db",
+    BOT_TOKEN: "test-token-for-regression",
+    NODE_ENV: "production",
+    JWT_ACCESS_SECRET: "",
+    CORS_ALLOWED_ORIGINS: "https://app.cryprice.dev",
+    PATH: process.env.PATH || "",
+  };
+  const r = runEnvHelper(env);
+  ok(r.status !== 0);
+  match(r.stderr + r.stdout, /JWT_ACCESS_SECRET is required in production/);
+});
+
+test("production startup fails when JWT_ACCESS_SECRET is too short", () => {
+  const env = {
+    ...process.env,
+    DATABASE_URL: "postgres://u:p@localhost/db",
+    BOT_TOKEN: "test-token-for-regression",
+    NODE_ENV: "production",
+    JWT_ACCESS_SECRET: "short-secret",
+    CORS_ALLOWED_ORIGINS: "https://app.cryprice.dev",
+    PATH: process.env.PATH || "",
+  };
+  const r = runEnvHelper(env);
+  ok(r.status !== 0);
+  match(r.stderr + r.stdout, /at least 32 characters/);
+});
+
+test("production startup fails when CORS_ALLOWED_ORIGINS is missing", () => {
+  const env = {
+    ...process.env,
+    DATABASE_URL: "postgres://u:p@localhost/db",
+    BOT_TOKEN: "test-token-for-regression",
+    NODE_ENV: "production",
+    JWT_ACCESS_SECRET: "test-jwt-access-secret-at-least-32-chars",
+    CORS_ALLOWED_ORIGINS: "",
+    PATH: process.env.PATH || "",
+  };
+  const r = runEnvHelper(env);
+  ok(r.status !== 0);
+  match(r.stderr + r.stdout, /CORS_ALLOWED_ORIGINS is required in production/);
 });

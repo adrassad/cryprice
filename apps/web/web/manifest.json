@@ -1,11 +1,11 @@
 {
-    "name": "Crypto Price",
-    "short_name": "Crypto Price",
+    "name": "CryPrice",
+    "short_name": "CryPrice",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Crypto tracker price.",
+    "description": "Multi-chain DeFi risk monitoring.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

@@ -64,16 +64,11 @@ export function startCommand(bot) {
       const rawToken = payload.slice("link_".length);
       try {
         await consumeTelegramLinkToken(rawToken, ctx.from);
-        console.log("bot /start link", { telegramId, linked: true });
         await ctx.reply(t(ctx.from.language_code, "start_link_success"), {
           parse_mode: "HTML",
           ...mainKeyboard(ctx.from.language_code),
         });
       } catch (e) {
-        console.log("bot /start link failed", {
-          telegramId,
-          error: e?.message ?? "unknown",
-        });
         await ctx.reply(t(ctx.from.language_code, "start_link_failed"), {
           parse_mode: "HTML",
         });
@@ -82,7 +77,6 @@ export function startCommand(bot) {
     }
 
     const user = await resolveLinkedTelegramUser(telegramId);
-    console.log("bot /start", { telegramId, linked: Boolean(user) });
 
     if (user) {
       await ctx.reply(t(ctx.from.language_code, "start_linked_success"), {

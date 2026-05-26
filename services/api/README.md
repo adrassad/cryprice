@@ -20,7 +20,7 @@ Capabilities present in **this** public repository:
 - **Cron / background jobs** — `src/cron/` (asset and price refresh jobs, Health Factor updater wiring).
 - **Portfolio API** — authenticated portfolio summary, allocation series, positions, and PDF export (`/portfolio/*`, see [`docs/API_PORTFOLIO.md`](docs/API_PORTFOLIO.md)).
 - **Wallet and user routes** — `/wallets`, `/users/me` for authenticated wallet and profile management.
-- **Token icons** — `/token-icons` metadata service (no committed binary cache).
+- **Token icons** — `GET /static/token-icons/:chainId/:file` (path-validated PNG serving; no committed binary cache).
 - **Protocol asset sync** — scheduled refresh of protocol-linked asset metadata.
 
 Optional **Google Sign-In + JWT** session API exists under `/auth/*` when the corresponding env vars are set (see [`docs/AUTH.md`](docs/AUTH.md)).
@@ -32,7 +32,7 @@ From `package.json` and project layout:
 | Area | Technology |
 |------|------------|
 | Runtime | **Node.js** (ES modules, `"type": "module"`) |
-| HTTP API | **Express** 5.x, **cors**, **express-rate-limit** |
+| HTTP API | **Express** 5.x, **cors**, **helmet**, **express-rate-limit** |
 | Database | **PostgreSQL** via **`pg`** |
 | Cache | **Redis** via **`ioredis`** |
 | Scheduling | **`node-cron`** |
@@ -70,7 +70,7 @@ flowchart TD
 
 ### API layer (`src/api/`)
 
-- **`server.js`** wires the Express app: routes for prices, assets, networks, health, and authentication; JSON parsing; CORS; proxy trust.
+- **`server.js`** wires the Express app: routes for prices, assets, networks, health, and authentication; JSON body parsing (100kb limit); CORS allowlist; Helmet security headers; proxy trust.
 - **`routes/`**: `health`, `assets`, `onchainPrices`, `offchainPrices`, `network`, `auth`, `portfolio`, `wallets`, `users`, `tokenIcons`.
 - **`middlewares/`**: API and `/auth` rate limiting, error handling, JWT verification for protected routes.
 - **`errors/`**: typed HTTP errors for consistent responses.

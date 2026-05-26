@@ -1,58 +1,74 @@
 # Public Sync Policy
 
-CryPrice public repository is a sanitized public edition.
+CryPrice public repository is a **sanitized public edition**. Private repositories are the source of truth; this repository is an export suitable for open review and collaboration.
 
 ## Source repositories
 
-- Backend private: `/path/to/cryprice_backend_private`
-- Frontend private: `/path/to/cryprice_frontend_private`
-- Marketing private: `/path/to/cryprice_marketing_private`
-- Public repo: `/path/to/cryprice`
+Private source repositories (names and paths are intentionally generic — never commit real local machine paths):
+
+- `<private-backend-repository>` — full backend source
+- `<private-frontend-repository>` — full Flutter client source
+- `<private-marketing-repository>` — full marketing site source
+
+Public repository:
+
+- https://github.com/adrassad/cryprice
 
 ## Mapping
 
-- Backend → `services/api`
-- Frontend → `apps/web`
-- Marketing → `apps/marketing`
+| Private source | Public path |
+|----------------|-------------|
+| Backend | `services/api` |
+| Frontend | `apps/web` |
+| Marketing | `apps/marketing` |
 
-## Always excluded
+## Policy
 
-- `.env`, `.env.*`
-- real secrets, tokens, API keys, RPC URLs, JWT secrets
-- payment, billing, subscription enforcement, premium plans
-- admin tooling, admin bot commands, operator scripts
-- production deployment scripts/configs
-- server IPs, SSH users, nginx/pm2/systemd configs
-- user/customer data, wallet data dumps, logs, backups
+- **Private repositories are the source of truth** for production development.
+- **This public repository is a sanitized export** — not a full production replica.
+- **Secrets must never be exported** (API keys, JWT secrets, bot tokens, database URLs with credentials, RPC keys, etc.).
+- **Private deployment configs must never be exported** (server IPs, SSH users, nginx/pm2/systemd configs, CI deploy secrets).
+- **Admin, payment, billing, and private operator modules must never be exported.**
+- **Local machine paths, usernames, and private repo absolute paths must never appear** in the public tree.
+
+## Always excluded from export
+
+- `.env`, `.env.*` (real values)
+- Payment, billing, subscription enforcement, premium plans
+- Admin tooling, admin bot commands, operator scripts
+- Production deployment scripts and infrastructure details
+- User/customer data, wallet data dumps, logs, backups
 - `node_modules`, `dist`, `build`, `.dart_tool`, coverage, caches
 - `android/local.properties`
-- public Telegram bot CTAs
+- Public Telegram bot CTAs (standalone marketing links to the bot)
 
-## Allowed
+## Allowed in public export
 
-- read-only DeFi monitoring logic
-- portfolio aggregation
+- Read-only DeFi monitoring logic
+- Portfolio aggregation
 - Aave V3 Health Factor monitoring
-- wallet/profile UI
-- authenticated Telegram linking after Google sign-in
-- token icon infrastructure without binary cache
+- Wallet/profile UI
+- Authenticated Telegram linking after Google sign-in
+- Token icon infrastructure without binary cache
 - PDF export
-- tests
-- documentation
+- Tests and documentation
 - `.env.example` with placeholders only
 
-## Required checks
+## Required checks before publish
 
 Run grep checks for:
-- secrets
-- payment/billing/subscription/admin
-- public Telegram links
-- generated artifacts
-- `backend-public`
-- `AaveRadar`
 
-## Required validation
+- secrets and real credentials
+- payment/billing/subscription/admin modules
+- public Telegram links outside authenticated backend deep-link generation
+- generated build artifacts tracked by git
+- `backend-public` references
+- `AaveRadar` branding leaks
+- local machine paths (`/Users/`, private repo names with absolute paths)
 
+Run validation:
+
+- `scripts/public-sync-check.sh` (when available locally)
 - marketing lint/build
 - API test/build
 - Flutter gen-l10n/analyze/test
@@ -60,14 +76,8 @@ Run grep checks for:
 
 ## Public positioning
 
-CryPrice is Multi-Chain DeFi Risk Monitoring Infrastructure.
+CryPrice is **Multi-Chain DeFi Risk Monitoring Infrastructure**.
 
-Do not mention:
-- O-1
-- visa
-- immigration
-- USCIS
-- extraordinary ability
-- evidence trail
+Do not mention immigration, visa, or USCIS-related framing in public docs.
 
-Planned features must be marked as planned.
+Planned features must be marked as planned, not as shipped.

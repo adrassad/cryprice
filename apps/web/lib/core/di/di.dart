@@ -47,7 +47,7 @@ void setupDependencies() {
   }
 
   /// Single HTTP entry for aggregated prices. Base URL: [crypriceBackendBaseUrl]
-  /// (default `https://api.cryprice.dev`; local: `--dart-define=CRYPRICE_BACKEND_BASE_URL=...`).
+  /// (default `http://127.0.0.1:3000`; production: `--dart-define=CRYPRICE_BACKEND_BASE_URL=https://api.cryprice.dev`).
   /// No direct Binance / Bybit / CoinGecko calls in the app flow.
   di.registerLazySingleton<OffchainOnchainPricesClient>(
     () => OffchainOnchainPricesClient(baseUrl: backendBase),

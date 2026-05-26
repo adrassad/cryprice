@@ -1,5 +1,6 @@
 // src/config/env.js
 import "dotenv/config";
+import { resolveCorsOriginPolicy } from "./cors.policy.js";
 
 function parseBoolFlag(value) {
   return value === "true" || value === "1";
@@ -35,12 +36,21 @@ function parsePublicApiBaseUrl(port) {
   return base.replace(/\/+$/, "");
 }
 
+function parseCorsAllowedOrigins() {
+  const raw = process.env.CORS_ALLOWED_ORIGINS ?? "";
+  return raw
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+}
+
 const NODE_ENV = process.env.NODE_ENV || "development";
 const PORT_API = parsePort();
 
 export const ENV = {
   NODE_ENV,
   PORT_API,
+  CORS_ALLOWED_ORIGINS: parseCorsAllowedOrigins(),
   DATABASE_URL: process.env.DATABASE_URL,
   BOT_TOKEN: process.env.BOT_TOKEN,
   GEMINI_API_KEY: process.env.GEMINI_API_KEY,
@@ -98,6 +108,27 @@ export function shouldFlushRedisOnStart() {
   return true;
 }
 
+function validateJwtAccessSecret() {
+  if (ENV.NODE_ENV !== "production") return;
+
+  const secret = ENV.JWT_ACCESS_SECRET;
+  if (!secret) {
+    throw new Error(
+      "JWT_ACCESS_SECRET is required in production. Set a random secret of at least 32 characters.",
+    );
+  }
+  if (secret.length < 32) {
+    throw new Error(
+      "JWT_ACCESS_SECRET must be at least 32 characters in production.",
+    );
+  }
+}
+
+function validateCorsOrigins() {
+  if (ENV.NODE_ENV !== "production") return;
+  resolveCorsOriginPolicy(ENV.NODE_ENV, ENV.CORS_ALLOWED_ORIGINS);
+}
+
 function validateStartupEnv() {
   const missing = [];
   if (!ENV.DATABASE_URL) missing.push("DATABASE_URL");
@@ -107,6 +138,9 @@ function validateStartupEnv() {
       `Missing required environment variables: ${missing.join(", ")}. Set them in the environment or .env file.`,
     );
   }
+
+  validateJwtAccessSecret();
+  validateCorsOrigins();
 }
 
 validateStartupEnv();

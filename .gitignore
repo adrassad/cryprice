@@ -28,6 +28,7 @@ Thumbs.db
 .env.*
 !.env.example
 !.env.sample
+!.env.*.example
 *.pem
 *.key
 *.crt
@@ -38,6 +39,10 @@ Thumbs.db
 *.jks
 *.asc
 *.gpg
+certs/
+service-account*.json
+google-services.json
+GoogleService-Info.plist
 
 # =========================
 # Node / React / Vite / packages

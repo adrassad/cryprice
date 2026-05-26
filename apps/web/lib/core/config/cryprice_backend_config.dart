@@ -1,17 +1,17 @@
 // Single source of truth for the Cryprice HTTP API base (prices, profile, `/auth/*`).
 // Used by [OffchainOnchainPricesClient] and [authBackendBaseUrl].
 //
-// Default: public API (works on device/emulator). For local machine backend use:
-//   flutter run --dart-define=CRYPRICE_BACKEND_BASE_URL=http://127.0.0.1:3000
+// Default: local API for OSS clone-and-run. For production/staging builds pass:
+//   flutter build web --dart-define=CRYPRICE_BACKEND_BASE_URL=https://api.cryprice.dev
 // Android emulator → host machine: use http://10.0.2.2:3000
 String get crypriceBackendBaseUrl {
   const fromEnv = String.fromEnvironment(
     'CRYPRICE_BACKEND_BASE_URL',
-    defaultValue: 'https://api.cryprice.dev',
+    defaultValue: 'http://127.0.0.1:3000',
   );
   final raw = fromEnv.trim();
   if (raw.isEmpty) {
-    return 'https://api.cryprice.dev';
+    return 'http://127.0.0.1:3000';
   }
   return _stripTrailingSlashes(raw);
 }

@@ -1,6 +1,6 @@
 //src/api/server.js
 import express from "express";
-import cors from "cors";
+import helmet from "helmet";
 import healthRoute from "./routes/health.route.js";
 import assetsRoute from "./routes/assets.route.js";
 import onchainPricesRoute from "./routes/onchainPrices.route.js";
@@ -15,12 +15,19 @@ import apiLimiter from "./middlewares/rateLimit.middleware.js";
 import authLimiter from "./middlewares/authRateLimit.middleware.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
 import { ENV } from "../config/env.js";
+import { createCorsMiddleware } from "../config/cors.js";
 
 export function startServer() {
   const app = express();
   app.set("trust proxy", 1);
-  app.use(cors());
-  app.use(express.json());
+  app.use(
+    helmet({
+      contentSecurityPolicy: false,
+      crossOriginResourcePolicy: { policy: "cross-origin" },
+    }),
+  );
+  app.use(createCorsMiddleware());
+  app.use(express.json({ limit: "100kb" }));
 
   app.use("/health", apiLimiter);
   app.use("/assets", apiLimiter);

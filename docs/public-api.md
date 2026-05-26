@@ -35,14 +35,18 @@ The root `.env.example` defines `CRYPRICE_PUBLIC_API_URL` for client configurati
 | GET | `/prices/current/offchain` | Latest off-chain prices |
 | GET | `/networks` | Enabled blockchain networks |
 | POST | `/auth/google` | Google Sign-In token exchange (when configured) |
-| POST | `/auth/refresh` | JWT refresh (when configured) |
+| POST | `/auth/refresh` | Refresh session (when configured) |
+| POST | `/auth/logout` | Revoke refresh token |
+| GET | `/auth/me` | Current user profile (JWT) |
 | POST | `/auth/link/telegram` | Issue Telegram deep-link token for authenticated linking |
 | GET | `/users/me` | Current user profile (JWT) |
-| GET/POST/DELETE | `/wallets` | Monitored wallet addresses (JWT) |
-| GET | `/portfolio/summary` | Portfolio totals and allocation (JWT) |
-| GET | `/portfolio/positions` | DeFi positions across networks (JWT) |
-| GET | `/portfolio/report.pdf` | Server-side PDF export (JWT) |
-| GET | `/token-icons/:symbol` | Token icon metadata (public read) |
+| PATCH | `/users/me` | Update profile fields (JWT) |
+| GET/POST/PATCH/DELETE | `/wallets` | Monitored wallet addresses (JWT) |
+| GET | `/portfolio` | Aggregated portfolio dashboard (JWT) |
+| GET | `/portfolio/export/pdf` | Server-side PDF export (JWT) |
+| GET | `/static/token-icons/:chainId/:file` | Token icon PNG (public read; path-validated) |
+
+Additional portfolio sub-routes may exist for legacy or internal shapes — see [`services/api/docs/API_PORTFOLIO.md`](../services/api/docs/API_PORTFOLIO.md).
 
 ---
 
@@ -54,8 +58,8 @@ Route versioning (e.g., `/v1/` prefix) may be introduced as the API stabilizes. 
 
 ## Client packages
 
-- [`packages/api-client`](../packages/api-client) — TypeScript HTTP client
-- [`packages/shared`](../packages/shared) — Shared types and constants
+- [`packages/api-client`](../packages/api-client) — TypeScript HTTP client (**public stub / planned SDK**)
+- [`packages/shared`](../packages/shared) — Shared types and constants (**minimal public stub**)
 
 ---
 
@@ -64,3 +68,5 @@ Route versioning (e.g., `/v1/` prefix) may be introduced as the API stabilizes. 
 This document describes the public API surface included in the sanitized repository. Production-only endpoints related to billing, subscription enforcement, and admin operations are intentionally excluded.
 
 OpenAPI specification generation is planned as the API contract stabilizes.
+
+Auth/user identity migration items are tracked in [`docs/DEFERRED_PHASE_2B_AUTH_IDENTITY.md`](DEFERRED_PHASE_2B_AUTH_IDENTITY.md).

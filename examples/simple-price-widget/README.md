@@ -1,3 +1,5 @@
 # Simple price widget
 
-Минимальный пример виджета с отображением цены (использует `@cryprice/api-client` после публикации или через `workspace:*` в монорепо).
+**Placeholder example** — minimal pattern for reading public price endpoints from the CryPrice API.
+
+This is a safe public stub for integrators. See [`docs/public-api.md`](../../docs/public-api.md) for `/prices/current/onchain` and `/prices/current/offchain`.

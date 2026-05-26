@@ -133,7 +133,7 @@ See [`services/api/README.md`](services/api/README.md) and [`docs/setup.md`](doc
 - Google Sign-In + JWT session API
 - Authenticated Telegram alert linking (in-app, post sign-in)
 - Server-side PDF portfolio reporting
-- Public TypeScript client packages for API consumers
+- Public TypeScript client packages for API consumers (**stubs / planned SDK** — see `packages/`)
 
 See [`docs/TECHNICAL_CONTRIBUTIONS.md`](docs/TECHNICAL_CONTRIBUTIONS.md).
 
@@ -145,7 +145,7 @@ CryPrice is read-only by design. It does not store private keys, does not custod
 
 Production secrets, deployment credentials, and commercially sensitive modules are excluded from this public edition.
 
-See [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md).
+See [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md). To report vulnerabilities, see [`SECURITY.md`](SECURITY.md).
 
 ---
 
@@ -178,6 +178,8 @@ See [`docs/roadmap.md`](docs/roadmap.md).
 | [`docs/CASE_STUDY.md`](docs/CASE_STUDY.md) | Product case study |
 | [`docs/TECHNICAL_CONTRIBUTIONS.md`](docs/TECHNICAL_CONTRIBUTIONS.md) | Engineering contributions |
 | [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md) | Security and public edition scope |
+| [`SECURITY.md`](SECURITY.md) | Vulnerability reporting |
+| [`docs/DEFERRED_PHASE_2B_AUTH_IDENTITY.md`](docs/DEFERRED_PHASE_2B_AUTH_IDENTITY.md) | Deferred auth/identity migration (Phase 2B) |
 | [`docs/architecture.md`](docs/architecture.md) | System architecture |
 | [`docs/setup.md`](docs/setup.md) | Local development setup |
 | [`docs/public-api.md`](docs/public-api.md) | API contract overview |

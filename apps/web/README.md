@@ -15,7 +15,13 @@ Subscription, upgrade, and payment UI are **not** part of the public edition.
 
 ## Configuration (no secrets in the repo)
 
-Runtime API hosts are **not** hardcoded to production URLs. Pass base URLs and OAuth client ids at **compile time** with `--dart-define=...` (see [`.env.example`](.env.example) and [DEVELOPMENT.md](DEVELOPMENT.md)). Defaults point at `http://127.0.0.1:3000` for local development.
+Runtime API hosts default to **`http://127.0.0.1:3000`** for local OSS development. Pass base URLs and OAuth client ids at **compile time** with `--dart-define=...` (see [`.env.example`](.env.example) and [DEVELOPMENT.md](DEVELOPMENT.md)).
+
+For production or staging builds, set the deployed API explicitly:
+
+```bash
+flutter build web --dart-define=CRYPRICE_BACKEND_BASE_URL=https://api.cryprice.dev
+```
 
 ## Getting started
 
@@ -32,10 +38,15 @@ flutter run
 
 ```bash
 flutter run -d chrome --web-port=5000 \
+  --dart-define=CRYPRICE_BACKEND_BASE_URL=http://127.0.0.1:3000 \
   --dart-define=GOOGLE_WEB_CLIENT_ID=YOUR_WEB_CLIENT_ID.apps.googleusercontent.com
 ```
 
-Point your backend with e.g. `--dart-define=CRYPRICE_BACKEND_BASE_URL=...` and `--dart-define=AUTH_BACKEND_BASE_URL=...` when they differ from the local default.
+Override the API host only when it differs from the local default (e.g. production staging):
+
+```bash
+--dart-define=CRYPRICE_BACKEND_BASE_URL=https://api.cryprice.dev
+```
 
 ## License
 
