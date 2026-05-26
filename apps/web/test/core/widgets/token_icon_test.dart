@@ -107,11 +107,14 @@ void main() {
   group('TokenIcon', () {
     testWidgets('attempts network load for root-relative backend logo URL',
         (tester) async {
+      const path = '/static/token-icons/1/0xabc.png?v=hash1';
+      final expectedUrl = resolveTokenIconNetworkUrl(path)!;
+
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: TokenIcon(
-              logoUrl: '/static/token-icons/1/0xabc.png?v=hash1',
+              logoUrl: path,
               symbol: 'ETH',
               size: 36,
             ),
@@ -122,13 +125,8 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
       final image = tester.widget<Image>(find.byType(Image));
       final networkImage = image.image as NetworkImage;
-      expect(
-        networkImage.url,
-        'https://api.cryprice.dev/static/token-icons/1/0xabc.png?v=hash1',
-      );
-      expect(image.key, const ValueKey(
-        'https://api.cryprice.dev/static/token-icons/1/0xabc.png?v=hash1',
-      ));
+      expect(networkImage.url, expectedUrl);
+      expect(image.key, ValueKey(expectedUrl));
     });
 
     testWidgets('shows fallback when logoUrl is null', (tester) async {
