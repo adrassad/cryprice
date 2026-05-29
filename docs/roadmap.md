@@ -9,6 +9,7 @@ The following capabilities are present in the public repository:
 - Supplied and borrowed DeFi position tracking
 - Backend-calculated allocation series
 - Authenticated Telegram alert linking after Google sign-in
+- Health Factor threshold alerts (alert rules API, in-app inbox, Telegram delivery when linked)
 - Server-side PDF portfolio reports
 - On-chain and off-chain price ingestion
 - React/Vite marketing site

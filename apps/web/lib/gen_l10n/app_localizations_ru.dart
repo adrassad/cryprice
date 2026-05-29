@@ -252,6 +252,36 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileTelegramLinkButton => 'Привязать Telegram';
 
   @override
+  String get profileHfAlertsTitle => 'Оповещения Health Factor';
+
+  @override
+  String get profileHfAlertsDescription =>
+      'Уведомлять, когда мой Health Factor в Aave опускается ниже этого порога.';
+
+  @override
+  String get profileHfAlertsEnabled => 'Включено';
+
+  @override
+  String get profileHfAlertsHelper =>
+      'Оповещение срабатывает при пересечении порога, а не пока HF просто остаётся ниже него.';
+
+  @override
+  String get profileHfAlertsTelegramWarning =>
+      'Telegram не привязан. Настройки сохранятся в приложении, но доставка в Telegram требует привязки Telegram.';
+
+  @override
+  String get profileHfAlertsLegacySyncFailed =>
+      'Правило оповещения сохранено, но синхронизация legacy-порога профиля не удалась.';
+
+  @override
+  String get profileHfAlertsSaveSuccess => 'Настройки оповещения сохранены';
+
+  @override
+  String profileHfThresholdRangeError(String min, String max) {
+    return 'Порог Health Factor должен быть от $min до $max';
+  }
+
+  @override
   String get email => 'Email';
 
   @override
@@ -515,7 +545,188 @@ class AppLocalizationsRu extends AppLocalizations {
   String get navPortfolio => 'Портфель';
 
   @override
+  String get navAlerts => 'Оповещения';
+
+  @override
   String get navHealthFactorCalculator => 'Калькулятор HF';
+
+  @override
+  String get alertsEmpty => 'Оповещений пока нет';
+
+  @override
+  String get alertsLoading => 'Загрузка оповещений…';
+
+  @override
+  String get alertsError =>
+      'Не удалось загрузить оповещения. Попробуйте позже.';
+
+  @override
+  String get alertsNetworkError =>
+      'Не удалось связаться с сервером. Проверьте подключение и повторите попытку.';
+
+  @override
+  String get alertsRefreshFailed =>
+      'Не удалось обновить оповещения. Потяните вниз, чтобы повторить.';
+
+  @override
+  String get alertsMarkReadFailed =>
+      'Не удалось отметить оповещение прочитанным. Попробуйте снова.';
+
+  @override
+  String get alertsUnreadBadgeMax => '99+';
+
+  @override
+  String get alertsSeverityUnknown => 'Неизвестно';
+
+  @override
+  String get alertsScopeUnknown => 'Другое';
+
+  @override
+  String get alertsUnsupportedType => 'Неподдерживаемый тип оповещения';
+
+  @override
+  String get alertsMarkReadHint => 'Отметить прочитанным';
+
+  @override
+  String get alertsCopy => 'Копировать';
+
+  @override
+  String get alertsCopiedToClipboard => 'Оповещение скопировано в буфер обмена';
+
+  @override
+  String get alertsCopyFailed => 'Не удалось скопировать оповещение';
+
+  @override
+  String get alertsCopiedTooltip => 'Копировать сводку оповещения';
+
+  @override
+  String get alertsRiskNewsDisclaimer =>
+      'Сигнал на основе правил, не финансовая рекомендация';
+
+  @override
+  String get alertsRiskNewsScopeGlobal => '🌍 Глобальный DeFi-риск';
+
+  @override
+  String get alertsRiskNewsScopeExposure => '⚠️ Обнаружена ваша экспозиция';
+
+  @override
+  String get alertsRiskNewsScopeAdminOnly => '🛠 Внутреннее / админ';
+
+  @override
+  String get alertsRiskNewsSeverityCritical => 'Критический';
+
+  @override
+  String get alertsRiskNewsSeverityHigh => 'Высокий';
+
+  @override
+  String get alertsRiskNewsSeverityMedium => 'Средний';
+
+  @override
+  String get alertsRiskNewsSeverityLow => 'Низкий';
+
+  @override
+  String get alertsRiskNewsSeverityWarning => 'Предупреждение';
+
+  @override
+  String get alertsRiskNewsSeverityInfo => 'Инфо';
+
+  @override
+  String get alertsRiskNewsSource => 'Источник';
+
+  @override
+  String get alertsRiskNewsSourceUnavailable => 'Ссылка на источник недоступна';
+
+  @override
+  String get alertsRiskNewsSourceOpenFailed => 'Не удалось открыть ссылку';
+
+  @override
+  String get alertsRiskNewsGlobalReason => 'Причина';
+
+  @override
+  String get alertsRiskNewsMatchedAsset => 'Совпавший актив';
+
+  @override
+  String get alertsRiskNewsMatchedProtocol => 'Совпавший протокол';
+
+  @override
+  String get alertsRiskNewsMatchedChain => 'Совпавшая сеть';
+
+  @override
+  String alertsRiskNewsMatchConfidence(String value) {
+    return 'Уверенность совпадения: $value';
+  }
+
+  @override
+  String get alertsRiskNewsAffectedAssets => 'Затронутые активы';
+
+  @override
+  String get alertsRiskNewsAffectedProtocols => 'Затронутые протоколы';
+
+  @override
+  String get alertsRiskNewsAffectedChains => 'Затронутые сети';
+
+  @override
+  String get alertsHfAlertTypeBreach => 'Пробой HF';
+
+  @override
+  String get alertsHfAlertTypeRecovery => 'Восстановление HF';
+
+  @override
+  String get alertsHfWallet => 'Кошелёк';
+
+  @override
+  String get alertsHfProtocol => 'Протокол';
+
+  @override
+  String get alertsHfNetwork => 'Сеть';
+
+  @override
+  String get alertsHfThreshold => 'Порог';
+
+  @override
+  String get alertsHfThresholdLabel => '🎯 Порог оповещения';
+
+  @override
+  String get alertsHfLiquidationHeadline => 'Ликвидация';
+
+  @override
+  String get alertsHfLiquidationExplanation =>
+      'Критическая ситуация: позиция может быть ликвидирована';
+
+  @override
+  String get alertsHfBelowAlertThreshold =>
+      'Health Factor ниже вашего порога оповещения';
+
+  @override
+  String get alertsHfRecoveredAboveAlertThreshold =>
+      'Health Factor восстановился выше вашего порога оповещения';
+
+  @override
+  String get alertsHfCriticalHeadline => 'Health Factor критический';
+
+  @override
+  String get alertsHfRecoveryHeadline => 'Health Factor восстановлен';
+
+  @override
+  String get alertsHfPreviousHf => 'Предыдущий HF';
+
+  @override
+  String get alertsHfCurrentHf => 'Текущий HF';
+
+  @override
+  String get alertsHfNetworkProtocol => 'Сеть · Протокол';
+
+  @override
+  String get alertsHfMovementChanged => 'Health Factor изменился';
+
+  @override
+  String get alertsHfMovementImproved => 'Health Factor улучшился';
+
+  @override
+  String get alertsHfMovementDecreased => 'Health Factor снизился';
+
+  @override
+  String get alertsHfMovementUnchanged => 'Health Factor без изменений';
 
   @override
   String get comingSoon => 'Скоро';

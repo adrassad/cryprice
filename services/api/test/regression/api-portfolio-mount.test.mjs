@@ -10,7 +10,7 @@ test("API server mounts portfolio routes with shared rate limiter", () => {
   const src = readFileSync(join(root, "src/api/server.js"), "utf8");
   ok(src.includes('from "./routes/portfolio.route.js"'));
   ok(src.includes('app.use("/portfolio", apiLimiter)'));
-  ok(src.includes('app.use("/portfolio", portfolioRoute)'));
+  ok(src.includes('app.use("/portfolio", requireAccessToken, portfolioRoute)'));
 });
 
 test("portfolio root route exposes authenticated aggregated portfolio", () => {

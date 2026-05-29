@@ -10,6 +10,10 @@ import {
 import { calculateAndStoreHF } from "./healthfactor.core.js";
 import { extractUniqueAddresses } from "../wallet/wallet.utils.js";
 import { getUserProfile } from "../user/user.service.js";
+import {
+  collectChangedBelowThresholdNetworks,
+  hasPersistedHealthFactor,
+} from "./healthfactor.collector.utils.js";
 
 const CONCURRENCY = 5;
 
@@ -62,27 +66,20 @@ export async function collectHealthFactors({
     const mapHF = await calcHF(networks, addresses, checkChange);
     for (const [uId, walletsMap] of resultMap.entries()) {
       const stat = await getUserProfile(uId);
-      if (!stat) continue;
+      if (!stat.isActive) continue;
       const userAddressMap = new Map();
-      let hfIsChanged = false;
       for (const address of walletsMap.keys()) {
-        const networkMap = new Map();
-        for (const network of Object.values(networks)) {
-          const resultHF = mapHF.get(address)?.get(network.name);
-          if (
-            resultHF &&
-            resultHF.isChanged &&
-            Number(stat.threshold_hf) > resultHF.healthfactor
-          ) {
-            networkMap.set(network.name, resultHF.healthfactor);
-            hfIsChanged = true;
-          }
-        }
-        if (hfIsChanged) {
+        const networkMap = collectChangedBelowThresholdNetworks(
+          address,
+          mapHF,
+          networks,
+          stat.threshold_hf,
+        );
+        if (networkMap.size > 0) {
           userAddressMap.set(address, networkMap);
         }
       }
-      if (hfIsChanged) {
+      if (userAddressMap.size > 0) {
         finalResult.set(uId, userAddressMap);
       }
     }
@@ -103,7 +100,7 @@ async function calcHF(networks, addresses, checkChange) {
             network,
             checkChange,
           });
-          if (hfResult?.healthfactor) {
+          if (hasPersistedHealthFactor(hfResult)) {
             networkMap.set(network.name, hfResult);
           }
         }),

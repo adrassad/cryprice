@@ -149,6 +149,32 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
+  /// Keeps legacy [PublicUser.thresholdHf] in sync after alert rule saves.
+  ///
+  /// Does not emit profile snackbars or [ProfileViewStatus.updating].
+  /// Returns `true` when synced or already matching; `false` on API failure.
+  Future<bool> syncLegacyThresholdHf(double thresholdHf) async {
+    final current = state.user?.thresholdHf;
+    if (current != null && (current - thresholdHf).abs() < 0.000001) {
+      return true;
+    }
+    try {
+      final user = await _updateProfileUseCase.execute(<String, Object?>{
+        'threshold_hf': thresholdHf,
+      });
+      emit(
+        state.copyWith(
+          user: user,
+          clearError: true,
+          clearSuccess: true,
+        ),
+      );
+      return true;
+    } on Object {
+      return false;
+    }
+  }
+
   Future<void> addWallet({
     required String address,
     String? label,

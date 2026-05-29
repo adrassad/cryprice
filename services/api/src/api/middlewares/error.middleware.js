@@ -28,7 +28,7 @@ export function errorHandler(err, req, res, next) {
     return;
   }
 
-  console.error("[api] unhandled error:", err);
+  console.error("[api] unhandled error:", err?.message ?? err);
   const message =
     ENV.NODE_ENV === "production"
       ? "Internal server error."

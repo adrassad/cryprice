@@ -9,6 +9,7 @@ Use this file when syncing or reviewing **what is included vs excluded** from th
 ## Included in this export
 
 - **Portfolio API** — routes, services, repositories, cache, cron, tests (`src/services/portfolio/`, `src/api/routes/portfolio.route.js`)
+- **Health Factor alerts (v2)** — alert rules, inbox, Telegram HF delivery (`src/services/alerts/healthFactorAlert.*`, `alertRule.service.js`, `alert.service.js`, `alertDelivery.service.js`, `/alerts`, `/alert-rules`)
 - **Wallet and user routes** — authenticated wallet management and user profile (`wallets.route.js`, `users.route.js`)
 - **PDF export** — server-side portfolio report generation
 - **Protocol asset modules** — asset sync and protocol exposure helpers
@@ -16,7 +17,7 @@ Use this file when syncing or reviewing **what is included vs excluded** from th
 - **Account link tokens** — repository and authenticated Telegram linking middleware
 - **Auth** — Google Sign-In, JWT, `/auth/link/telegram` deep-link flow (backend-generated link only; no public bot CTA in clients)
 - **Cron jobs** — protocol asset, portfolio, token icon, price, and Health Factor refresh (safe subsets)
-- **Documentation** — `docs/API_PORTFOLIO.md`, `docs/API_PORTFOLIO_FRONTEND_HANDOFF.md`
+- **Documentation** — `docs/API_PORTFOLIO.md`, `docs/API_PORTFOLIO_FRONTEND_HANDOFF.md`, `docs/API_ALERT_RULES_FRONTEND_HANDOFF.md`
 
 ---
 
@@ -29,7 +30,9 @@ Do **not** sync the following from the private backend:
 | **Billing / subscription** | `src/services/subscription/**`, subscription enforcement, paid-feature gates |
 | **Payments** | `payments_pending` DDL, payment instruction locales, Stripe/payment env |
 | **Admin** | `admin.guard.js`, `users.command.js`, `upgradetopro.command.js`, `upgrade.handler.js`, admin support relay scene, `ADMIN_ID` env |
-| **Price alerts (PRO-gated)** | `priceAlert.service.js`, `alerts/` modules, `getAllProUsers`-based alert fan-out |
+| **Price alerts (PRO-gated)** | `priceAlert.service.js`, PRO-gated price alert fan-out |
+| **Risk Insights / news pipeline** | `src/services/news/**`, risk event crons, `riskNewsAlert.service.js`, admin risk APIs |
+| **Push / PWA notifications** | `src/services/push/**`, push token routes |
 | **Operational artifacts** | `node_modules/`, `dist/`, production filesystem paths, binary token icon cache, debug scripts |
 | **Secrets** | Real values in `.env`; only placeholders in `.env.example` |
 

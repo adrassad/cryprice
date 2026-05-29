@@ -68,6 +68,10 @@ export async function getAssets(networkName, protocolName) {
   return resolveProtocol(networkName, protocolName).getAssets();
 }
 
+export async function getProtocolAssetTokens(networkName, protocolName) {
+  return resolveProtocol(networkName, protocolName).getProtocolAssetTokens();
+}
+
 export async function getPrices(networkName, protocolName, assets) {
   return resolveProtocol(networkName, protocolName).getPrices(assets);
 }

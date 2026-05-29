@@ -1,11 +1,12 @@
 // src/config/networks.config.js
-export const networksConfig = {
+import { applyRpcEnvToNetwork } from "./rpc.config.js";
+
+const baseNetworksConfig = {
   ethereum: {
     CHAIN_ID: 1,
     name: "ethereum",
     NATIVE_SYMBOL: "ETH",
     ENABLED: true,
-    RPC_URL: process.env.ETHEREUM_RPC_URL,
     explorer: {
       url: process.env.ETHEREUM_EXPLORER,
       apiKey: process.env.ETHEREUM_EXPLORER_KEY,
@@ -24,7 +25,6 @@ export const networksConfig = {
     name: "arbitrum",
     NATIVE_SYMBOL: "ETH",
     ENABLED: true,
-    RPC_URL: process.env.ARBITRUM_RPC_URL,
     explorer: {
       url: process.env.ARBITRUM_EXPLORER,
       apiKey: process.env.ARBITRUM_EXPLORER_KEY,
@@ -43,7 +43,6 @@ export const networksConfig = {
     name: "avalanche",
     NATIVE_SYMBOL: "AVAX",
     ENABLED: true,
-    RPC_URL: process.env.AVALANCHE_RPC_URL,
     explorer: {
       url: process.env.AVALANCHE_EXPLORER,
       apiKey: process.env.AVALANCHE_EXPLORER_KEY,
@@ -62,7 +61,6 @@ export const networksConfig = {
     name: "base",
     NATIVE_SYMBOL: "ETH",
     ENABLED: true,
-    RPC_URL: process.env.BASE_RPC_URL,
     explorer: {
       url: process.env.BASE_EXPLORER,
       apiKey: process.env.BASE_EXPLORER_KEY,
@@ -76,3 +74,29 @@ export const networksConfig = {
     },
   },
 };
+
+const RPC_ENV_BY_NETWORK = {
+  ethereum: {
+    primaryUrl: process.env.ETHEREUM_RPC_URL,
+    urlsList: process.env.ETHEREUM_RPC_URLS,
+  },
+  arbitrum: {
+    primaryUrl: process.env.ARBITRUM_RPC_URL,
+    urlsList: process.env.ARBITRUM_RPC_URLS,
+  },
+  avalanche: {
+    primaryUrl: process.env.AVALANCHE_RPC_URL,
+    urlsList: process.env.AVALANCHE_RPC_URLS,
+  },
+  base: {
+    primaryUrl: process.env.BASE_RPC_URL,
+    urlsList: process.env.BASE_RPC_URLS,
+  },
+};
+
+export const networksConfig = Object.fromEntries(
+  Object.entries(baseNetworksConfig).map(([key, network]) => [
+    key,
+    applyRpcEnvToNetwork(network, RPC_ENV_BY_NETWORK[key]),
+  ]),
+);

@@ -4,5 +4,6 @@
 enum AppSection {
   priceCalculator,
   portfolio,
+  alerts,
   healthFactorCalculator,
 }

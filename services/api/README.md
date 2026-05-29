@@ -20,6 +20,7 @@ Capabilities present in **this** public repository:
 - **Cron / background jobs** — `src/cron/` (asset and price refresh jobs, Health Factor updater wiring).
 - **Portfolio API** — authenticated portfolio summary, allocation series, positions, and PDF export (`/portfolio/*`, see [`docs/API_PORTFOLIO.md`](docs/API_PORTFOLIO.md)).
 - **Wallet and user routes** — `/wallets`, `/users/me` for authenticated wallet and profile management.
+- **Health Factor alerts (v2)** — `/alert-rules`, `/alerts` for threshold rules, in-app inbox, and Telegram delivery when linked (see [`docs/API_ALERT_RULES_FRONTEND_HANDOFF.md`](docs/API_ALERT_RULES_FRONTEND_HANDOFF.md)).
 - **Token icons** — `GET /static/token-icons/:chainId/:file` (path-validated PNG serving; no committed binary cache).
 - **Protocol asset sync** — scheduled refresh of protocol-linked asset metadata.
 
@@ -71,7 +72,7 @@ flowchart TD
 ### API layer (`src/api/`)
 
 - **`server.js`** wires the Express app: routes for prices, assets, networks, health, and authentication; JSON body parsing (100kb limit); CORS allowlist; Helmet security headers; proxy trust.
-- **`routes/`**: `health`, `assets`, `onchainPrices`, `offchainPrices`, `network`, `auth`, `portfolio`, `wallets`, `users`, `tokenIcons`.
+- **`routes/`**: `health`, `assets`, `onchainPrices`, `offchainPrices`, `network`, `auth`, `portfolio`, `wallets`, `users`, `alerts`, `alertRules`, `tokenIcons`.
 - **`middlewares/`**: API and `/auth` rate limiting, error handling, JWT verification for protected routes.
 - **`errors/`**: typed HTTP errors for consistent responses.
 

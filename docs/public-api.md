@@ -44,6 +44,9 @@ The root `.env.example` defines `CRYPRICE_PUBLIC_API_URL` for client configurati
 | GET/POST/PATCH/DELETE | `/wallets` | Monitored wallet addresses (JWT) |
 | GET | `/portfolio` | Aggregated portfolio dashboard (JWT) |
 | GET | `/portfolio/export/pdf` | Server-side PDF export (JWT) |
+| GET | `/alerts` | In-app alert inbox (JWT) |
+| PATCH | `/alerts/:id/read` | Mark alert read (JWT) |
+| GET/POST/PATCH | `/alert-rules` | Health Factor alert rule settings (JWT) |
 | GET | `/static/token-icons/:chainId/:file` | Token icon PNG (public read; path-validated) |
 
 Additional portfolio sub-routes may exist for legacy or internal shapes — see [`services/api/docs/API_PORTFOLIO.md`](../services/api/docs/API_PORTFOLIO.md).

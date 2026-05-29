@@ -6,12 +6,14 @@ export const NotificationService = {
     try {
       const bot = getBot();
       await bot.telegram.sendMessage(telegramId, message, extra);
+      return { ok: true };
     } catch (err) {
       console.error(
         `⚠️ Failed to send message to ${telegramId}:`,
         new Date().toISOString(),
         err.message,
       );
+      return { ok: false, error: err.message ?? String(err) };
     }
   },
 };

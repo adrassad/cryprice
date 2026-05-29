@@ -18,7 +18,7 @@ Protocol adapter layer for Aave V3 reads supplied and borrowed positions per wal
 
 ### Health Factor risk classification and threshold alerting
 
-Health Factor values are normalized across networks and classified into risk tiers. Configurable thresholds trigger alert delivery through the authenticated Telegram linking flow.
+Health Factor values are normalized across networks and classified into risk tiers. Configurable threshold rules (Alerts v2) persist user settings, surface an in-app inbox, and deliver Telegram notifications when the account is linked through the authenticated flow.
 
 ### Backend-calculated allocation series
 

@@ -9,6 +9,10 @@ export class AaveBaseAdapter {
     throw new Error("getAssets not implemented");
   }
 
+  async getProtocolAssetTokens() {
+    throw new Error("getProtocolAssetTokens not implemented");
+  }
+
   async getPrices() {
     throw new Error("getPrices not implemented");
   }

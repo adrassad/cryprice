@@ -6,7 +6,8 @@ export function buildBotPrompt({ userText, profile, locale = "ru" }) {
 
   const profileContext = profile
     ? `Профиль пользователя:
-- telegramId: ${profile.telegramId}`
+- telegramId: ${profile.telegramId}
+- locale: ${profile.locale ?? "en"}`
     : "Профиль пользователя недоступен.";
 
   return `

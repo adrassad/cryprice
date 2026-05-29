@@ -48,7 +48,7 @@ CryPrice brings these signals into one read-only monitoring layer so meaningful 
 - **Networks:** Ethereum, Arbitrum, Avalanche, Base
 - Multi-wallet, multi-chain portfolio visibility
 - Supplied and borrowed DeFi position tracking
-- Health Factor monitoring and threshold alerting
+- Health Factor monitoring and configurable threshold alerts (rules API, in-app inbox, Telegram when linked)
 - Backend-calculated allocation series
 - Authenticated Telegram linking after Google sign-in
 - Server-side PDF portfolio reports

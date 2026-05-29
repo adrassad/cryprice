@@ -20,10 +20,12 @@ void main() {
       build: ShellNavigationCubit.new,
       act: (ShellNavigationCubit cubit) {
         cubit.selectSection(AppSection.portfolio);
+        cubit.selectSection(AppSection.alerts);
         cubit.selectSection(AppSection.healthFactorCalculator);
       },
       expect: () => <ShellNavigationState>[
         const ShellNavigationState(selectedSection: AppSection.portfolio),
+        const ShellNavigationState(selectedSection: AppSection.alerts),
         const ShellNavigationState(
           selectedSection: AppSection.healthFactorCalculator,
         ),

@@ -1,8 +1,12 @@
+import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_cubit.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_state.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/widgets/profile_hf_alert_block.dart';
 import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:cryprice_frontend/features/profile/domain/entities/public_user.dart';
 import 'package:cryprice_frontend/features/profile/domain/entities/wallet.dart';
 import 'package:cryprice_frontend/features/profile/presentation/widgets/profile_telegram_block.dart';
 import 'package:cryprice_frontend/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -16,6 +20,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   static const _fallback = 'Не указано';
+  bool _alertRulesInitialLoadDone = false;
 
   @override
   void initState() {
@@ -25,26 +30,103 @@ class _ProfilePageState extends State<ProfilePage> {
     });
   }
 
+  void _loadAlertRulesIfNeeded(BuildContext context, PublicUser user) {
+    if (_alertRulesInitialLoadDone) {
+      return;
+    }
+    _alertRulesInitialLoadDone = true;
+    context.read<AlertRulesCubit>().load(fallbackThresholdHf: user.thresholdHf);
+  }
+
+  Future<void> _refreshProfile(BuildContext context) async {
+    await context.read<ProfileCubit>().refreshAll();
+    if (!context.mounted) {
+      return;
+    }
+    final user = context.read<ProfileCubit>().state.user;
+    if (user != null) {
+      await context.read<AlertRulesCubit>().load(fallbackThresholdHf: user.thresholdHf);
+    }
+  }
+
+  Future<void> _onAlertRulesSaved(BuildContext context, AlertRulesState state) async {
+    if (state.status != AlertRulesStatus.success) {
+      return;
+    }
+
+    final loc = AppLocalizations.of(context)!;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(loc.profileHfAlertsSaveSuccess)),
+    );
+    context.read<AlertRulesCubit>().clearMessages();
+
+    final thresholdHf = state.globalRule?.thresholdHfValue;
+    if (thresholdHf == null) {
+      return;
+    }
+
+    final synced = await context.read<ProfileCubit>().syncLegacyThresholdHf(thresholdHf);
+    if (!context.mounted || synced) {
+      return;
+    }
+
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(loc.profileHfAlertsLegacySyncFailed)),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    return BlocListener<ProfileCubit, ProfileState>(
-      listenWhen: (previous, current) =>
-          previous.lastSuccessMessage != current.lastSuccessMessage ||
-          previous.errorMessage != current.errorMessage,
-      listener: (context, state) {
-        if (state.lastSuccessMessage != null && state.lastSuccessMessage!.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.lastSuccessMessage!)),
-          );
-          context.read<ProfileCubit>().clearMessages();
-        }
-        if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
-          context.read<ProfileCubit>().clearMessages();
-        }
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<ProfileCubit, ProfileState>(
+          listenWhen: (previous, current) =>
+              previous.lastSuccessMessage != current.lastSuccessMessage ||
+              previous.errorMessage != current.errorMessage ||
+              (previous.user == null && current.user != null),
+          listener: (context, state) {
+            if (state.user != null) {
+              _loadAlertRulesIfNeeded(context, state.user!);
+            }
+            if (state.lastSuccessMessage != null && state.lastSuccessMessage!.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.lastSuccessMessage!)),
+              );
+              context.read<ProfileCubit>().clearMessages();
+            }
+            if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(state.errorMessage!)),
+              );
+              context.read<ProfileCubit>().clearMessages();
+            }
+          },
+        ),
+        BlocListener<AlertRulesCubit, AlertRulesState>(
+          listenWhen: (previous, current) =>
+              previous.status != current.status ||
+              previous.errorMessage != current.errorMessage,
+          listener: (context, state) {
+            if (state.status == AlertRulesStatus.success) {
+              _onAlertRulesSaved(context, state);
+              return;
+            }
+            if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+              final loc = AppLocalizations.of(context)!;
+              final message = state.errorMessage == kAlertRulesThresholdRangeErrorCode
+                  ? loc.profileHfThresholdRangeError(
+                      kMinHfThreshold.toStringAsFixed(2),
+                      kMaxHfThreshold.toStringAsFixed(2),
+                    )
+                  : state.errorMessage!;
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text(message)),
+              );
+              context.read<AlertRulesCubit>().clearMessages();
+            }
+          },
+        ),
+      ],
       child: Scaffold(
         appBar: AppBar(title: const Text('Профиль')),
         body: BlocBuilder<ProfileCubit, ProfileState>(
@@ -60,7 +142,7 @@ class _ProfilePageState extends State<ProfilePage> {
               return const Center(child: Text('Не удалось загрузить профиль'));
             }
             return RefreshIndicator(
-              onRefresh: () => context.read<ProfileCubit>().refreshAll(),
+              onRefresh: () => _refreshProfile(context),
               child: ListView(
                 padding: const EdgeInsets.all(16),
                 children: [
@@ -81,6 +163,10 @@ class _ProfilePageState extends State<ProfilePage> {
                           : const Icon(Icons.edit),
                       label: const Text('Редактировать профиль'),
                     ),
+                  ),
+                  const SizedBox(height: 12),
+                  ProfileHfAlertBlock(
+                    isTelegramLinked: state.user!.isTelegramLinked,
                   ),
                   const SizedBox(height: 12),
                   ProfileTelegramBlock(
@@ -119,7 +205,6 @@ class _ProfilePageState extends State<ProfilePage> {
     final firstNameController = TextEditingController(text: user.firstName ?? '');
     final lastNameController = TextEditingController(text: user.lastName ?? '');
     final languageController = TextEditingController(text: user.language ?? '');
-    final thresholdController = TextEditingController(text: user.thresholdHf?.toString() ?? '');
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
@@ -129,7 +214,6 @@ class _ProfilePageState extends State<ProfilePage> {
             child: Column(
               children: [
                 TextField(controller: languageController, decoration: const InputDecoration(labelText: 'Язык')),
-                TextField(controller: thresholdController, decoration: const InputDecoration(labelText: 'Threshold HF')),
                 TextField(controller: usernameController, decoration: const InputDecoration(labelText: 'Username')),
                 TextField(controller: firstNameController, decoration: const InputDecoration(labelText: 'Имя')),
                 TextField(controller: lastNameController, decoration: const InputDecoration(labelText: 'Фамилия')),
@@ -145,13 +229,6 @@ class _ProfilePageState extends State<ProfilePage> {
                 _putIfChangedString(patch, 'username', user.username, usernameController.text);
                 _putIfChangedString(patch, 'first_name', user.firstName, firstNameController.text);
                 _putIfChangedString(patch, 'last_name', user.lastName, lastNameController.text);
-                final threshold = thresholdController.text.trim();
-                final parsedThreshold = threshold.isEmpty ? null : double.tryParse(threshold);
-                if (parsedThreshold != null && parsedThreshold >= 0.01 && parsedThreshold <= 9999.99) {
-                  if (user.thresholdHf != parsedThreshold) {
-                    patch['threshold_hf'] = parsedThreshold;
-                  }
-                }
                 context.read<ProfileCubit>().updateProfile(patch);
                 Navigator.pop(dialogContext);
               },
@@ -331,14 +408,10 @@ class _UserInfoCard extends StatelessWidget {
             _InfoLine(label: 'Username', value: user.username ?? _ProfilePageState._fallback),
             _InfoLine(label: 'Email', value: user.email ?? _ProfilePageState._fallback),
             _InfoLine(
-              label: 'Email verified',
+              label: 'Email подтвержден',
               value: user.emailVerified == null
                   ? _ProfilePageState._fallback
-                  : (user.emailVerified! ? 'Yes' : 'No'),
-            ),
-            _InfoLine(
-              label: 'Threshold HF',
-              value: user.thresholdHf?.toStringAsFixed(2) ?? _ProfilePageState._fallback,
+                  : (user.emailVerified! ? 'Да' : 'Нет'),
             ),
             _InfoLine(label: 'Язык', value: user.language ?? _ProfilePageState._fallback),
           ],

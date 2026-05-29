@@ -5,6 +5,9 @@ import 'package:cryprice_frontend/core/shell/shell_visuals.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_left_command_menu.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_section_nav.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_user_menu.dart';
+import 'package:cryprice_frontend/core/shell/widgets/shell_alerts_nav_icon.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/pages/alerts_inbox_page.dart';
 import 'package:cryprice_frontend/features/crypto_price/presentation/cubit/crypto_cubit.dart';
 import 'package:cryprice_frontend/features/crypto_price/presentation/pages/price_calculator_page.dart';
 import 'package:cryprice_frontend/features/health_factor/presentation/pages/health_factor_page.dart';
@@ -34,23 +37,29 @@ class AppShell extends StatefulWidget {
 
 class _AppShellState extends State<AppShell> {
   late final ShellNavigationCubit _shellNavigationCubit;
+  late final AlertsInboxCubit _alertsInboxCubit;
 
   @override
   void initState() {
     super.initState();
     _shellNavigationCubit = ShellNavigationCubit();
+    _alertsInboxCubit = di<AlertsInboxCubit>();
   }
 
   @override
   void dispose() {
     _shellNavigationCubit.close();
+    _alertsInboxCubit.close();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<ShellNavigationCubit>.value(
-      value: _shellNavigationCubit,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<ShellNavigationCubit>.value(value: _shellNavigationCubit),
+        BlocProvider<AlertsInboxCubit>.value(value: _alertsInboxCubit),
+      ],
       child: _AppShellScaffold(
         onProfile: widget.onProfile,
         onLogin: widget.onLogin,
@@ -276,6 +285,11 @@ class _ShellNarrowLayout extends StatelessWidget {
                   label: loc.navPortfolio,
                 ),
                 NavigationDestination(
+                  icon: const ShellAlertsNavIcon(),
+                  selectedIcon: const ShellAlertsNavIcon(selected: true),
+                  label: loc.navAlerts,
+                ),
+                NavigationDestination(
                   icon: const Icon(Icons.monitor_heart_outlined),
                   label: loc.navHealthFactorCalculator,
                 ),
@@ -358,6 +372,7 @@ class _ShellSectionBody extends StatelessWidget {
   static const List<Widget> _pages = <Widget>[
     _ShellPriceCalculatorTab(),
     _ShellPortfolioTab(),
+    _ShellAlertsTab(),
     HealthFactorPage(),
   ];
 
@@ -402,6 +417,33 @@ class _ShellPriceCalculatorTabState extends State<_ShellPriceCalculatorTab> {
   }
 }
 
+/// Owns [AlertsInboxCubit] load lifecycle; stays mounted under [IndexedStack].
+class _ShellAlertsTab extends StatefulWidget {
+  const _ShellAlertsTab();
+
+  @override
+  State<_ShellAlertsTab> createState() => _ShellAlertsTabState();
+}
+
+class _ShellAlertsTabState extends State<_ShellAlertsTab> {
+  var _initialLoadStarted = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (_initialLoadStarted) {
+      return;
+    }
+    _initialLoadStarted = true;
+    context.read<AlertsInboxCubit>().load();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return const AlertsInboxPage();
+  }
+}
+
 /// Owns [PortfolioCubit] for the shell portfolio tab; stays mounted under [IndexedStack].
 class _ShellPortfolioTab extends StatefulWidget {
   const _ShellPortfolioTab();
@@ -439,6 +481,7 @@ String _sectionTitle(BuildContext context, AppSection section) {
   return switch (section) {
     AppSection.priceCalculator => loc.navPriceCalculator,
     AppSection.portfolio => loc.navPortfolio,
+    AppSection.alerts => loc.navAlerts,
     AppSection.healthFactorCalculator => loc.navHealthFactorCalculator,
   };
 }
@@ -447,6 +490,7 @@ int _sectionIndex(AppSection section) {
   return switch (section) {
     AppSection.priceCalculator => 0,
     AppSection.portfolio => 1,
-    AppSection.healthFactorCalculator => 2,
+    AppSection.alerts => 2,
+    AppSection.healthFactorCalculator => 3,
   };
 }

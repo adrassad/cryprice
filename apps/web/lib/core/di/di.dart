@@ -1,4 +1,16 @@
 import 'package:cryprice_frontend/core/config/cryprice_backend_config.dart';
+import 'package:cryprice_frontend/features/alerts/data/datasources/alert_rules_remote_datasource.dart';
+import 'package:cryprice_frontend/features/alerts/data/datasources/alerts_inbox_remote_datasource.dart';
+import 'package:cryprice_frontend/features/alerts/data/repositories/alert_rules_repository_impl.dart';
+import 'package:cryprice_frontend/features/alerts/data/repositories/alerts_inbox_repository_impl.dart';
+import 'package:cryprice_frontend/features/alerts/domain/repositories/alert_rules_repository.dart';
+import 'package:cryprice_frontend/features/alerts/domain/repositories/alerts_inbox_repository.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alert_rules_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alerts_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_alert_read_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/upsert_global_hf_alert_rule_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_cubit.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
 import 'package:cryprice_frontend/features/auth/data/datasources/auth_remote_datasource.dart';
 import 'package:cryprice_frontend/features/auth/data/datasources/google_id_token_provider.dart';
 import 'package:cryprice_frontend/features/auth/data/gateways/google_sign_in_gateway_impl.dart';
@@ -47,7 +59,7 @@ void setupDependencies() {
   }
 
   /// Single HTTP entry for aggregated prices. Base URL: [crypriceBackendBaseUrl]
-  /// (default `http://127.0.0.1:3000`; production: `--dart-define=CRYPRICE_BACKEND_BASE_URL=https://api.cryprice.dev`).
+  /// (default `https://api.cryprice.dev`; local: `--dart-define=CRYPRICE_BACKEND_BASE_URL=...`).
   /// No direct Binance / Bybit / CoinGecko calls in the app flow.
   di.registerLazySingleton<OffchainOnchainPricesClient>(
     () => OffchainOnchainPricesClient(baseUrl: backendBase),
@@ -125,6 +137,36 @@ void setupDependencies() {
       addWalletUseCase: di<AddWalletUseCase>(),
       updateWalletLabelUseCase: di<UpdateWalletLabelUseCase>(),
       deleteWalletUseCase: di<DeleteWalletUseCase>(),
+    ),
+  );
+  di.registerLazySingleton<AlertRulesRemoteDataSource>(
+    () => AlertRulesRemoteDataSource(sessionService: di<AuthSessionService>()),
+  );
+  di.registerLazySingleton<AlertRulesRepository>(
+    () => AlertRulesRepositoryImpl(remote: di<AlertRulesRemoteDataSource>()),
+  );
+  di.registerLazySingleton(() => GetAlertRulesUseCase(di<AlertRulesRepository>()));
+  di.registerLazySingleton(
+    () => UpsertGlobalHfAlertRuleUseCase(di<AlertRulesRepository>()),
+  );
+  di.registerFactory(
+    () => AlertRulesCubit(
+      getAlertRulesUseCase: di<GetAlertRulesUseCase>(),
+      upsertGlobalHfAlertRuleUseCase: di<UpsertGlobalHfAlertRuleUseCase>(),
+    ),
+  );
+  di.registerLazySingleton<AlertsInboxRemoteDataSource>(
+    () => AlertsInboxRemoteDataSource(sessionService: di<AuthSessionService>()),
+  );
+  di.registerLazySingleton<AlertsInboxRepository>(
+    () => AlertsInboxRepositoryImpl(remote: di<AlertsInboxRemoteDataSource>()),
+  );
+  di.registerLazySingleton(() => GetAlertsUseCase(di<AlertsInboxRepository>()));
+  di.registerLazySingleton(() => MarkAlertReadUseCase(di<AlertsInboxRepository>()));
+  di.registerFactory(
+    () => AlertsInboxCubit(
+      getAlertsUseCase: di<GetAlertsUseCase>(),
+      markAlertReadUseCase: di<MarkAlertReadUseCase>(),
     ),
   );
 }

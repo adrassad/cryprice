@@ -5,7 +5,6 @@ import { getEnabledNetworks } from "../../services/network/network.service.js";
 const router = express.Router();
 
 router.get("/", async (req, res) => {
-  console.log("networks");
   try {
     const networks = await getEnabledNetworks(); // ждём результат
     res.json(networks);

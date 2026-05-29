@@ -24,6 +24,8 @@ cp apps/marketing/.env.example apps/marketing/.env  # optional, for custom URLs
 
 Edit `services/api/.env` with your local `DATABASE_URL`, `BOT_TOKEN`, Redis settings, and RPC provider variables. See [`services/api/.env.example`](../services/api/.env.example).
 
+**Optional — Health Factor alerts v2:** set `ALERTS_V2_ENABLED=true` to enable persisted HF alert rules (`/alert-rules`), the in-app inbox (`/alerts`), and Telegram HF delivery when the account is linked. When disabled (default), HF sync uses legacy inline Telegram summaries instead.
+
 ### 2. Infrastructure (optional)
 
 ```bash

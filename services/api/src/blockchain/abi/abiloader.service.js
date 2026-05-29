@@ -57,7 +57,7 @@ export class ABILoaderService {
       throw new Error(`Network config not found for "${network}"`);
     }
 
-    if (!config.enabled) {
+    if (config.ENABLED === false) {
       throw new Error(`Network "${network}" is disabled`);
     }
 
@@ -70,15 +70,18 @@ export class ABILoaderService {
     if (!explorer || !explorer.url)
       throw new Error(`Explorer not configured for ${network}`);
 
+    const apiKey = explorer.apiKey ?? explorer.key;
+    const chainId = explorer.chainId ?? this.getNetworkConfig(network).CHAIN_ID;
+
     let url;
     if (explorer.type === "v2") {
-      if (!explorer.key) throw new Error(`API key missing for ${network}`);
-      url = `${explorer.url}v2/api?module=contract&action=getabi&address=${address}&chainid=${explorer.chainId}&apikey=${explorer.key}`;
+      if (!apiKey) throw new Error(`API key missing for ${network}`);
+      url = `${explorer.url}v2/api?module=contract&action=getabi&address=${address}&chainid=${chainId}&apikey=${apiKey}`;
     } else if (explorer.type === "snowtrace") {
       url = `${
         explorer.url
       }api?module=contract&action=getabi&address=${address}&apikey=${
-        explorer.key || ""
+        apiKey || ""
       }`;
     } else {
       throw new Error(`Unsupported explorer type for ${network}`);

@@ -1,11 +1,14 @@
-// blockchain/networks/arbitrum/index.js
-import { JsonRpcProvider } from "ethers";
+// blockchain/networks/avalanche/index.js
+import { createNetworkProvider } from "../../../config/rpc.config.js";
 
 export function createAvalancheNetwork(config) {
   return {
     name: "avalanche",
     chainId: config.CHAIN_ID,
-    provider: new JsonRpcProvider(config.RPC_URL),
+    provider: createNetworkProvider(config.RPC_URLS, {
+      chainId: config.CHAIN_ID,
+      networkName: "avalanche",
+    }),
     config: {
       protocols: config.protocols,
     },

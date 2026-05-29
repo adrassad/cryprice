@@ -14,7 +14,7 @@ class ABIRegistry {
     return `${network}:${address.toLowerCase()}`;
   }
 
-  buildPath(network, address, protocol) {
+  buildPath(network, address, protocol = "aave") {
     return path.join(
       this.baseDir,
       network,
@@ -23,7 +23,7 @@ class ABIRegistry {
     );
   }
 
-  async get(network, address) {
+  async get(network, address, protocolName = "aave") {
     if (!network || !address) throw new Error("network/address required");
 
     const key = this.buildKey(network, address);
@@ -41,7 +41,7 @@ class ABIRegistry {
     }
 
     // filesystem
-    const file = this.buildPath(network, address);
+    const file = this.buildPath(network, address, protocolName);
 
     if (fs.existsSync(file)) {
       const abi = JSON.parse(fs.readFileSync(file));
@@ -61,7 +61,7 @@ class ABIRegistry {
     return abi;
   }
 
-  async save(network, address, abi, protocolName) {
+  async save(network, address, abi, protocolName = "aave") {
     const file = this.buildPath(network, address, protocolName);
 
     fs.mkdirSync(path.dirname(file), { recursive: true });

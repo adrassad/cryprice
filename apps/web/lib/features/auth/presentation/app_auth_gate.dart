@@ -2,6 +2,7 @@ import 'package:cryprice_frontend/core/di/di.dart';
 import 'package:cryprice_frontend/core/shell/app_shell.dart';
 import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:cryprice_frontend/features/auth/presentation/pages/login_page.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_cubit.dart';
 import 'package:cryprice_frontend/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:cryprice_frontend/features/profile/presentation/pages/profile_page.dart';
 import 'package:flutter/material.dart';
@@ -31,8 +32,11 @@ class AppAuthGate extends StatelessWidget {
             onProfile: () {
               Navigator.of(context).push(
                 MaterialPageRoute<void>(
-                  builder: (_) => BlocProvider<ProfileCubit>(
-                    create: (_) => di<ProfileCubit>(),
+                  builder: (_) => MultiBlocProvider(
+                    providers: [
+                      BlocProvider<ProfileCubit>(create: (_) => di<ProfileCubit>()),
+                      BlocProvider<AlertRulesCubit>(create: (_) => di<AlertRulesCubit>()),
+                    ],
                     child: const ProfilePage(),
                   ),
                 ),

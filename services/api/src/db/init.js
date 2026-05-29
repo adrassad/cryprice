@@ -5,6 +5,7 @@ import { migrateUserInternalIdPhase1IfNeeded } from "./migrateUserInternalIdPhas
 import { migrateOnchainPriceAssetIdBigintIfNeeded } from "./migrateOnchainPriceAssetIdBigint.js";
 import { migrateAssetTokenIconsSchemaIfNeeded } from "./migrateAssetTokenIconsSchema.js";
 import { migrateAccountLinkTokensIfNeeded } from "./migrateAccountLinkTokens.js";
+import { migrateAlertSchemaIfNeeded } from "./migrateAlertSchema.js";
 
 export async function initDb() {
   //
@@ -441,6 +442,7 @@ export async function initDb() {
   await migrateUserAuthSchemaIfNeeded(postgresClient);
   await migrateUserInternalIdPhase1IfNeeded(postgresClient);
   await migrateAccountLinkTokensIfNeeded(postgresClient);
+  await migrateAlertSchemaIfNeeded(postgresClient);
 
   console.log("✅ DB initialized");
 }

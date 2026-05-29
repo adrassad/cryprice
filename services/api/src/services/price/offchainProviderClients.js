@@ -118,6 +118,7 @@ async function fetchCoinGeckoJson(url, options = {}) {
       const ra = res.headers.get("retry-after");
       const waitSec = ra ? Number(ra) : Math.min(120, 5 * 2 ** (attempt - 1));
       const waitMs = (Number.isFinite(waitSec) && waitSec > 0 ? waitSec : 30) * 1000;
+      // TODO: tie maxAttempts / base backoff to env when off-chain cron interval is tuned down.
       console.warn(
         `[offchain] coingecko: HTTP 429, retry ${attempt}/${maxAttempts} in ${Math.round(waitMs / 1000)}s`,
         new Date().toISOString(),

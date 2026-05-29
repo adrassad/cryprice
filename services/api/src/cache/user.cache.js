@@ -38,7 +38,7 @@ export async function setUsersToCache(users) {
     const multi = redis.multi();
 
     for (const user of users) {
-      const id = user?.telegram_id;
+      const id = user?.id;
       if (id == null) continue;
 
       multi.set(usersKey(id), JSON.stringify(user), "EX", TTL);

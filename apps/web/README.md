@@ -6,6 +6,7 @@ Public Flutter client for the CryPrice API. Package name: **`cryprice_frontend`*
 
 - **Portfolio** — multi-wallet, multi-chain visibility with backend-calculated allocation.
 - **Health Factor** — Aave V3 supplied/borrowed positions and risk classification.
+- **Alerts** — in-app inbox, configurable HF threshold rules (profile), Telegram delivery when linked.
 - **Profile** — Google Sign-In, authenticated Telegram linking (in-app only; no public bot CTA).
 - **PDF reports** — download server-generated portfolio snapshots.
 - **Prices** — off-chain and on-chain price lookup; Price Calculator utility.

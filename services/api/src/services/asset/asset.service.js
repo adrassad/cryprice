@@ -7,7 +7,19 @@ import {
   getAssetBySymbolCache,
 } from "../../cache/asset.cache.js";
 import { getAssets } from "../../blockchain/index.js";
-import { getEnabledNetworks } from "../network/network.service.js";
+import { getEnabledNetworks, getNetwork } from "../network/network.service.js";
+import { buildPublicUrlForAssetLogo } from "./tokenIcon.service.js";
+
+export function mapAssetForCache(assetRow, chainId) {
+  return {
+    id: assetRow.id,
+    network_id: assetRow.network_id,
+    address: assetRow.address,
+    symbol: assetRow.symbol,
+    decimals: assetRow.decimals,
+    logo_url: buildPublicUrlForAssetLogo(assetRow, chainId),
+  };
+}
 
 export async function syncAssets() {
   console.log("⏱ Asset sync started");
@@ -99,14 +111,12 @@ export async function getAsset(networkId, addressOrSymbol) {
   if (looksLikeEvmAddress(raw)) {
     const fromDb = await db.assets.findByAddress(networkId, raw.toLowerCase());
     if (fromDb) {
+      const network = await getNetwork(networkId);
       await setAssetsToCache(networkId, {
-        [fromDb.address.toLowerCase()]: {
-          id: fromDb.id,
-          network_id: fromDb.network_id,
-          address: fromDb.address,
-          symbol: fromDb.symbol,
-          decimals: fromDb.decimals,
-        },
+        [fromDb.address.toLowerCase()]: mapAssetForCache(
+          fromDb,
+          network?.chain_id,
+        ),
       });
     }
     return fromDb;
@@ -116,14 +126,9 @@ export async function getAsset(networkId, addressOrSymbol) {
   const fromDb =
     rows.find((r) => r.symbol.toUpperCase() === raw.toUpperCase()) ?? null;
   if (fromDb) {
+    const network = await getNetwork(networkId);
     await setAssetsToCache(networkId, {
-      [fromDb.address.toLowerCase()]: {
-        id: fromDb.id,
-        network_id: fromDb.network_id,
-        address: fromDb.address,
-        symbol: fromDb.symbol,
-        decimals: fromDb.decimals,
-      },
+      [fromDb.address.toLowerCase()]: mapAssetForCache(fromDb, network?.chain_id),
     });
   }
   return fromDb;
@@ -152,18 +157,16 @@ export async function loadAllAssetsToCache() {
 
 export async function loadAssetsToCache(network_id) {
   if (!network_id) return;
-  const assets = await db.assets.findByNetwork(network_id);
+  const [assets, network] = await Promise.all([
+    db.assets.findByNetwork(network_id),
+    getNetwork(network_id),
+  ]);
+  const chainId = network?.chain_id ?? null;
 
   const assetsByAddress = Object.fromEntries(
     assets.map((a) => [
       a.address.toLowerCase(),
-      {
-        id: a.id,
-        network_id: a.network_id,
-        address: a.address,
-        symbol: a.symbol,
-        decimals: a.decimals,
-      },
+      mapAssetForCache(a, chainId),
     ]),
   );
   await setAssetsToCache(network_id, assetsByAddress);
@@ -175,6 +178,12 @@ export async function loadAssetsToCache(network_id) {
 
 export async function getAssetsByNetwork(network_id) {
   return await getAssetsByNetworkCache(network_id);
+}
+
+/** Authoritative asset list from DB (same rows used by sync/cache loaders). */
+export async function listAssetsByNetworkFromDb(networkId) {
+  if (networkId == null) return [];
+  return db.assets.findByNetwork(networkId);
 }
 
 export async function getAddressAssetsByNetwork(network_id) {

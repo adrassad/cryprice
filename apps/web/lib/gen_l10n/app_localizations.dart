@@ -548,6 +548,54 @@ abstract class AppLocalizations {
   /// **'Link Telegram'**
   String get profileTelegramLinkButton;
 
+  /// No description provided for @profileHfAlertsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor Alerts'**
+  String get profileHfAlertsTitle;
+
+  /// No description provided for @profileHfAlertsDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify me when my Aave Health Factor drops below this threshold.'**
+  String get profileHfAlertsDescription;
+
+  /// No description provided for @profileHfAlertsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Enabled'**
+  String get profileHfAlertsEnabled;
+
+  /// No description provided for @profileHfAlertsHelper.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts trigger when HF crosses the threshold, not while it simply stays below it.'**
+  String get profileHfAlertsHelper;
+
+  /// No description provided for @profileHfAlertsTelegramWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Telegram is not linked. Alerts will still be saved in the app, but Telegram delivery requires linking Telegram.'**
+  String get profileHfAlertsTelegramWarning;
+
+  /// No description provided for @profileHfAlertsLegacySyncFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert rule saved, but legacy profile threshold sync failed.'**
+  String get profileHfAlertsLegacySyncFailed;
+
+  /// No description provided for @profileHfAlertsSaveSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert settings saved'**
+  String get profileHfAlertsSaveSuccess;
+
+  /// No description provided for @profileHfThresholdRangeError.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor threshold must be between {min} and {max}'**
+  String profileHfThresholdRangeError(String min, String max);
+
   /// No description provided for @email.
   ///
   /// In en, this message translates to:
@@ -1064,11 +1112,353 @@ abstract class AppLocalizations {
   /// **'Portfolio'**
   String get navPortfolio;
 
+  /// No description provided for @navAlerts.
+  ///
+  /// In en, this message translates to:
+  /// **'Alerts'**
+  String get navAlerts;
+
   /// No description provided for @navHealthFactorCalculator.
   ///
   /// In en, this message translates to:
   /// **'HF Calculator'**
   String get navHealthFactorCalculator;
+
+  /// No description provided for @alertsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No alerts yet'**
+  String get alertsEmpty;
+
+  /// No description provided for @alertsLoading.
+  ///
+  /// In en, this message translates to:
+  /// **'Loading alerts…'**
+  String get alertsLoading;
+
+  /// No description provided for @alertsError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not load alerts. Try again later.'**
+  String get alertsError;
+
+  /// No description provided for @alertsNetworkError.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not reach the server. Check your connection and try again.'**
+  String get alertsNetworkError;
+
+  /// No description provided for @alertsRefreshFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not refresh alerts. Pull down to try again.'**
+  String get alertsRefreshFailed;
+
+  /// No description provided for @alertsMarkReadFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not mark alert as read. Try again.'**
+  String get alertsMarkReadFailed;
+
+  /// No description provided for @alertsUnreadBadgeMax.
+  ///
+  /// In en, this message translates to:
+  /// **'99+'**
+  String get alertsUnreadBadgeMax;
+
+  /// No description provided for @alertsSeverityUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Unknown'**
+  String get alertsSeverityUnknown;
+
+  /// No description provided for @alertsScopeUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'Other'**
+  String get alertsScopeUnknown;
+
+  /// No description provided for @alertsUnsupportedType.
+  ///
+  /// In en, this message translates to:
+  /// **'Unsupported alert type'**
+  String get alertsUnsupportedType;
+
+  /// No description provided for @alertsMarkReadHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Mark as read'**
+  String get alertsMarkReadHint;
+
+  /// No description provided for @alertsCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy'**
+  String get alertsCopy;
+
+  /// No description provided for @alertsCopiedToClipboard.
+  ///
+  /// In en, this message translates to:
+  /// **'Alert copied to clipboard'**
+  String get alertsCopiedToClipboard;
+
+  /// No description provided for @alertsCopyFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not copy alert'**
+  String get alertsCopyFailed;
+
+  /// No description provided for @alertsCopiedTooltip.
+  ///
+  /// In en, this message translates to:
+  /// **'Copy alert summary'**
+  String get alertsCopiedTooltip;
+
+  /// No description provided for @alertsRiskNewsDisclaimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Rule-based risk signal, not financial advice'**
+  String get alertsRiskNewsDisclaimer;
+
+  /// No description provided for @alertsRiskNewsScopeGlobal.
+  ///
+  /// In en, this message translates to:
+  /// **'🌍 Global DeFi Risk'**
+  String get alertsRiskNewsScopeGlobal;
+
+  /// No description provided for @alertsRiskNewsScopeExposure.
+  ///
+  /// In en, this message translates to:
+  /// **'⚠️ Your exposure detected'**
+  String get alertsRiskNewsScopeExposure;
+
+  /// No description provided for @alertsRiskNewsScopeAdminOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'🛠 Internal/Admin'**
+  String get alertsRiskNewsScopeAdminOnly;
+
+  /// No description provided for @alertsRiskNewsSeverityCritical.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical'**
+  String get alertsRiskNewsSeverityCritical;
+
+  /// No description provided for @alertsRiskNewsSeverityHigh.
+  ///
+  /// In en, this message translates to:
+  /// **'High'**
+  String get alertsRiskNewsSeverityHigh;
+
+  /// No description provided for @alertsRiskNewsSeverityMedium.
+  ///
+  /// In en, this message translates to:
+  /// **'Medium'**
+  String get alertsRiskNewsSeverityMedium;
+
+  /// No description provided for @alertsRiskNewsSeverityLow.
+  ///
+  /// In en, this message translates to:
+  /// **'Low'**
+  String get alertsRiskNewsSeverityLow;
+
+  /// No description provided for @alertsRiskNewsSeverityWarning.
+  ///
+  /// In en, this message translates to:
+  /// **'Warning'**
+  String get alertsRiskNewsSeverityWarning;
+
+  /// No description provided for @alertsRiskNewsSeverityInfo.
+  ///
+  /// In en, this message translates to:
+  /// **'Info'**
+  String get alertsRiskNewsSeverityInfo;
+
+  /// No description provided for @alertsRiskNewsSource.
+  ///
+  /// In en, this message translates to:
+  /// **'Source'**
+  String get alertsRiskNewsSource;
+
+  /// No description provided for @alertsRiskNewsSourceUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Source link unavailable'**
+  String get alertsRiskNewsSourceUnavailable;
+
+  /// No description provided for @alertsRiskNewsSourceOpenFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open source link'**
+  String get alertsRiskNewsSourceOpenFailed;
+
+  /// No description provided for @alertsRiskNewsGlobalReason.
+  ///
+  /// In en, this message translates to:
+  /// **'Reason'**
+  String get alertsRiskNewsGlobalReason;
+
+  /// No description provided for @alertsRiskNewsMatchedAsset.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched asset'**
+  String get alertsRiskNewsMatchedAsset;
+
+  /// No description provided for @alertsRiskNewsMatchedProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched protocol'**
+  String get alertsRiskNewsMatchedProtocol;
+
+  /// No description provided for @alertsRiskNewsMatchedChain.
+  ///
+  /// In en, this message translates to:
+  /// **'Matched chain'**
+  String get alertsRiskNewsMatchedChain;
+
+  /// No description provided for @alertsRiskNewsMatchConfidence.
+  ///
+  /// In en, this message translates to:
+  /// **'Match confidence: {value}'**
+  String alertsRiskNewsMatchConfidence(String value);
+
+  /// No description provided for @alertsRiskNewsAffectedAssets.
+  ///
+  /// In en, this message translates to:
+  /// **'Affected assets'**
+  String get alertsRiskNewsAffectedAssets;
+
+  /// No description provided for @alertsRiskNewsAffectedProtocols.
+  ///
+  /// In en, this message translates to:
+  /// **'Affected protocols'**
+  String get alertsRiskNewsAffectedProtocols;
+
+  /// No description provided for @alertsRiskNewsAffectedChains.
+  ///
+  /// In en, this message translates to:
+  /// **'Affected chains'**
+  String get alertsRiskNewsAffectedChains;
+
+  /// No description provided for @alertsHfAlertTypeBreach.
+  ///
+  /// In en, this message translates to:
+  /// **'HF breach'**
+  String get alertsHfAlertTypeBreach;
+
+  /// No description provided for @alertsHfAlertTypeRecovery.
+  ///
+  /// In en, this message translates to:
+  /// **'HF recovery'**
+  String get alertsHfAlertTypeRecovery;
+
+  /// No description provided for @alertsHfWallet.
+  ///
+  /// In en, this message translates to:
+  /// **'Wallet'**
+  String get alertsHfWallet;
+
+  /// No description provided for @alertsHfProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Protocol'**
+  String get alertsHfProtocol;
+
+  /// No description provided for @alertsHfNetwork.
+  ///
+  /// In en, this message translates to:
+  /// **'Network'**
+  String get alertsHfNetwork;
+
+  /// No description provided for @alertsHfThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Threshold'**
+  String get alertsHfThreshold;
+
+  /// No description provided for @alertsHfThresholdLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'🎯 Alert threshold'**
+  String get alertsHfThresholdLabel;
+
+  /// No description provided for @alertsHfLiquidationHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Liquidation'**
+  String get alertsHfLiquidationHeadline;
+
+  /// No description provided for @alertsHfLiquidationExplanation.
+  ///
+  /// In en, this message translates to:
+  /// **'Critical situation: your position may be liquidated'**
+  String get alertsHfLiquidationExplanation;
+
+  /// No description provided for @alertsHfBelowAlertThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor below your alert threshold'**
+  String get alertsHfBelowAlertThreshold;
+
+  /// No description provided for @alertsHfRecoveredAboveAlertThreshold.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor recovered above your alert threshold'**
+  String get alertsHfRecoveredAboveAlertThreshold;
+
+  /// No description provided for @alertsHfCriticalHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor critical'**
+  String get alertsHfCriticalHeadline;
+
+  /// No description provided for @alertsHfRecoveryHeadline.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor recovered'**
+  String get alertsHfRecoveryHeadline;
+
+  /// No description provided for @alertsHfPreviousHf.
+  ///
+  /// In en, this message translates to:
+  /// **'Previous HF'**
+  String get alertsHfPreviousHf;
+
+  /// No description provided for @alertsHfCurrentHf.
+  ///
+  /// In en, this message translates to:
+  /// **'Current HF'**
+  String get alertsHfCurrentHf;
+
+  /// No description provided for @alertsHfNetworkProtocol.
+  ///
+  /// In en, this message translates to:
+  /// **'Network · Protocol'**
+  String get alertsHfNetworkProtocol;
+
+  /// No description provided for @alertsHfMovementChanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor changed'**
+  String get alertsHfMovementChanged;
+
+  /// No description provided for @alertsHfMovementImproved.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor improved'**
+  String get alertsHfMovementImproved;
+
+  /// No description provided for @alertsHfMovementDecreased.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor decreased'**
+  String get alertsHfMovementDecreased;
+
+  /// No description provided for @alertsHfMovementUnchanged.
+  ///
+  /// In en, this message translates to:
+  /// **'Health Factor unchanged'**
+  String get alertsHfMovementUnchanged;
 
   /// No description provided for @comingSoon.
   ///

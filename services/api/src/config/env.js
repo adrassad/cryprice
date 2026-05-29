@@ -93,6 +93,15 @@ export const ENV = {
     process.env.TOKEN_ICON_MAX_BYTES,
     524_288,
   ),
+
+  /** CryPrice web app origin for alert deep links (Telegram, etc.). */
+  PUBLIC_APP_BASE_URL: (process.env.PUBLIC_APP_BASE_URL?.trim() || "https://app.cryprice.dev").replace(
+    /\/+$/,
+    "",
+  ),
+
+  /** Persisted HF alerts (v2) + disable legacy inline Telegram HF alerts when true. */
+  ALERTS_V2_ENABLED: parseBoolFlag(process.env.ALERTS_V2_ENABLED ?? ""),
 };
 
 export function shouldFlushRedisOnStart() {

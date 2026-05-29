@@ -251,6 +251,36 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTelegramLinkButton => 'Link Telegram';
 
   @override
+  String get profileHfAlertsTitle => 'Health Factor Alerts';
+
+  @override
+  String get profileHfAlertsDescription =>
+      'Notify me when my Aave Health Factor drops below this threshold.';
+
+  @override
+  String get profileHfAlertsEnabled => 'Enabled';
+
+  @override
+  String get profileHfAlertsHelper =>
+      'Alerts trigger when HF crosses the threshold, not while it simply stays below it.';
+
+  @override
+  String get profileHfAlertsTelegramWarning =>
+      'Telegram is not linked. Alerts will still be saved in the app, but Telegram delivery requires linking Telegram.';
+
+  @override
+  String get profileHfAlertsLegacySyncFailed =>
+      'Alert rule saved, but legacy profile threshold sync failed.';
+
+  @override
+  String get profileHfAlertsSaveSuccess => 'Alert settings saved';
+
+  @override
+  String profileHfThresholdRangeError(String min, String max) {
+    return 'Health Factor threshold must be between $min and $max';
+  }
+
+  @override
   String get email => 'Email';
 
   @override
@@ -514,7 +544,186 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navPortfolio => 'Portfolio';
 
   @override
+  String get navAlerts => 'Alerts';
+
+  @override
   String get navHealthFactorCalculator => 'HF Calculator';
+
+  @override
+  String get alertsEmpty => 'No alerts yet';
+
+  @override
+  String get alertsLoading => 'Loading alerts…';
+
+  @override
+  String get alertsError => 'Could not load alerts. Try again later.';
+
+  @override
+  String get alertsNetworkError =>
+      'Could not reach the server. Check your connection and try again.';
+
+  @override
+  String get alertsRefreshFailed =>
+      'Could not refresh alerts. Pull down to try again.';
+
+  @override
+  String get alertsMarkReadFailed => 'Could not mark alert as read. Try again.';
+
+  @override
+  String get alertsUnreadBadgeMax => '99+';
+
+  @override
+  String get alertsSeverityUnknown => 'Unknown';
+
+  @override
+  String get alertsScopeUnknown => 'Other';
+
+  @override
+  String get alertsUnsupportedType => 'Unsupported alert type';
+
+  @override
+  String get alertsMarkReadHint => 'Mark as read';
+
+  @override
+  String get alertsCopy => 'Copy';
+
+  @override
+  String get alertsCopiedToClipboard => 'Alert copied to clipboard';
+
+  @override
+  String get alertsCopyFailed => 'Could not copy alert';
+
+  @override
+  String get alertsCopiedTooltip => 'Copy alert summary';
+
+  @override
+  String get alertsRiskNewsDisclaimer =>
+      'Rule-based risk signal, not financial advice';
+
+  @override
+  String get alertsRiskNewsScopeGlobal => '🌍 Global DeFi Risk';
+
+  @override
+  String get alertsRiskNewsScopeExposure => '⚠️ Your exposure detected';
+
+  @override
+  String get alertsRiskNewsScopeAdminOnly => '🛠 Internal/Admin';
+
+  @override
+  String get alertsRiskNewsSeverityCritical => 'Critical';
+
+  @override
+  String get alertsRiskNewsSeverityHigh => 'High';
+
+  @override
+  String get alertsRiskNewsSeverityMedium => 'Medium';
+
+  @override
+  String get alertsRiskNewsSeverityLow => 'Low';
+
+  @override
+  String get alertsRiskNewsSeverityWarning => 'Warning';
+
+  @override
+  String get alertsRiskNewsSeverityInfo => 'Info';
+
+  @override
+  String get alertsRiskNewsSource => 'Source';
+
+  @override
+  String get alertsRiskNewsSourceUnavailable => 'Source link unavailable';
+
+  @override
+  String get alertsRiskNewsSourceOpenFailed => 'Could not open source link';
+
+  @override
+  String get alertsRiskNewsGlobalReason => 'Reason';
+
+  @override
+  String get alertsRiskNewsMatchedAsset => 'Matched asset';
+
+  @override
+  String get alertsRiskNewsMatchedProtocol => 'Matched protocol';
+
+  @override
+  String get alertsRiskNewsMatchedChain => 'Matched chain';
+
+  @override
+  String alertsRiskNewsMatchConfidence(String value) {
+    return 'Match confidence: $value';
+  }
+
+  @override
+  String get alertsRiskNewsAffectedAssets => 'Affected assets';
+
+  @override
+  String get alertsRiskNewsAffectedProtocols => 'Affected protocols';
+
+  @override
+  String get alertsRiskNewsAffectedChains => 'Affected chains';
+
+  @override
+  String get alertsHfAlertTypeBreach => 'HF breach';
+
+  @override
+  String get alertsHfAlertTypeRecovery => 'HF recovery';
+
+  @override
+  String get alertsHfWallet => 'Wallet';
+
+  @override
+  String get alertsHfProtocol => 'Protocol';
+
+  @override
+  String get alertsHfNetwork => 'Network';
+
+  @override
+  String get alertsHfThreshold => 'Threshold';
+
+  @override
+  String get alertsHfThresholdLabel => '🎯 Alert threshold';
+
+  @override
+  String get alertsHfLiquidationHeadline => 'Liquidation';
+
+  @override
+  String get alertsHfLiquidationExplanation =>
+      'Critical situation: your position may be liquidated';
+
+  @override
+  String get alertsHfBelowAlertThreshold =>
+      'Health Factor below your alert threshold';
+
+  @override
+  String get alertsHfRecoveredAboveAlertThreshold =>
+      'Health Factor recovered above your alert threshold';
+
+  @override
+  String get alertsHfCriticalHeadline => 'Health Factor critical';
+
+  @override
+  String get alertsHfRecoveryHeadline => 'Health Factor recovered';
+
+  @override
+  String get alertsHfPreviousHf => 'Previous HF';
+
+  @override
+  String get alertsHfCurrentHf => 'Current HF';
+
+  @override
+  String get alertsHfNetworkProtocol => 'Network · Protocol';
+
+  @override
+  String get alertsHfMovementChanged => 'Health Factor changed';
+
+  @override
+  String get alertsHfMovementImproved => 'Health Factor improved';
+
+  @override
+  String get alertsHfMovementDecreased => 'Health Factor decreased';
+
+  @override
+  String get alertsHfMovementUnchanged => 'Health Factor unchanged';
 
   @override
   String get comingSoon => 'Coming soon';

@@ -71,5 +71,7 @@ export function formatHealthFactorOverview(walletMap) {
     ? "🚨 <b>Health Factor Alert</b>"
     : "📊 <b>Health Factor Overview</b>";
 
-  return `${header}\n\n${walletBlocks.join("\n\n")}`;
+  const message = `${header}\n\n${walletBlocks.join("\n\n")}`;
+  console.log(message);
+  return message;
 }

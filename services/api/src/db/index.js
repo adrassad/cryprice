@@ -16,6 +16,8 @@ import { PortfolioAggregationRepository } from "./repositories/portfolioAggregat
 import { AccountLinkTokenRepository } from "./repositories/accountLinkToken.repo.js";
 import { ProtocolAssetTokenRepository } from "./repositories/protocolAssetToken.repo.js";
 import { WalletProtocolPositionRepository } from "./repositories/walletProtocolPosition.repo.js";
+import { AlertRuleRepository } from "./repositories/alertRule.repo.js";
+import { AlertRepository } from "./repositories/alert.repo.js";
 
 export const db = {
   users: new UserRepository(postgresClient),
@@ -34,4 +36,6 @@ export const db = {
   accountLinkTokens: new AccountLinkTokenRepository(postgresClient),
   protocolAssetTokens: new ProtocolAssetTokenRepository(postgresClient),
   walletProtocolPositions: new WalletProtocolPositionRepository(postgresClient),
+  alertRules: new AlertRuleRepository(postgresClient),
+  alerts: new AlertRepository(postgresClient),
 };

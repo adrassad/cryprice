@@ -1,4 +1,5 @@
 import 'package:cryprice_frontend/core/navigation/app_section.dart';
+import 'package:cryprice_frontend/core/shell/widgets/shell_alerts_nav_icon.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -36,6 +37,19 @@ class ShellSectionNav extends StatelessWidget {
         onTap: () => onSectionSelected(AppSection.portfolio),
       ),
       _ShellSectionNavItem(
+        label: loc.navAlerts,
+        compact: compactLabels,
+        selected: selectedSection == AppSection.alerts,
+        onTap: () => onSectionSelected(AppSection.alerts),
+        iconWidgetBuilder: (Color foreground, bool selected) {
+          return ShellAlertsNavIcon(
+            size: compactLabels ? 18 : 20,
+            color: foreground,
+            selected: selected,
+          );
+        },
+      ),
+      _ShellSectionNavItem(
         label: loc.navHealthFactorCalculator,
         icon: Icons.monitor_heart_outlined,
         compact: compactLabels,
@@ -60,14 +74,16 @@ class ShellSectionNav extends StatelessWidget {
 class _ShellSectionNavItem extends StatelessWidget {
   const _ShellSectionNavItem({
     required this.label,
-    required this.icon,
     required this.compact,
     required this.selected,
     required this.onTap,
-  });
+    this.icon,
+    this.iconWidgetBuilder,
+  }) : assert(icon != null || iconWidgetBuilder != null);
 
   final String label;
-  final IconData icon;
+  final IconData? icon;
+  final Widget Function(Color foreground, bool selected)? iconWidgetBuilder;
   final bool compact;
   final bool selected;
   final VoidCallback onTap;
@@ -98,7 +114,10 @@ class _ShellSectionNavItem extends StatelessWidget {
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Icon(icon, size: compact ? 18 : 20, color: foreground),
+              if (iconWidgetBuilder != null)
+                iconWidgetBuilder!(foreground, selected)
+              else
+                Icon(icon, size: compact ? 18 : 20, color: foreground),
               if (!compact) ...[
                 const SizedBox(width: 10),
                 Flexible(

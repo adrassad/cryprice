@@ -3,6 +3,18 @@ import {
   setNetworksToCashe,
   getEnabledNetworksCache,
 } from "../../cache/network.cashe.js";
+import { resolveNativeLogoUrl } from "../asset/tokenIcon.service.js";
+
+async function mapEnabledNetworkRow(network) {
+  return {
+    id: network.id,
+    chain_id: network.chain_id,
+    name: network.name.toLowerCase(),
+    native_symbol: network.native_symbol,
+    enabled: network.enabled,
+    native_logo_url: await resolveNativeLogoUrl(network.chain_id),
+  };
+}
 
 export async function getEnabledNetworks() {
   const cached = await getEnabledNetworksCache();
@@ -34,16 +46,14 @@ export async function loadNetworksToCache() {
 }
 
 export async function getEnabledNetworksFromDB() {
-  const networks = await db.networks.findAll();
+  const networks = await db.networks.findAll({ limit: 1000 });
+  const enabledNetworks = networks.filter((network) => network.enabled);
+  const mapped = await Promise.all(enabledNetworks.map(mapEnabledNetworkRow));
   const mapNetworks = {};
-  for (const network of networks) {
-    mapNetworks[network.id] = {
-      id: network.id,
-      chain_id: network.chain_id,
-      name: network.name.toLowerCase(),
-      native_symbol: network.native_symbol,
-      enabled: network.enabled,
-    };
+
+  for (const network of mapped) {
+    mapNetworks[network.id] = network;
   }
+
   return mapNetworks;
 }

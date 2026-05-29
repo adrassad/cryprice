@@ -77,6 +77,18 @@ export class AssetRepository extends BaseRepository {
     return res.rows;
   }
 
+  async findByIds(assetIds) {
+    const ids = Array.isArray(assetIds)
+      ? assetIds.filter((id) => id != null).map((id) => String(id))
+      : [];
+    if (!ids.length) return [];
+    const res = await this.db.query(
+      `SELECT * FROM assets WHERE id = ANY($1::bigint[])`,
+      [ids],
+    );
+    return res.rows;
+  }
+
   async findAllBySymbol(symbol) {
     const res = await this.db.query(
       `
@@ -99,12 +111,78 @@ export class AssetRepository extends BaseRepository {
     return res.rows;
   }
 
-  async findByIds(ids) {
-    if (!ids?.length) return [];
-    const res = await this.db.query(
-      `SELECT * FROM assets WHERE id = ANY($1::bigint[])`,
-      [ids],
+  async updateLogoMetadata(assetId, patch) {
+    if (assetId === undefined || assetId === null || assetId === "") {
+      throw new Error("assetId is required");
+    }
+    if (!patch || typeof patch !== "object") {
+      throw new Error("patch must be an object");
+    }
+
+    const allowedFields = [
+      "logo_status",
+      "logo_source",
+      "logo_local_path",
+      "logo_updated_at",
+      "logo_content_hash",
+      "logo_error",
+    ];
+
+    const sets = [];
+    const params = [assetId];
+
+    for (const field of allowedFields) {
+      if (patch[field] !== undefined) {
+        params.push(patch[field]);
+        sets.push(`${field} = $${params.length}`);
+      }
+    }
+
+    if (!sets.length) {
+      return this.findById(assetId);
+    }
+
+    const result = await this.db.query(
+      `
+        UPDATE assets
+        SET ${sets.join(", ")}
+        WHERE id = $1
+        RETURNING *
+      `,
+      params,
     );
-    return res.rows;
+
+    return result.rows[0] || null;
+  }
+
+  async findAssetsForTrustWalletIconSync(supportedChainIds) {
+    const chainIds = Array.isArray(supportedChainIds)
+      ? supportedChainIds.filter((id) => id != null).map((id) => Number(id))
+      : [];
+    if (!chainIds.length) return [];
+
+    const { rows } = await this.db.query(
+      `
+        SELECT
+          a.*,
+          n.chain_id AS chain_id
+        FROM assets a
+        INNER JOIN networks n
+          ON n.id = a.network_id
+        WHERE n.enabled = TRUE
+          AND a.address IS NOT NULL
+          AND n.chain_id = ANY($1::int[])
+          AND a.logo_source IS DISTINCT FROM 'manual'
+          AND (
+            a.logo_source IS NULL
+            OR a.logo_source IN ('generated', 'token_list')
+            OR a.logo_status IN ('pending', 'failed', 'skipped')
+          )
+        ORDER BY n.chain_id ASC, a.id ASC
+      `,
+      [chainIds],
+    );
+
+    return rows;
   }
 }

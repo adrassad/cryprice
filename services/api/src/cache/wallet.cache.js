@@ -56,27 +56,10 @@ export async function getWalletsByUser(userId) {
 }
 
 // ------------------- Get all wallets -------------------
-async function scanKeys(pattern) {
-  const keys = [];
-  let cursor = "0";
-  do {
-    const [nextCursor, batch] = await redis.scan(
-      cursor,
-      "MATCH",
-      pattern,
-      "COUNT",
-      100,
-    );
-    cursor = nextCursor;
-    keys.push(...batch);
-  } while (cursor !== "0");
-  return keys;
-}
-
 export async function getAllWalletsCache() {
   if (!redis || redis.status === "end") return new Map();
   try {
-    const keys = await scanKeys("wallets:*");
+    const keys = await redis.keys("wallets:*"); // все пользователи
     const result = new Map();
 
     if (keys.length === 0) return result;
@@ -103,6 +86,12 @@ export async function getAllWalletsCache() {
 
 // ------------------- Delete wallet -------------------
 export async function delWalletFromCache(userId, address) {
+  console.log(
+    "delWalletFromCache redis.status:",
+    userId,
+    address,
+    redis.status,
+  );
   if (!redis || redis.status === "end") return;
   try {
     const key = userWalletsKey(userId);
