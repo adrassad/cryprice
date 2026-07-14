@@ -65,6 +65,21 @@ For export provenance and sanitization notes, see [`../services/api/PUBLIC_EXPOR
 
 ---
 
+## Official public surfaces
+
+| Surface | URL |
+|---------|-----|
+| Marketing / trust pages | https://cryprice.dev |
+| Web dashboard | https://app.cryprice.dev |
+| Read-only API | https://api.cryprice.dev |
+| Security contact (`security.txt`) | https://cryprice.dev/.well-known/security.txt |
+| Trust hub | https://cryprice.dev/trust |
+| Transparency | https://cryprice.dev/transparency |
+
+Vulnerability reporting for these surfaces and this repository: [`../SECURITY.md`](../SECURITY.md). Support channels: [`../SUPPORT.md`](../SUPPORT.md).
+
+---
+
 ## User safety
 
 - **CryPrice is not financial advice.** Monitoring data is informational; users are responsible for their own risk management decisions.

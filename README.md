@@ -145,7 +145,7 @@ CryPrice is read-only by design. It does not store private keys, does not custod
 
 Production secrets, deployment credentials, and commercially sensitive modules are excluded from this public edition.
 
-See [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md). To report vulnerabilities, see [`SECURITY.md`](SECURITY.md).
+See [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md). To report vulnerabilities, see [`SECURITY.md`](SECURITY.md). For product support contacts, see [`SUPPORT.md`](SUPPORT.md).
 
 ---
 
@@ -179,6 +179,7 @@ See [`docs/roadmap.md`](docs/roadmap.md).
 | [`docs/TECHNICAL_CONTRIBUTIONS.md`](docs/TECHNICAL_CONTRIBUTIONS.md) | Engineering contributions |
 | [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md) | Security and public edition scope |
 | [`SECURITY.md`](SECURITY.md) | Vulnerability reporting |
+| [`SUPPORT.md`](SUPPORT.md) | Product support and contact channels |
 | [`docs/DEFERRED_PHASE_2B_AUTH_IDENTITY.md`](docs/DEFERRED_PHASE_2B_AUTH_IDENTITY.md) | Deferred auth/identity migration (Phase 2B) |
 | [`docs/architecture.md`](docs/architecture.md) | System architecture |
 | [`docs/setup.md`](docs/setup.md) | Local development setup |

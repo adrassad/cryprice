@@ -1,26 +1,14 @@
 # Security Policy
 
-## Reporting a vulnerability
-
-If you discover a security issue in this public repository or the documented public API surface, please report it responsibly:
-
-**Email:** [security@cryprice.dev](mailto:security@cryprice.dev)
-
-Please include:
-
-- A clear description of the issue
-- Steps to reproduce (if applicable)
-- Impact assessment
-- Your contact information (optional, for follow-up)
-
-We ask that you **do not** publicly disclose the issue until we have had a reasonable opportunity to investigate and respond.
-
-There is **no bug bounty program** at this time.
+CryPrice is a read-only DeFi risk intelligence platform. This document describes how to report security vulnerabilities affecting CryPrice public surfaces and this public repository.
 
 ## Scope
 
 In scope:
 
+- `https://cryprice.dev`
+- `https://app.cryprice.dev`
+- `https://api.cryprice.dev`
 - Code in this public repository (`https://github.com/adrassad/cryprice`)
 - Public API and client examples documented in this repository
 - Security model and setup documentation in `docs/`
@@ -28,29 +16,62 @@ In scope:
 Out of scope:
 
 - Social engineering attacks
-- Spam or denial-of-service against third-party infrastructure
-- Physical attacks
-- Third-party services not controlled by CryPrice (Google OAuth, Telegram, RPC providers, hosting providers, etc.)
+- Denial-of-service / spam against third-party infrastructure
+- Issues requiring access to other users' private data beyond what is necessary to demonstrate impact
+- Vulnerabilities in third-party services outside CryPrice control (Google OAuth, Telegram, RPC providers, hosting providers, etc.)
 - Financial loss claims arising from market or trading decisions
 - Issues in private repositories or production infrastructure not published here
 
-## Product security model
+## Read-only guarantees
 
-CryPrice is **read-only monitoring infrastructure**:
+CryPrice:
 
-- CryPrice **does not custody funds**
-- CryPrice **does not ask for private keys or seed phrases**
-- CryPrice **does not execute transactions**
-- Monitoring data is **informational only** — **not financial advice**
+- Never requests seed phrases
+- Never stores private keys
+- Never signs transactions
+- Never executes blockchain transactions
+- Never takes custody of assets
 
-For the full security model, see [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md).
+Monitoring data is **informational only** — not financial advice. Full model: [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md).
+
+## How to report
+
+Email: **security@cryprice.dev**
+
+Machine-readable contact file: https://cryprice.dev/.well-known/security.txt
+
+Trust hub: https://cryprice.dev/trust
+
+Please include:
+
+- A clear description of the issue
+- Affected URLs or components
+- Steps to reproduce
+- Your assessment of impact
+- Optional contact information for follow-up
+
+Do not open public GitHub issues with exploit details before we have had a reasonable opportunity to investigate.
+
+There is **no bug bounty program** at this time.
+
+## Expected response times
+
+- Acknowledgment target: within 3 business days
+- Initial triage target: within 10 business days for verified reports
+
+These are targets, not guarantees of resolution or compensation.
+
+## Safe harbor
+
+Good-faith security research that follows this policy and avoids privacy violations, service degradation, and destructive testing is welcome.
 
 ## Supported versions
 
-Security fixes are applied to the `main` branch of this public repository. There are no long-term support branches published at this time.
+Security fixes for this public edition are applied to the `main` branch. There are no long-term support branches published at this time.
 
-## What to expect
+## Contact
 
-We will acknowledge receipt of your report when possible and investigate valid issues affecting the public codebase. Response times may vary; this is an open-source project without a formal SLA.
-
-Thank you for helping keep CryPrice and its users safe.
+- Security: security@cryprice.dev
+- Support: support@cryprice.dev
+- Website: https://cryprice.dev/security
+- Support channels: [`SUPPORT.md`](SUPPORT.md)
