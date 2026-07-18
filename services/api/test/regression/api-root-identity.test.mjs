@@ -5,6 +5,7 @@ import { spawnSync } from "node:child_process";
 import { ok, strictEqual } from "node:assert";
 import { test } from "node:test";
 import { API_IDENTITY_PAYLOAD } from "../../src/api/routes/apiIdentity.route.js";
+import { withHttpTestEnv } from "./helpers/http-test-env.mjs";
 
 const root = join(dirname(fileURLToPath(import.meta.url)), "../..");
 const httpHelper = join(
@@ -71,7 +72,7 @@ test("HTTP: GET / returns public API identity JSON", () => {
   const run = spawnSync(process.execPath, [httpHelper], {
     cwd: root,
     encoding: "utf8",
-    env: { ...process.env, PATH: process.env.PATH ?? "" },
+    env: withHttpTestEnv(),
   });
   strictEqual(run.status, 0, run.stderr || run.stdout);
   const lines = run.stdout.trim().split("\n").filter(Boolean);

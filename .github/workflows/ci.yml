@@ -51,6 +51,10 @@ jobs:
       DATABASE_URL: postgres://test:test@localhost:5432/cryprice_test
       BOT_TOKEN: test-token-for-ci
       JWT_ACCESS_SECRET: test-jwt-access-secret-at-least-32-chars
+      ETHEREUM_RPC_URL: https://ethereum-rpc.publicnode.com
+      ARBITRUM_RPC_URL: https://arb1.arbitrum.io/rpc
+      AVALANCHE_RPC_URL: https://api.avax.network/ext/bc/C/rpc
+      BASE_RPC_URL: https://mainnet.base.org
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
