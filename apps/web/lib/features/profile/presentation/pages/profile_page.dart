@@ -1,12 +1,17 @@
+import 'package:cryprice_frontend/core/di/di.dart';
+import 'package:cryprice_frontend/core/network/api_error_localizer.dart';
+import 'package:cryprice_frontend/core/web/app_cache_reset_service.dart';
+import 'package:cryprice_frontend/features/auth/data/local/auth_token_store.dart';
+import 'package:cryprice_frontend/features/auth/presentation/widgets/authenticated_feature_gate.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_cubit.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_state.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/widgets/profile_hf_alert_block.dart';
-import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:cryprice_frontend/features/profile/domain/entities/public_user.dart';
 import 'package:cryprice_frontend/features/profile/domain/entities/wallet.dart';
 import 'package:cryprice_frontend/features/profile/presentation/widgets/profile_telegram_block.dart';
 import 'package:cryprice_frontend/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,15 +24,11 @@ class ProfilePage extends StatefulWidget {
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  static const _fallback = 'Не указано';
   bool _alertRulesInitialLoadDone = false;
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      context.read<ProfileCubit>().load();
-    });
   }
 
   void _loadAlertRulesIfNeeded(BuildContext context, PublicUser user) {
@@ -89,14 +90,26 @@ class _ProfilePageState extends State<ProfilePage> {
               _loadAlertRulesIfNeeded(context, state.user!);
             }
             if (state.lastSuccessMessage != null && state.lastSuccessMessage!.isNotEmpty) {
-              ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.lastSuccessMessage!)),
+              final message = _localizedSuccessMessage(
+                AppLocalizations.of(context)!,
+                state.lastSuccessMessage!,
               );
+              if (message != null) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text(message)),
+                );
+              }
               context.read<ProfileCubit>().clearMessages();
             }
             if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+              final loc = AppLocalizations.of(context)!;
+              final message = localizeApiError(
+                loc,
+                code: state.errorCode,
+                message: state.errorMessage,
+              );
               ScaffoldMessenger.of(context).showSnackBar(
-                SnackBar(content: Text(state.errorMessage!)),
+                SnackBar(content: Text(message)),
               );
               context.read<ProfileCubit>().clearMessages();
             }
@@ -128,18 +141,43 @@ class _ProfilePageState extends State<ProfilePage> {
         ),
       ],
       child: Scaffold(
-        appBar: AppBar(title: const Text('Профиль')),
-        body: BlocBuilder<ProfileCubit, ProfileState>(
+        appBar: AppBar(title: Text(AppLocalizations.of(context)!.profileTitle)),
+        body: AuthenticatedFeatureGate(
+          onAuthenticated: () => context.read<ProfileCubit>().load(),
+          child: BlocBuilder<ProfileCubit, ProfileState>(
           builder: (context, state) {
-            if (state.profileStatus == ProfileViewStatus.unauthenticated ||
-                context.read<AuthCubit>().state is AuthStateUnauthenticated) {
-              return const Center(child: Text('Требуется авторизация'));
-            }
             if (state.profileStatus == ProfileViewStatus.loading && state.user == null) {
               return const Center(child: CircularProgressIndicator());
             }
             if (state.user == null) {
-              return const Center(child: Text('Не удалось загрузить профиль'));
+              if (state.profileStatus == ProfileViewStatus.error) {
+                final loc = AppLocalizations.of(context)!;
+                final message = localizeApiError(
+                  loc,
+                  code: state.errorCode,
+                  message: state.errorMessage,
+                );
+                return Center(
+                  child: Padding(
+                    padding: const EdgeInsets.all(24),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          message,
+                          textAlign: TextAlign.center,
+                        ),
+                        const SizedBox(height: 16),
+                        FilledButton(
+                          onPressed: () => context.read<ProfileCubit>().load(),
+                          child: Text(loc.portfolioRetry),
+                        ),
+                      ],
+                    ),
+                  ),
+                );
+              }
+              return Center(child: Text(AppLocalizations.of(context)!.profileLoadFailed));
             }
             return RefreshIndicator(
               onRefresh: () => _refreshProfile(context),
@@ -161,7 +199,7 @@ class _ProfilePageState extends State<ProfilePage> {
                               child: CircularProgressIndicator(strokeWidth: 2),
                             )
                           : const Icon(Icons.edit),
-                      label: const Text('Редактировать профиль'),
+                      label: Text(AppLocalizations.of(context)!.editProfile),
                     ),
                   ),
                   const SizedBox(height: 12),
@@ -181,26 +219,33 @@ class _ProfilePageState extends State<ProfilePage> {
                     onDeleteWallet: (wallet) => _confirmDeleteWallet(context, wallet),
                     onCopyAddress: (address) => _copyAddress(context, address),
                   ),
+                  if (kIsWeb && isAppCacheResetSupported) ...[
+                    const SizedBox(height: 24),
+                    const _AppCacheResetSection(),
+                  ],
                 ],
               ),
             );
           },
+        ),
         ),
       ),
     );
   }
 
   Future<void> _copyAddress(BuildContext context, String address) async {
+    final loc = AppLocalizations.of(context)!;
     await Clipboard.setData(ClipboardData(text: address));
     if (!context.mounted) {
       return;
     }
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Скопировано в буфер обмена')),
+      SnackBar(content: Text(loc.copiedToClipboard)),
     );
   }
 
   Future<void> _showEditProfileDialog(BuildContext context, PublicUser user) async {
+    final loc = AppLocalizations.of(context)!;
     final usernameController = TextEditingController(text: user.username ?? '');
     final firstNameController = TextEditingController(text: user.firstName ?? '');
     final lastNameController = TextEditingController(text: user.lastName ?? '');
@@ -209,19 +254,34 @@ class _ProfilePageState extends State<ProfilePage> {
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Редактировать профиль'),
+          title: Text(loc.editProfile),
           content: SingleChildScrollView(
             child: Column(
               children: [
-                TextField(controller: languageController, decoration: const InputDecoration(labelText: 'Язык')),
-                TextField(controller: usernameController, decoration: const InputDecoration(labelText: 'Username')),
-                TextField(controller: firstNameController, decoration: const InputDecoration(labelText: 'Имя')),
-                TextField(controller: lastNameController, decoration: const InputDecoration(labelText: 'Фамилия')),
+                TextField(
+                  controller: languageController,
+                  decoration: InputDecoration(labelText: loc.language),
+                ),
+                TextField(
+                  controller: usernameController,
+                  decoration: InputDecoration(labelText: loc.username),
+                ),
+                TextField(
+                  controller: firstNameController,
+                  decoration: InputDecoration(labelText: loc.firstName),
+                ),
+                TextField(
+                  controller: lastNameController,
+                  decoration: InputDecoration(labelText: loc.lastName),
+                ),
               ],
             ),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Отмена')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(loc.cancel),
+            ),
             ElevatedButton(
               onPressed: () {
                 final patch = <String, Object?>{};
@@ -232,7 +292,7 @@ class _ProfilePageState extends State<ProfilePage> {
                 context.read<ProfileCubit>().updateProfile(patch);
                 Navigator.pop(dialogContext);
               },
-              child: const Text('Сохранить'),
+              child: Text(loc.save),
             ),
           ],
         );
@@ -241,33 +301,37 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _showAddWalletDialog(BuildContext context) async {
+    final loc = AppLocalizations.of(context)!;
     final addressController = TextEditingController();
     final labelController = TextEditingController();
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Добавить кошелек'),
+          title: Text(loc.addWallet),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: addressController,
-                decoration: const InputDecoration(labelText: 'Адрес'),
+                decoration: InputDecoration(labelText: loc.walletAddress),
               ),
               TextField(
                 controller: labelController,
-                decoration: const InputDecoration(labelText: 'Label'),
+                decoration: InputDecoration(labelText: loc.walletLabel),
               ),
             ],
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Отмена')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(loc.cancel),
+            ),
             ElevatedButton(
               onPressed: () {
                 final address = addressController.text.trim();
                 final label = labelController.text.trim();
-                final validation = _validateAddress(address);
+                final validation = _validateAddress(loc, address);
                 if (validation != null) {
                   ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(validation)));
                   return;
@@ -278,7 +342,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                 Navigator.pop(dialogContext);
               },
-              child: const Text('Сохранить'),
+              child: Text(loc.save),
             ),
           ],
         );
@@ -287,18 +351,22 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _showEditWalletDialog(BuildContext context, Wallet wallet) async {
+    final loc = AppLocalizations.of(context)!;
     final labelController = TextEditingController(text: wallet.label ?? '');
     await showDialog<void>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Изменить label'),
+          title: Text(loc.editWalletLabel),
           content: TextField(
             controller: labelController,
-            decoration: const InputDecoration(labelText: 'Label'),
+            decoration: InputDecoration(labelText: loc.walletLabel),
           ),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext), child: const Text('Отмена')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: Text(loc.cancel),
+            ),
             ElevatedButton(
               onPressed: () {
                 final value = labelController.text.trim();
@@ -308,7 +376,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     );
                 Navigator.pop(dialogContext);
               },
-              child: const Text('Сохранить'),
+              child: Text(loc.save),
             ),
           ],
         );
@@ -317,17 +385,21 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _confirmDeleteWallet(BuildContext context, Wallet wallet) async {
+    final loc = AppLocalizations.of(context)!;
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (dialogContext) {
         return AlertDialog(
-          title: const Text('Удалить кошелек'),
-          content: const Text('Вы действительно хотите удалить кошелек?'),
+          title: Text(loc.deleteWallet),
+          content: Text(loc.deleteWalletConfirm),
           actions: [
-            TextButton(onPressed: () => Navigator.pop(dialogContext, false), child: const Text('Отмена')),
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext, false),
+              child: Text(loc.cancel),
+            ),
             ElevatedButton(
               onPressed: () => Navigator.pop(dialogContext, true),
-              child: const Text('Удалить'),
+              child: Text(loc.delete),
             ),
           ],
         );
@@ -350,18 +422,29 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  String? _validateAddress(String address) {
+  String? _validateAddress(AppLocalizations loc, String address) {
     if (address.isEmpty) {
-      return 'Введите адрес кошелька';
+      return loc.walletAddressRequired;
     }
     if (!address.startsWith('0x')) {
-      return 'Адрес должен начинаться с 0x';
+      return loc.walletAddressStartWith0x;
     }
     if (address.length != 42) {
-      return 'Ожидаемая длина EVM адреса: 42 символа';
+      return loc.walletAddressLengthHint;
     }
     return null;
   }
+}
+
+String? _localizedSuccessMessage(AppLocalizations loc, String key) {
+  return switch (key) {
+    ProfileSuccessMessageKey.profileUpdated => loc.profileUpdatedSuccess,
+    ProfileSuccessMessageKey.publicAddressAdded => loc.publicAddressAddedSuccess,
+    ProfileSuccessMessageKey.publicAddressLabelUpdated => loc.publicAddressLabelUpdatedSuccess,
+    ProfileSuccessMessageKey.publicAddressRemoved => loc.publicAddressRemovedSuccess,
+    ProfileSuccessMessageKey.telegramLinkCreated => loc.profileTelegramLinkCreatedSuccess,
+    _ => null,
+  };
 }
 
 class _UserInfoCard extends StatelessWidget {
@@ -371,6 +454,7 @@ class _UserInfoCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(12),
@@ -392,7 +476,7 @@ class _UserInfoCard extends StatelessWidget {
                 Expanded(
                   child: Text(
                     '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim().isEmpty
-                        ? _ProfilePageState._fallback
+                        ? loc.notSpecified
                         : '${user.firstName ?? ''} ${user.lastName ?? ''}'.trim(),
                     style: Theme.of(context).textTheme.titleMedium,
                   ),
@@ -400,20 +484,20 @@ class _UserInfoCard extends StatelessWidget {
               ],
             ),
             const SizedBox(height: 12),
-            _InfoLine(label: 'ID', value: user.id?.toString() ?? _ProfilePageState._fallback),
+            _InfoLine(label: loc.profileUserIdLabel, value: user.id?.toString() ?? loc.notSpecified),
             _InfoLine(
-              label: 'Telegram ID',
-              value: user.telegramId?.toString() ?? _ProfilePageState._fallback,
+              label: loc.telegramId,
+              value: user.telegramId?.toString() ?? loc.notSpecified,
             ),
-            _InfoLine(label: 'Username', value: user.username ?? _ProfilePageState._fallback),
-            _InfoLine(label: 'Email', value: user.email ?? _ProfilePageState._fallback),
+            _InfoLine(label: loc.username, value: user.username ?? loc.notSpecified),
+            _InfoLine(label: loc.email, value: user.email ?? loc.notSpecified),
             _InfoLine(
-              label: 'Email подтвержден',
+              label: loc.emailVerified,
               value: user.emailVerified == null
-                  ? _ProfilePageState._fallback
-                  : (user.emailVerified! ? 'Да' : 'Нет'),
+                  ? loc.notSpecified
+                  : (user.emailVerified! ? loc.yes : loc.no),
             ),
-            _InfoLine(label: 'Язык', value: user.language ?? _ProfilePageState._fallback),
+            _InfoLine(label: loc.language, value: user.language ?? loc.notSpecified),
           ],
         ),
       ),
@@ -438,6 +522,7 @@ class _WalletsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
     final wallets = state.wallets;
     final status = state.walletsStatus;
     return Card(
@@ -449,7 +534,7 @@ class _WalletsSection extends StatelessWidget {
             Row(
               children: [
                 Expanded(
-                  child: Text('Кошельки', style: Theme.of(context).textTheme.titleMedium),
+                  child: Text(loc.walletsTitle, style: Theme.of(context).textTheme.titleMedium),
                 ),
                 IconButton(onPressed: onAddWallet, icon: const Icon(Icons.add)),
               ],
@@ -464,9 +549,9 @@ class _WalletsSection extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(vertical: 8),
                 child: Column(
                   children: [
-                    const Text('Кошельки пока не добавлены'),
+                    Text(loc.walletsEmpty),
                     const SizedBox(height: 8),
-                    OutlinedButton(onPressed: onAddWallet, child: const Text('Добавить кошелек')),
+                    OutlinedButton(onPressed: onAddWallet, child: Text(loc.addWallet)),
                   ],
                 ),
               ),
@@ -475,12 +560,12 @@ class _WalletsSection extends StatelessWidget {
                   (status == WalletsViewStatus.updating || status == WalletsViewStatus.deleting);
               return ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: Text(wallet.label ?? _ProfilePageState._fallback),
+                title: Text(wallet.label ?? loc.notSpecified),
                 subtitle: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(_shortAddress(wallet.address)),
-                    Text('Создан: ${wallet.createdAt ?? _ProfilePageState._fallback}'),
+                    Text('${loc.createdAt}: ${wallet.createdAt ?? loc.notSpecified}'),
                   ],
                 ),
                 trailing: isBusy
@@ -519,6 +604,70 @@ class _WalletsSection extends StatelessWidget {
       return address;
     }
     return '${address.substring(0, 6)}...${address.substring(address.length - 4)}';
+  }
+}
+
+class _AppCacheResetSection extends StatelessWidget {
+  const _AppCacheResetSection();
+
+  Future<void> _confirmAndReset(BuildContext context) async {
+    final loc = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: Text(loc.appCacheResetConfirmTitle),
+          content: Text(loc.appCacheResetConfirmMessage),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(dialogContext).pop(false),
+              child: Text(loc.cancel),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(dialogContext).pop(true),
+              child: Text(loc.appCacheResetConfirmAction),
+            ),
+          ],
+        );
+      },
+    );
+    if (confirmed != true || !context.mounted) {
+      return;
+    }
+    await resetAppCache(clearAuthTokens: () => di<AuthTokenStore>().clear());
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Text(
+              loc.appCacheReset,
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              loc.appCacheResetConfirmMessage,
+              style: Theme.of(context).textTheme.bodySmall,
+            ),
+            const SizedBox(height: 12),
+            Align(
+              alignment: Alignment.centerRight,
+              child: OutlinedButton.icon(
+                onPressed: () => _confirmAndReset(context),
+                icon: const Icon(Icons.cached_outlined),
+                label: Text(loc.appCacheReset),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
 

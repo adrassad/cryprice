@@ -1,5 +1,6 @@
 import 'package:cryprice_frontend/core/cubit/locale_cubit.dart';
 import 'package:cryprice_frontend/core/di/di.dart';
+import 'package:cryprice_frontend/core/navigation/push_navigation_bridge.dart';
 import 'package:cryprice_frontend/core/shell/app_shell.dart';
 import 'package:cryprice_frontend/core/theme/cryprice_theme.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alert_rules_usecase.dart';
@@ -50,6 +51,9 @@ import 'package:cryprice_frontend/features/profile/domain/usecases/update_profil
 import 'package:cryprice_frontend/features/profile/domain/usecases/update_wallet_label_usecase.dart';
 import 'package:cryprice_frontend/features/profile/presentation/cubit/profile_cubit.dart';
 import 'package:cryprice_frontend/features/profile/presentation/pages/profile_page.dart';
+import 'package:cryprice_frontend/features/push_notifications/data/platforms/push_messaging_stub.dart';
+import 'package:cryprice_frontend/features/push_notifications/domain/repositories/push_token_repository.dart';
+import 'package:cryprice_frontend/features/push_notifications/presentation/push_notification_coordinator.dart';
 import 'package:cryprice_frontend/features/theme/cubit/theme_cubit.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
@@ -91,6 +95,10 @@ class MockGetAlertRulesUseCase extends Mock implements GetAlertRulesUseCase {}
 
 class MockUpsertGlobalHfAlertRuleUseCase extends Mock
     implements UpsertGlobalHfAlertRuleUseCase {}
+
+class MockPushTokenRepository extends Mock implements PushTokenRepository {}
+
+class MockPushMessagingPlatform extends Mock implements PushMessagingPlatform {}
 
 class _GuestModeTestContext {
   _GuestModeTestContext({
@@ -174,6 +182,31 @@ Future<_GuestModeTestContext> _setupGuestModeDi() async {
       getNetworksUseCase: getNetworks,
       getMarketsUseCase: getMarkets,
       calculateHealthFactorUseCase: calculateHf,
+    ),
+  );
+
+  final pushMessaging = MockPushMessagingPlatform();
+  when(() => pushMessaging.configureForegroundPresentation())
+      .thenAnswer((_) async {});
+  when(() => pushMessaging.getInitialMessage()).thenAnswer((_) async => null);
+  when(() => pushMessaging.onMessage)
+      .thenAnswer((_) => const Stream<Map<String, String>>.empty());
+  when(() => pushMessaging.onMessageOpenedApp)
+      .thenAnswer((_) => const Stream<Map<String, String>>.empty());
+  when(() => pushMessaging.onTokenRefresh)
+      .thenAnswer((_) => const Stream<String>.empty());
+
+  di.registerLazySingleton<PushTokenRepository>(MockPushTokenRepository.new);
+  di.registerLazySingleton<PushMessagingPlatform>(() => pushMessaging);
+  di.registerLazySingleton(MutablePushNavigationBridge.new);
+  di.registerLazySingleton<PushNavigationBridge>(
+    () => di<MutablePushNavigationBridge>(),
+  );
+  di.registerLazySingleton(
+    () => PushNotificationCoordinator(
+      messagingPlatform: di<PushMessagingPlatform>(),
+      tokenRepository: di<PushTokenRepository>(),
+      navigationBridge: di<PushNavigationBridge>(),
     ),
   );
 
