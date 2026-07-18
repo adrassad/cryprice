@@ -42,14 +42,26 @@ class AppLocalizationsRu extends AppLocalizations {
   String get error_no_internet => 'Нет подключения к интернету';
 
   @override
+  String get error_rate_limited =>
+      'Слишком много запросов. Подождите немного и попробуйте снова.';
+
+  @override
   String get error_unknown => 'Произошла неизвестная ошибка';
+
+  @override
+  String get error_invalid_count => 'Количество должно быть больше нуля';
 
   @override
   String get resultsSectionCexTitle => 'CEX-цены';
 
   @override
   String get resultsSectionCexSubtitle =>
-      'Биржи, индексы, off-chain API — один GET, тикер — последний сегмент пути';
+      'Binance и Bybit — готовая сумма в Монете 2 через backend API';
+
+  @override
+  String resultsCexConvertHint(String count, String coin1, String coin2) {
+    return '$count × $coin1 → $coin2';
+  }
 
   @override
   String get resultsSectionDexTitle => 'DEX-цены';
@@ -147,26 +159,52 @@ class AppLocalizationsRu extends AppLocalizations {
   String get labelPrice => 'Цена';
 
   @override
-  String get authScreenTitle => 'Вход';
+  String get authScreenTitle => 'Доступ к аккаунту CryPrice';
 
   @override
   String get authScreenSubtitle =>
-      'Войдите, чтобы продолжить. Сеанс хранится на этом устройстве.';
+      'Используйте Google только для доступа к read-only дашборду.';
 
   @override
-  String get signIn => 'Войти';
+  String get authTrustTitle => 'CryPrice — read-only.';
+
+  @override
+  String get authTrustBody =>
+      'Используйте Google только для доступа к дашборду CryPrice.';
+
+  @override
+  String get authTrustNoWalletConnection => 'Без подключения кошелька';
+
+  @override
+  String get authTrustNoSeedKeys => 'Без seed-фраз и приватных ключей';
+
+  @override
+  String get authTrustNoSigningCustody =>
+      'Без подписания транзакций и хранения средств';
+
+  @override
+  String get authTrustPublicAddressesOnly =>
+      'Только публичные адреса для мониторинга';
+
+  @override
+  String get signIn => 'Доступ к аккаунту';
 
   @override
   String get signOut => 'Выйти';
 
   @override
-  String get signInWithGoogle => 'Продолжить с Google';
+  String get signInWithGoogle =>
+      'Использовать Google для доступа к аккаунту CryPrice';
 
   @override
   String get profileTitle => 'Профиль';
 
   @override
-  String get loginRequired => 'Требуется авторизация';
+  String get loginRequired => 'Требуется доступ к аккаунту';
+
+  @override
+  String get accountAccessRequiredBody =>
+      'Используйте Google только для доступа к сохранённым данным CryPrice.';
 
   @override
   String get profileLoadFailed => 'Не удалось загрузить профиль';
@@ -196,34 +234,35 @@ class AppLocalizationsRu extends AppLocalizations {
   String get save => 'Сохранить';
 
   @override
-  String get walletsTitle => 'Кошельки';
+  String get walletsTitle => 'Публичные адреса';
 
   @override
-  String get walletsEmpty => 'Кошельки пока не добавлены';
+  String get walletsEmpty => 'Публичные адреса пока не добавлены';
 
   @override
-  String get addWallet => 'Добавить кошелек';
+  String get addWallet => 'Добавить публичный адрес';
 
   @override
-  String get walletAddress => 'Адрес';
+  String get walletAddress => 'Публичный адрес';
 
   @override
-  String get walletLabel => 'Label';
+  String get walletLabel => 'Метка';
 
   @override
-  String get editWalletLabel => 'Изменить label';
+  String get editWalletLabel => 'Изменить метку';
 
   @override
-  String get deleteWallet => 'Удалить кошелек';
+  String get deleteWallet => 'Удалить адрес из мониторинга';
 
   @override
-  String get deleteWalletConfirm => 'Вы действительно хотите удалить кошелек?';
+  String get deleteWalletConfirm =>
+      'Удалить этот адрес из мониторинга CryPrice?';
 
   @override
   String get delete => 'Удалить';
 
   @override
-  String get walletAddressRequired => 'Введите адрес кошелька';
+  String get walletAddressRequired => 'Публичный адрес обязателен';
 
   @override
   String get walletAddressStartWith0x => 'Адрес должен начинаться с 0x';
@@ -242,21 +281,44 @@ class AppLocalizationsRu extends AppLocalizations {
   String get profileTelegramTitle => 'Telegram';
 
   @override
-  String get profileTelegramLinked => 'Telegram привязан';
+  String get profileTelegramLinked => 'Уведомления Telegram привязаны';
 
   @override
   String get profileTelegramLinkPrompt =>
-      'Привяжите Telegram, чтобы получать уведомления.';
+      'Привяжите Telegram только для опциональных уведомлений.';
 
   @override
-  String get profileTelegramLinkButton => 'Привязать Telegram';
+  String get profileTelegramLinkButton =>
+      'Привязать Telegram для опциональных уведомлений';
+
+  @override
+  String get profileTelegramSafetyNote =>
+      'Telegram опционален и не получает seed-фразы, приватные ключи или доступ к кошельку.';
+
+  @override
+  String get profileUpdatedSuccess => 'Профиль обновлён';
+
+  @override
+  String get publicAddressAddedSuccess => 'Публичный адрес добавлен';
+
+  @override
+  String get publicAddressLabelUpdatedSuccess => 'Метка адреса обновлена';
+
+  @override
+  String get publicAddressRemovedSuccess => 'Адрес удалён из мониторинга';
+
+  @override
+  String get profileTelegramLinkCreatedSuccess => 'Ссылка для Telegram создана';
+
+  @override
+  String get profileUserIdLabel => 'ID';
 
   @override
   String get profileHfAlertsTitle => 'Оповещения Health Factor';
 
   @override
   String get profileHfAlertsDescription =>
-      'Уведомлять, когда мой Health Factor в Aave опускается ниже этого порога.';
+      'Уведомлять, когда мой DeFi Health Factor опускается ниже этого порога.';
 
   @override
   String get profileHfAlertsEnabled => 'Включено';
@@ -267,7 +329,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get profileHfAlertsTelegramWarning =>
-      'Telegram не привязан. Настройки сохранятся в приложении, но доставка в Telegram требует привязки Telegram.';
+      'Уведомления Telegram не привязаны. Настройки сохранятся в приложении, но для опциональных уведомлений Telegram нужна привязка.';
 
   @override
   String get profileHfAlertsLegacySyncFailed =>
@@ -306,7 +368,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get portfolioNetValue => 'Чистая стоимость';
 
   @override
-  String get portfolioWalletValue => 'Стоимость кошельков';
+  String get portfolioWalletValue => 'Ончейн-стоимость';
 
   @override
   String get portfolioSuppliedValue => 'Вложено в DeFi';
@@ -384,17 +446,17 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get portfolioOverviewScopeWalletFilter =>
-      'Итоги отражают выбранный кошелек по всем протоколам.';
+      'Итоги отражают выбранный адрес по всем протоколам.';
 
   @override
   String get portfolioOverviewScopeProtocolWallet =>
-      'Итоги отражают выбранный кошелек. Детали по протоколу и сети — в группах DeFi ниже.';
+      'Итоги отражают выбранный адрес. Детали по протоколу и сети — в группах DeFi ниже.';
 
   @override
-  String get portfolioWalletHoldings => 'Активы кошельков';
+  String get portfolioWalletHoldings => 'Ончейн-активы';
 
   @override
-  String get portfolioNoWalletHoldings => 'Нет активов кошельков';
+  String get portfolioNoWalletHoldings => 'Нет ончейн-активов';
 
   @override
   String get portfolioDefiPositions => 'DeFi-позиции';
@@ -439,7 +501,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get portfolioValueUnavailable => 'Стоимость недоступна';
 
   @override
-  String get portfolioWallets => 'Кошельки';
+  String get portfolioWallets => 'Публичные адреса';
 
   @override
   String get portfolioAssets => 'Активы';
@@ -464,7 +526,7 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get portfolioEmptyHint =>
-      'Добавьте или синхронизируйте кошелек в профиле, затем обновите портфель.';
+      'Добавьте публичный адрес в профиле, затем обновите портфель.';
 
   @override
   String get portfolioLoadFailed => 'Не удалось загрузить портфель';
@@ -509,7 +571,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get portfolioUsdValue => 'Стоимость в USD';
 
   @override
-  String get portfolioWalletBreakdown => 'Детализация по кошелькам';
+  String get portfolioWalletBreakdown => 'Детализация по адресам';
 
   @override
   String get portfolioSyncedAt => 'Синхронизировано';
@@ -527,10 +589,10 @@ class AppLocalizationsRu extends AppLocalizations {
   String get portfolioAllProtocols => 'Все протоколы';
 
   @override
-  String get portfolioAllWallets => 'Все кошельки';
+  String get portfolioAllWallets => 'Все адреса';
 
   @override
-  String get portfolioWallet => 'Кошелек';
+  String get portfolioWallet => 'Адрес';
 
   @override
   String get portfolioProtocols => 'Протоколы';
@@ -571,6 +633,19 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get alertsMarkReadFailed =>
       'Не удалось отметить оповещение прочитанным. Попробуйте снова.';
+
+  @override
+  String get alertsMarkAllRead => 'Отметить все прочитанными';
+
+  @override
+  String get alertsMarkAllReadTooltip => 'Отметить все оповещения прочитанными';
+
+  @override
+  String get alertsMarkAllReadFailed =>
+      'Не удалось отметить все оповещения прочитанными. Попробуйте ещё раз.';
+
+  @override
+  String get alertsMarkingAllRead => 'Отмечаем прочитанными…';
 
   @override
   String get alertsUnreadBadgeMax => '99+';
@@ -672,7 +747,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get alertsHfAlertTypeRecovery => 'Восстановление HF';
 
   @override
-  String get alertsHfWallet => 'Кошелёк';
+  String get alertsHfWallet => 'Адрес';
 
   @override
   String get alertsHfProtocol => 'Протокол';
@@ -729,16 +804,222 @@ class AppLocalizationsRu extends AppLocalizations {
   String get alertsHfMovementUnchanged => 'Health Factor без изменений';
 
   @override
+  String get hfCalcTitle => 'Калькулятор Health Factor';
+
+  @override
+  String get hfCalcSubtitle =>
+      'Оцените health factor в DeFi-кредитовании по актуальным рыночным данным.';
+
+  @override
+  String get hfCalcProtocol => 'Протокол';
+
+  @override
+  String get hfCalcSelectProtocol => 'Выберите протокол';
+
+  @override
+  String get hfCalcNetwork => 'Сеть';
+
+  @override
+  String get hfCalcSelectNetwork => 'Выберите сеть';
+
+  @override
+  String get hfCalcSupplySection => 'Депозит / залог';
+
+  @override
+  String get hfCalcBorrowSection => 'Займ';
+
+  @override
+  String get hfCalcAddSupply => 'Добавить депозит';
+
+  @override
+  String get hfCalcAddBorrow => 'Добавить займ';
+
+  @override
+  String get hfCalcAsset => 'Актив';
+
+  @override
+  String get hfCalcSelectAsset => 'Выберите актив';
+
+  @override
+  String get hfCalcAmount => 'Сумма';
+
+  @override
+  String get hfCalcUseAsCollateral => 'Использовать как залог';
+
+  @override
+  String get hfCalcCalculate => 'Рассчитать';
+
+  @override
+  String get hfCalcCalculating => 'Расчёт…';
+
+  @override
+  String get hfCalcResult => 'Результат';
+
+  @override
+  String get hfCalcHealthFactor => 'Health Factor';
+
+  @override
+  String get hfCalcRiskLevel => 'Уровень риска';
+
+  @override
+  String get hfCalcCollateralUsd => 'Залог (USD)';
+
+  @override
+  String get hfCalcCollateralWeightedUsd => 'Взвешенный залог (USD)';
+
+  @override
+  String get hfCalcBorrowUsd => 'Займ (USD)';
+
+  @override
+  String get hfCalcWarnings => 'Предупреждения';
+
+  @override
+  String get hfCalcBreakdown => 'Разбивка по позициям';
+
+  @override
+  String get hfCalcNoResultTitle => 'Результата пока нет';
+
+  @override
+  String get hfCalcNoResultSubtitle =>
+      'Укажите депозиты и/или займы и нажмите «Рассчитать».';
+
+  @override
+  String get hfCalcLoading => 'Загрузка калькулятора…';
+
+  @override
+  String get hfCalcErrorTitle => 'Не удалось загрузить калькулятор';
+
+  @override
+  String get hfCalcRetry => 'Повторить';
+
+  @override
+  String get hfCalcUnauthenticatedTitle => 'Сессия истекла';
+
+  @override
+  String get hfCalcUnauthenticatedMessage =>
+      'Для расчёта health factor требуется доступ к аккаунту.';
+
+  @override
+  String get hfCalcNoMarkets => 'Для этой сети нет доступных резервов рынка.';
+
+  @override
+  String get hfCalcRemoveRow => 'Удалить строку';
+
+  @override
+  String get hfCalcNoProtocolsTitle => 'Протоколы недоступны';
+
+  @override
+  String get hfCalcNoProtocolsSubtitle =>
+      'Не удалось загрузить список протоколов.';
+
+  @override
+  String get hfCalcNoNetworksTitle => 'Сети недоступны';
+
+  @override
+  String get hfCalcNoNetworksSubtitle =>
+      'Выберите другой протокол или попробуйте позже.';
+
+  @override
+  String get hfCalcRiskNoDebt => 'Без долга';
+
+  @override
+  String get hfCalcRiskSafer => 'Безопаснее';
+
+  @override
+  String get hfCalcRiskModerate => 'Умеренный';
+
+  @override
+  String get hfCalcRiskWarning => 'Предупреждение';
+
+  @override
+  String get hfCalcRiskHigh => 'Высокий риск';
+
+  @override
+  String get hfCalcRiskCritical => 'Критический';
+
+  @override
+  String get hfCalcRiskLiquidation => 'Риск ликвидации';
+
+  @override
+  String get hfCalcRiskUnknown => 'Неизвестно';
+
+  @override
+  String get hfCalcCurrentPrice => 'Текущая цена';
+
+  @override
+  String get hfCalcMarketPrice => 'Рыночная цена';
+
+  @override
+  String get hfCalcUsedPrice => 'Цена в расчёте';
+
+  @override
+  String get hfCalcCustomPrice => 'Своя цена (USD)';
+
+  @override
+  String get hfCalcUseMarketPrice => 'Использовать рыночную цену';
+
+  @override
+  String get hfCalcSimulationOnly => 'Только для симуляции';
+
+  @override
+  String get hfCalcPriceUnavailable => 'Цена недоступна';
+
+  @override
+  String get hfCalcCustomPriceUsed => 'В расчёте использована своя цена';
+
+  @override
+  String get hfCalcCustomPriceDiffers =>
+      'Своя цена сильно отличается от рыночной';
+
+  @override
+  String get hfCalcPositionValue => 'Стоимость';
+
+  @override
   String get comingSoon => 'Скоро';
 
   @override
   String get menuProfile => 'Профиль';
 
   @override
-  String get logIn => 'Войти';
+  String get logIn => 'Доступ к аккаунту';
 
   @override
   String get logOut => 'Выйти';
+
+  @override
+  String get appUpdateAvailable =>
+      'CryPrice обновлён. Перезагрузите приложение для безопасной работы.';
+
+  @override
+  String get appUpdateReload => 'Перезагрузить';
+
+  @override
+  String get appUpdateManualInstructions =>
+      'Не удалось обновить CryPrice автоматически. Закройте другие вкладки этого сайта и перезагрузите страницу или очистите данные сайта для app.cryprice.dev.';
+
+  @override
+  String get authStaleRecoveryMessage =>
+      'Схема входа в CryPrice обновлена. Перезагрузите приложение и попробуйте снова.';
+
+  @override
+  String get authStaleRecoveryReload => 'Перезагрузить';
+
+  @override
+  String get googleAuthRedirectFailed =>
+      'Доступ к аккаунту через Google был отменён или завершился ошибкой. Попробуйте ещё раз.';
+
+  @override
+  String get appCacheReset => 'Сбросить кеш приложения';
+
+  @override
+  String get appCacheResetConfirmTitle => 'Сбросить кеш приложения?';
+
+  @override
+  String get appCacheResetConfirmMessage =>
+      'Это очистит локальный кеш приложения и перезагрузит CryPrice. Возможно, потребуется снова получить доступ к аккаунту.';
+
+  @override
+  String get appCacheResetConfirmAction => 'Сбросить и перезагрузить';
 
   @override
   String get themeLight => 'Светлая';

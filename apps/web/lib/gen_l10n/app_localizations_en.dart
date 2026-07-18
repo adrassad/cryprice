@@ -42,14 +42,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get error_no_internet => 'No internet connection';
 
   @override
+  String get error_rate_limited =>
+      'Too many requests. Please wait a moment and try again.';
+
+  @override
   String get error_unknown => 'Unknown error occurred';
+
+  @override
+  String get error_invalid_count => 'Count must be greater than zero';
 
   @override
   String get resultsSectionCexTitle => 'CEX prices';
 
   @override
   String get resultsSectionCexSubtitle =>
-      'Exchanges, indices, and off-chain API — one GET with ticker as last path segment';
+      'Binance and Bybit — converted amount in Coin 2 via backend API';
+
+  @override
+  String resultsCexConvertHint(String count, String coin1, String coin2) {
+    return '$count × $coin1 → $coin2';
+  }
 
   @override
   String get resultsSectionDexTitle => 'DEX prices';
@@ -146,26 +158,50 @@ class AppLocalizationsEn extends AppLocalizations {
   String get labelPrice => 'Price';
 
   @override
-  String get authScreenTitle => 'Sign in';
+  String get authScreenTitle => 'CryPrice account access';
 
   @override
   String get authScreenSubtitle =>
-      'Sign in to continue. Your session is stored on this device.';
+      'Use Google only for read-only dashboard access.';
 
   @override
-  String get signIn => 'Sign in';
+  String get authTrustTitle => 'CryPrice is read-only.';
+
+  @override
+  String get authTrustBody =>
+      'Use Google only to access your CryPrice dashboard.';
+
+  @override
+  String get authTrustNoWalletConnection => 'No wallet connection';
+
+  @override
+  String get authTrustNoSeedKeys => 'No seed phrases or private keys';
+
+  @override
+  String get authTrustNoSigningCustody => 'No transaction signing or custody';
+
+  @override
+  String get authTrustPublicAddressesOnly =>
+      'Public addresses for monitoring only';
+
+  @override
+  String get signIn => 'Account access';
 
   @override
   String get signOut => 'Log out';
 
   @override
-  String get signInWithGoogle => 'Continue with Google';
+  String get signInWithGoogle => 'Use Google for CryPrice account access';
 
   @override
   String get profileTitle => 'Profile';
 
   @override
-  String get loginRequired => 'Login required';
+  String get loginRequired => 'Account access required';
+
+  @override
+  String get accountAccessRequiredBody =>
+      'Use Google only to access your saved CryPrice dashboard data.';
 
   @override
   String get profileLoadFailed => 'Failed to load profile';
@@ -195,16 +231,16 @@ class AppLocalizationsEn extends AppLocalizations {
   String get save => 'Save';
 
   @override
-  String get walletsTitle => 'Wallets';
+  String get walletsTitle => 'Public addresses';
 
   @override
-  String get walletsEmpty => 'No wallets added yet';
+  String get walletsEmpty => 'No public addresses added yet';
 
   @override
-  String get addWallet => 'Add wallet';
+  String get addWallet => 'Add public address';
 
   @override
-  String get walletAddress => 'Address';
+  String get walletAddress => 'Public address';
 
   @override
   String get walletLabel => 'Label';
@@ -213,16 +249,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get editWalletLabel => 'Edit label';
 
   @override
-  String get deleteWallet => 'Delete wallet';
+  String get deleteWallet => 'Remove monitored address';
 
   @override
-  String get deleteWalletConfirm => 'Do you really want to delete this wallet?';
+  String get deleteWalletConfirm =>
+      'Remove this monitored address from CryPrice?';
 
   @override
   String get delete => 'Delete';
 
   @override
-  String get walletAddressRequired => 'Wallet address is required';
+  String get walletAddressRequired => 'Public address is required';
 
   @override
   String get walletAddressStartWith0x => 'Address should start with 0x';
@@ -241,21 +278,44 @@ class AppLocalizationsEn extends AppLocalizations {
   String get profileTelegramTitle => 'Telegram';
 
   @override
-  String get profileTelegramLinked => 'Telegram linked';
+  String get profileTelegramLinked => 'Telegram notifications linked';
 
   @override
   String get profileTelegramLinkPrompt =>
-      'Link Telegram to receive notifications.';
+      'Link Telegram for optional notifications only.';
 
   @override
-  String get profileTelegramLinkButton => 'Link Telegram';
+  String get profileTelegramLinkButton =>
+      'Link Telegram for optional notifications';
+
+  @override
+  String get profileTelegramSafetyNote =>
+      'Telegram is optional and never receives seed phrases, private keys, or wallet access.';
+
+  @override
+  String get profileUpdatedSuccess => 'Profile updated';
+
+  @override
+  String get publicAddressAddedSuccess => 'Public address added';
+
+  @override
+  String get publicAddressLabelUpdatedSuccess => 'Address label updated';
+
+  @override
+  String get publicAddressRemovedSuccess => 'Monitored address removed';
+
+  @override
+  String get profileTelegramLinkCreatedSuccess => 'Telegram link created';
+
+  @override
+  String get profileUserIdLabel => 'ID';
 
   @override
   String get profileHfAlertsTitle => 'Health Factor Alerts';
 
   @override
   String get profileHfAlertsDescription =>
-      'Notify me when my Aave Health Factor drops below this threshold.';
+      'Notify me when my DeFi Health Factor drops below this threshold.';
 
   @override
   String get profileHfAlertsEnabled => 'Enabled';
@@ -266,7 +326,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get profileHfAlertsTelegramWarning =>
-      'Telegram is not linked. Alerts will still be saved in the app, but Telegram delivery requires linking Telegram.';
+      'Telegram notifications are not linked. Alert settings will still be saved in the app, but optional Telegram notifications require linking.';
 
   @override
   String get profileHfAlertsLegacySyncFailed =>
@@ -305,7 +365,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portfolioNetValue => 'Net value';
 
   @override
-  String get portfolioWalletValue => 'Wallet value';
+  String get portfolioWalletValue => 'On-chain value';
 
   @override
   String get portfolioSuppliedValue => 'Supplied value';
@@ -383,17 +443,17 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get portfolioOverviewScopeWalletFilter =>
-      'Totals reflect the selected wallet across all protocols.';
+      'Totals reflect the selected address across all protocols.';
 
   @override
   String get portfolioOverviewScopeProtocolWallet =>
-      'Totals reflect the selected wallet. Protocol-specific wallet totals are shown in the DeFi groups below.';
+      'Totals reflect the selected address. Protocol-specific address totals are shown in the DeFi groups below.';
 
   @override
-  String get portfolioWalletHoldings => 'Wallet Holdings';
+  String get portfolioWalletHoldings => 'On-chain holdings';
 
   @override
-  String get portfolioNoWalletHoldings => 'No wallet holdings';
+  String get portfolioNoWalletHoldings => 'No on-chain holdings';
 
   @override
   String get portfolioDefiPositions => 'DeFi Positions';
@@ -438,7 +498,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portfolioValueUnavailable => 'Value unavailable';
 
   @override
-  String get portfolioWallets => 'Wallets';
+  String get portfolioWallets => 'Public addresses';
 
   @override
   String get portfolioAssets => 'Assets';
@@ -463,7 +523,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get portfolioEmptyHint =>
-      'Add or sync a wallet from Profile, then refresh Portfolio.';
+      'Add a public address in Profile, then refresh Portfolio.';
 
   @override
   String get portfolioLoadFailed => 'Failed to load portfolio';
@@ -508,7 +568,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portfolioUsdValue => 'USD Value';
 
   @override
-  String get portfolioWalletBreakdown => 'Wallet breakdown';
+  String get portfolioWalletBreakdown => 'Address breakdown';
 
   @override
   String get portfolioSyncedAt => 'Synced at';
@@ -526,10 +586,10 @@ class AppLocalizationsEn extends AppLocalizations {
   String get portfolioAllProtocols => 'All protocols';
 
   @override
-  String get portfolioAllWallets => 'All wallets';
+  String get portfolioAllWallets => 'All addresses';
 
   @override
-  String get portfolioWallet => 'Wallet';
+  String get portfolioWallet => 'Address';
 
   @override
   String get portfolioProtocols => 'Protocols';
@@ -568,6 +628,19 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get alertsMarkReadFailed => 'Could not mark alert as read. Try again.';
+
+  @override
+  String get alertsMarkAllRead => 'Mark all as read';
+
+  @override
+  String get alertsMarkAllReadTooltip => 'Mark all alerts as read';
+
+  @override
+  String get alertsMarkAllReadFailed =>
+      'Could not mark all alerts as read. Try again.';
+
+  @override
+  String get alertsMarkingAllRead => 'Marking as read…';
 
   @override
   String get alertsUnreadBadgeMax => '99+';
@@ -669,7 +742,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alertsHfAlertTypeRecovery => 'HF recovery';
 
   @override
-  String get alertsHfWallet => 'Wallet';
+  String get alertsHfWallet => 'Address';
 
   @override
   String get alertsHfProtocol => 'Protocol';
@@ -726,16 +799,223 @@ class AppLocalizationsEn extends AppLocalizations {
   String get alertsHfMovementUnchanged => 'Health Factor unchanged';
 
   @override
+  String get hfCalcTitle => 'Health Factor Calculator';
+
+  @override
+  String get hfCalcSubtitle =>
+      'Estimate your DeFi lending health factor using live market data.';
+
+  @override
+  String get hfCalcProtocol => 'Protocol';
+
+  @override
+  String get hfCalcSelectProtocol => 'Select protocol';
+
+  @override
+  String get hfCalcNetwork => 'Network';
+
+  @override
+  String get hfCalcSelectNetwork => 'Select network';
+
+  @override
+  String get hfCalcSupplySection => 'Supply / Collateral';
+
+  @override
+  String get hfCalcBorrowSection => 'Borrow';
+
+  @override
+  String get hfCalcAddSupply => 'Add supply';
+
+  @override
+  String get hfCalcAddBorrow => 'Add borrow';
+
+  @override
+  String get hfCalcAsset => 'Asset';
+
+  @override
+  String get hfCalcSelectAsset => 'Select asset';
+
+  @override
+  String get hfCalcAmount => 'Amount';
+
+  @override
+  String get hfCalcUseAsCollateral => 'Use as collateral';
+
+  @override
+  String get hfCalcCalculate => 'Calculate';
+
+  @override
+  String get hfCalcCalculating => 'Calculating…';
+
+  @override
+  String get hfCalcResult => 'Result';
+
+  @override
+  String get hfCalcHealthFactor => 'Health Factor';
+
+  @override
+  String get hfCalcRiskLevel => 'Risk level';
+
+  @override
+  String get hfCalcCollateralUsd => 'Collateral (USD)';
+
+  @override
+  String get hfCalcCollateralWeightedUsd => 'Weighted collateral (USD)';
+
+  @override
+  String get hfCalcBorrowUsd => 'Borrow (USD)';
+
+  @override
+  String get hfCalcWarnings => 'Warnings';
+
+  @override
+  String get hfCalcBreakdown => 'Position breakdown';
+
+  @override
+  String get hfCalcNoResultTitle => 'No result yet';
+
+  @override
+  String get hfCalcNoResultSubtitle =>
+      'Enter supply and/or borrow positions, then calculate.';
+
+  @override
+  String get hfCalcLoading => 'Loading calculator…';
+
+  @override
+  String get hfCalcErrorTitle => 'Could not load calculator';
+
+  @override
+  String get hfCalcRetry => 'Retry';
+
+  @override
+  String get hfCalcUnauthenticatedTitle => 'Session expired';
+
+  @override
+  String get hfCalcUnauthenticatedMessage =>
+      'Account access is required to calculate your health factor.';
+
+  @override
+  String get hfCalcNoMarkets =>
+      'No market reserves available for this network.';
+
+  @override
+  String get hfCalcRemoveRow => 'Remove row';
+
+  @override
+  String get hfCalcNoProtocolsTitle => 'No protocols available';
+
+  @override
+  String get hfCalcNoProtocolsSubtitle =>
+      'Health factor protocols could not be loaded.';
+
+  @override
+  String get hfCalcNoNetworksTitle => 'No networks available';
+
+  @override
+  String get hfCalcNoNetworksSubtitle =>
+      'Try another protocol or check back later.';
+
+  @override
+  String get hfCalcRiskNoDebt => 'No debt';
+
+  @override
+  String get hfCalcRiskSafer => 'Safer';
+
+  @override
+  String get hfCalcRiskModerate => 'Moderate';
+
+  @override
+  String get hfCalcRiskWarning => 'Warning';
+
+  @override
+  String get hfCalcRiskHigh => 'High risk';
+
+  @override
+  String get hfCalcRiskCritical => 'Critical';
+
+  @override
+  String get hfCalcRiskLiquidation => 'Liquidation risk';
+
+  @override
+  String get hfCalcRiskUnknown => 'Unknown';
+
+  @override
+  String get hfCalcCurrentPrice => 'Current price';
+
+  @override
+  String get hfCalcMarketPrice => 'Market price';
+
+  @override
+  String get hfCalcUsedPrice => 'Used price';
+
+  @override
+  String get hfCalcCustomPrice => 'Custom price (USD)';
+
+  @override
+  String get hfCalcUseMarketPrice => 'Use market price';
+
+  @override
+  String get hfCalcSimulationOnly => 'Used for simulation only';
+
+  @override
+  String get hfCalcPriceUnavailable => 'Price unavailable';
+
+  @override
+  String get hfCalcCustomPriceUsed => 'Custom price used for simulation';
+
+  @override
+  String get hfCalcCustomPriceDiffers =>
+      'Custom price differs significantly from market price';
+
+  @override
+  String get hfCalcPositionValue => 'Value';
+
+  @override
   String get comingSoon => 'Coming soon';
 
   @override
   String get menuProfile => 'Profile';
 
   @override
-  String get logIn => 'Log in';
+  String get logIn => 'Account access';
 
   @override
   String get logOut => 'Log out';
+
+  @override
+  String get appUpdateAvailable =>
+      'CryPrice was updated. Reload to continue safely.';
+
+  @override
+  String get appUpdateReload => 'Reload app';
+
+  @override
+  String get appUpdateManualInstructions =>
+      'CryPrice could not refresh automatically. Close other tabs for this site, then reload the page or clear site data for app.cryprice.dev.';
+
+  @override
+  String get authStaleRecoveryMessage =>
+      'CryPrice auth flow was updated. Reload the app and try again.';
+
+  @override
+  String get authStaleRecoveryReload => 'Reload app';
+
+  @override
+  String get googleAuthRedirectFailed =>
+      'Google account access was cancelled or failed. Please try again.';
+
+  @override
+  String get appCacheReset => 'Reset app cache';
+
+  @override
+  String get appCacheResetConfirmTitle => 'Reset app cache?';
+
+  @override
+  String get appCacheResetConfirmMessage =>
+      'This will clear local app cache and reload CryPrice. You may need to access your account again.';
+
+  @override
+  String get appCacheResetConfirmAction => 'Reset and reload';
 
   @override
   String get themeLight => 'Light';

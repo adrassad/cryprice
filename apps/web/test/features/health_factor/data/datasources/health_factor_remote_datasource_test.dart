@@ -165,6 +165,7 @@ void main() {
       final dataSource = HealthFactorRemoteDataSource(dio: dio);
 
       final call = dataSource.calculate(
+        protocol: 'aave_v3',
         request: const HealthFactorCalculateRequestModel(network: 'arbitrum'),
       );
 

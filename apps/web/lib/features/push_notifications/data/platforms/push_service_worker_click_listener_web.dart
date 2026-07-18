@@ -24,10 +24,11 @@ class PushServiceWorkerClickListener {
     _started = true;
 
     _listener = ((web.Event event) {
-      if (event is! web.MessageEvent) {
+      if (!event.isA<web.MessageEvent>()) {
         return;
       }
-      final data = event.data;
+      final messageEvent = event as web.MessageEvent;
+      final data = messageEvent.data;
       if (data == null || !data.isA<JSObject>()) {
         return;
       }
