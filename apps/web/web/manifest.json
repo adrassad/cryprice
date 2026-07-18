@@ -1,11 +1,11 @@
 {
-    "name": "CryPrice",
+    "name": "CryPrice — Read-Only DeFi Dashboard",
     "short_name": "CryPrice",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",
     "theme_color": "#0175C2",
-    "description": "Multi-chain DeFi risk monitoring.",
+    "description": "Read-only dashboard for public address monitoring, portfolio visibility, and DeFi risk context.",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

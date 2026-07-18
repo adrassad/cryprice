@@ -2,6 +2,8 @@
 import express from "express";
 import helmet from "helmet";
 import healthRoute from "./routes/health.route.js";
+import { sendApiIdentity } from "./routes/apiIdentity.route.js";
+import { sendSecurityTxt } from "./routes/securityTxt.route.js";
 import assetsRoute from "./routes/assets.route.js";
 import onchainPricesRoute from "./routes/onchainPrices.route.js";
 import offchainPricesRoute from "./routes/offchainPrices.route.js";
@@ -13,7 +15,10 @@ import usersRoute from "./routes/users.route.js";
 import tokenIconsRoute from "./routes/tokenIcons.route.js";
 import alertsRoute from "./routes/alerts.route.js";
 import alertRulesRoute from "./routes/alertRules.route.js";
-import apiLimiter from "./middlewares/rateLimit.middleware.js";
+import publicContactRoute from "./routes/publicContact.route.js";
+import apiLimiter, {
+  contactFormApiLimiter,
+} from "./middlewares/rateLimit.middleware.js";
 import authLimiter from "./middlewares/authRateLimit.middleware.js";
 import { requireAccessToken } from "./middlewares/auth.middleware.js";
 import { errorHandler } from "./middlewares/error.middleware.js";
@@ -32,6 +37,10 @@ export function createApp() {
   );
   app.use(createCorsMiddleware());
   app.use(express.json({ limit: "100kb" }));
+
+  app.get("/", apiLimiter, sendApiIdentity);
+  app.get("/.well-known/security.txt", apiLimiter, sendSecurityTxt);
+  app.use("/public/contact", contactFormApiLimiter, publicContactRoute);
 
   app.use("/health", apiLimiter);
   app.use("/assets", apiLimiter);

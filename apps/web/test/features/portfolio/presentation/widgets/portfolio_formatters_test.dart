@@ -80,6 +80,35 @@ void main() {
         '\$1.00',
       );
     });
+
+    test('rounds to fraction digits when requested', () {
+      expect(
+        formatPortfolioUsdForPriceStatus(
+          valueUsd: '1.0001',
+          priceStatus: PortfolioPriceStatus.ok,
+          unavailableLabel: 'Price unavailable',
+          fractionDigits: 2,
+        ),
+        '\$1.00',
+      );
+      expect(
+        formatPortfolioUsdForPriceStatus(
+          valueUsd: '2500.123456',
+          priceStatus: PortfolioPriceStatus.ok,
+          unavailableLabel: 'Price unavailable',
+          fractionDigits: 2,
+        ),
+        '\$2500.12',
+      );
+    });
+  });
+
+  group('roundFinancialDisplayToDecimalPlaces', () {
+    test('rounds half-up to requested precision', () {
+      expect(roundFinancialDisplayToDecimalPlaces('1.005', 2), '1.01');
+      expect(roundFinancialDisplayToDecimalPlaces('1.994', 2), '1.99');
+      expect(roundFinancialDisplayToDecimalPlaces('2500', 2), '2500.00');
+    });
   });
 
   group('compactPortfolioDecimalValue', () {

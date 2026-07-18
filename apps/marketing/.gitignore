@@ -1,29 +1,14 @@
-# Dependencies
-node_modules/
-
-# Build
-dist/
-dist-ssr/
-*.local
-
-# Environment (never commit secrets)
-.env
-.env.*
-!.env.example
-
-# Logs & cache
-*.log
-npm-debug.log*
-.pnpm-debug.log*
-.vite/
-.cache/
-node_modules/.tmp/
-
-# OS / IDE
+.audit_tmp/api.txt
+.audit_tmp/cors.txt
+.audit_tmp/headers.txt
+.audit_tmp/static.txt
+.audit_tmp/tls.txt
+.audit_tmp/port8443.txt
+.audit_tmp/path_tests.txt
+.audit_tmp/dns.txt
+dist-ssr
+node_modules
 .DS_Store
-.idea/
-*.swp
-*.swo
 
-# Test / coverage
-coverage/
+# macOS
+.DS_Store

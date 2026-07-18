@@ -87,6 +87,7 @@ class PortfolioAssetTile extends StatelessWidget {
                   valueUsd: asset.priceUsd,
                   priceStatus: asset.priceStatus,
                   unavailableLabel: loc.portfolioPriceUnavailable,
+                  fractionDigits: 2,
                 ),
               ),
               _AssetField(

@@ -46,7 +46,7 @@ void main() {
     final captured = verify(() => repository.createAlertRule(captureAny())).captured.single
         as CreateAlertRuleRequest;
     expect(captured.type, 'health_factor_threshold');
-    expect(captured.protocol, 'aave');
+    expect(captured.protocol, isNull);
     expect(captured.thresholdHf, '1.5');
     expect(captured.direction, 'below');
     expect(captured.enabled, isTrue);

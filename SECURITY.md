@@ -24,13 +24,17 @@ Out of scope:
 
 ## Read-only guarantees
 
+CryPrice is a read-only DeFi portfolio monitoring and risk intelligence platform for public blockchain addresses.
+
 CryPrice:
 
-- Never requests seed phrases
+- Does not require recovery phrases, private keys, or wallet signing credentials
 - Never stores private keys
 - Never signs transactions
 - Never executes blockchain transactions
 - Never takes custody of assets
+
+Google OAuth is used only for CryPrice account access and is unrelated to wallet authentication.
 
 Monitoring data is **informational only** — not financial advice. Full model: [`docs/SECURITY_MODEL.md`](docs/SECURITY_MODEL.md).
 

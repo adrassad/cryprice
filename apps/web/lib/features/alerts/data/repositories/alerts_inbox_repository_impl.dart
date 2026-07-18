@@ -12,4 +12,7 @@ class AlertsInboxRepositoryImpl implements AlertsInboxRepository {
 
   @override
   Future<InboxAlert> markAlertRead(String id) => _remote.markAlertRead(id);
+
+  @override
+  Future<int> markAllAsRead() => _remote.markAllAsRead();
 }

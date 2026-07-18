@@ -1,15 +1,22 @@
+import 'dart:async';
+
 import 'package:cryprice_frontend/core/di/di.dart';
 import 'package:cryprice_frontend/core/navigation/app_section.dart';
+import 'package:cryprice_frontend/core/navigation/push_navigation_bridge.dart';
 import 'package:cryprice_frontend/core/shell/cubit/shell_navigation_cubit.dart';
 import 'package:cryprice_frontend/core/shell/shell_visuals.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_left_command_menu.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_section_nav.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_user_menu.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_alerts_nav_icon.dart';
+import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
+import 'package:cryprice_frontend/features/push_notifications/presentation/push_notification_coordinator.dart';
+import 'package:cryprice_frontend/features/auth/presentation/widgets/authenticated_feature_gate.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/pages/alerts_inbox_page.dart';
 import 'package:cryprice_frontend/features/crypto_price/presentation/cubit/crypto_cubit.dart';
 import 'package:cryprice_frontend/features/crypto_price/presentation/pages/price_calculator_page.dart';
+import 'package:cryprice_frontend/features/health_factor/presentation/cubit/health_factor_calculator_cubit.dart';
 import 'package:cryprice_frontend/features/health_factor/presentation/pages/health_factor_page.dart';
 import 'package:cryprice_frontend/features/portfolio/presentation/cubit/portfolio_cubit.dart';
 import 'package:cryprice_frontend/features/portfolio/presentation/pages/portfolio_page.dart';
@@ -38,16 +45,34 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   late final ShellNavigationCubit _shellNavigationCubit;
   late final AlertsInboxCubit _alertsInboxCubit;
+  late final MutablePushNavigationBridge _pushNavigationBridge;
+  late final PushNotificationCoordinator _pushCoordinator;
+  StreamSubscription<dynamic>? _pushInboxRefreshSubscription;
 
   @override
   void initState() {
     super.initState();
     _shellNavigationCubit = ShellNavigationCubit();
     _alertsInboxCubit = di<AlertsInboxCubit>();
+    _pushNavigationBridge = di<MutablePushNavigationBridge>();
+    _pushCoordinator = di<PushNotificationCoordinator>();
+    _pushNavigationBridge.bind(
+      ShellPushNavigationBridge(
+        _shellNavigationCubit,
+        _alertsInboxCubit,
+      ),
+    );
+    _pushCoordinator.markRouteHandlerReady();
+    _pushInboxRefreshSubscription = _pushCoordinator.onAlertReceived.listen((_) {
+      unawaited(_alertsInboxCubit.refresh());
+    });
   }
 
   @override
   void dispose() {
+    unawaited(_pushInboxRefreshSubscription?.cancel());
+    _pushInboxRefreshSubscription = null;
+    _pushNavigationBridge.reset();
     _shellNavigationCubit.close();
     _alertsInboxCubit.close();
     super.dispose();
@@ -369,23 +394,22 @@ class _ShellSectionBody extends StatelessWidget {
 
   final AppSection selectedSection;
 
-  static const List<Widget> _pages = <Widget>[
-    _ShellPriceCalculatorTab(),
-    _ShellPortfolioTab(),
-    _ShellAlertsTab(),
-    HealthFactorPage(),
-  ];
-
   @override
   Widget build(BuildContext context) {
     return IndexedStack(
       index: _sectionIndex(selectedSection),
-      children: _pages,
+      children: [
+        const _ShellPriceCalculatorTab(),
+        _ShellPortfolioTab(isActive: selectedSection == AppSection.portfolio),
+        _ShellAlertsTab(isActive: selectedSection == AppSection.alerts),
+        _ShellHealthFactorTab(
+          isActive: selectedSection == AppSection.healthFactorCalculator,
+        ),
+      ],
     );
   }
 }
 
-/// Owns [TitleCubit] for the shell price tab; stays mounted under [IndexedStack].
 class _ShellPriceCalculatorTab extends StatefulWidget {
   const _ShellPriceCalculatorTab();
 
@@ -417,36 +441,132 @@ class _ShellPriceCalculatorTabState extends State<_ShellPriceCalculatorTab> {
   }
 }
 
+/// Defers protected tab loads until the section is active and the user is authenticated.
+void _maybeLoadProtectedTab({
+  required bool isActive,
+  required bool alreadyLoaded,
+  required void Function() onLoad,
+}) {
+  if (!isActive || alreadyLoaded) {
+    return;
+  }
+  onLoad();
+}
+
 /// Owns [AlertsInboxCubit] load lifecycle; stays mounted under [IndexedStack].
 class _ShellAlertsTab extends StatefulWidget {
-  const _ShellAlertsTab();
+  const _ShellAlertsTab({required this.isActive});
+
+  final bool isActive;
 
   @override
   State<_ShellAlertsTab> createState() => _ShellAlertsTabState();
 }
 
 class _ShellAlertsTabState extends State<_ShellAlertsTab> {
-  var _initialLoadStarted = false;
+  bool _deferredLoadDone = false;
 
   @override
-  void didChangeDependencies() {
-    super.didChangeDependencies();
-    if (_initialLoadStarted) {
-      return;
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _maybeLoadWhenActiveAndAuthenticated();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(_ShellAlertsTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _maybeLoadWhenActiveAndAuthenticated();
     }
-    _initialLoadStarted = true;
-    context.read<AlertsInboxCubit>().load();
+  }
+
+  void _maybeLoadWhenActiveAndAuthenticated() {
+    _maybeLoadProtectedTab(
+      isActive: widget.isActive,
+      alreadyLoaded: _deferredLoadDone,
+      onLoad: () {
+        final authState = context.read<AuthCubit>().state;
+        if (authState is! AuthStateAuthenticated) {
+          return;
+        }
+        _deferredLoadDone = true;
+        context.read<AlertsInboxCubit>().load();
+      },
+    );
   }
 
   @override
   Widget build(BuildContext context) {
-    return const AlertsInboxPage();
+    return AuthenticatedFeatureGate(
+      onAuthenticated: _maybeLoadWhenActiveAndAuthenticated,
+      child: const AlertsInboxPage(),
+    );
+  }
+}
+
+/// Owns [HealthFactorCalculatorCubit] for the shell HF tab; stays mounted under [IndexedStack].
+class _ShellHealthFactorTab extends StatefulWidget {
+  const _ShellHealthFactorTab({required this.isActive});
+
+  final bool isActive;
+
+  @override
+  State<_ShellHealthFactorTab> createState() => _ShellHealthFactorTabState();
+}
+
+class _ShellHealthFactorTabState extends State<_ShellHealthFactorTab> {
+  late final HealthFactorCalculatorCubit _calculatorCubit;
+  bool _lazyInitTriggered = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _calculatorCubit = di<HealthFactorCalculatorCubit>();
+    if (widget.isActive) {
+      _triggerLazyInit();
+    }
+  }
+
+  @override
+  void didUpdateWidget(_ShellHealthFactorTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _triggerLazyInit();
+    }
+  }
+
+  void _triggerLazyInit() {
+    if (_lazyInitTriggered) {
+      return;
+    }
+    _lazyInitTriggered = true;
+    _calculatorCubit.initialize();
+  }
+
+  @override
+  void dispose() {
+    _calculatorCubit.close();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider<HealthFactorCalculatorCubit>.value(
+      value: _calculatorCubit,
+      child: const HealthFactorPage(),
+    );
   }
 }
 
 /// Owns [PortfolioCubit] for the shell portfolio tab; stays mounted under [IndexedStack].
 class _ShellPortfolioTab extends StatefulWidget {
-  const _ShellPortfolioTab();
+  const _ShellPortfolioTab({required this.isActive});
+
+  final bool isActive;
 
   @override
   State<_ShellPortfolioTab> createState() => _ShellPortfolioTabState();
@@ -454,11 +574,40 @@ class _ShellPortfolioTab extends StatefulWidget {
 
 class _ShellPortfolioTabState extends State<_ShellPortfolioTab> {
   late final PortfolioCubit _portfolioCubit;
+  bool _deferredLoadDone = false;
 
   @override
   void initState() {
     super.initState();
-    _portfolioCubit = di<PortfolioCubit>()..load();
+    _portfolioCubit = di<PortfolioCubit>();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _maybeLoadWhenActiveAndAuthenticated();
+      }
+    });
+  }
+
+  @override
+  void didUpdateWidget(_ShellPortfolioTab oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.isActive && !oldWidget.isActive) {
+      _maybeLoadWhenActiveAndAuthenticated();
+    }
+  }
+
+  void _maybeLoadWhenActiveAndAuthenticated() {
+    _maybeLoadProtectedTab(
+      isActive: widget.isActive,
+      alreadyLoaded: _deferredLoadDone,
+      onLoad: () {
+        final authState = context.read<AuthCubit>().state;
+        if (authState is! AuthStateAuthenticated) {
+          return;
+        }
+        _deferredLoadDone = true;
+        _portfolioCubit.load();
+      },
+    );
   }
 
   @override
@@ -471,7 +620,10 @@ class _ShellPortfolioTabState extends State<_ShellPortfolioTab> {
   Widget build(BuildContext context) {
     return BlocProvider<PortfolioCubit>.value(
       value: _portfolioCubit,
-      child: const PortfolioPage(),
+      child: AuthenticatedFeatureGate(
+        onAuthenticated: _maybeLoadWhenActiveAndAuthenticated,
+        child: const PortfolioPage(),
+      ),
     );
   }
 }

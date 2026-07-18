@@ -10,6 +10,15 @@ import 'package:cryprice_frontend/features/profile/domain/usecases/update_profil
 import 'package:cryprice_frontend/features/profile/domain/usecases/update_wallet_label_usecase.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+/// l10n keys emitted in [ProfileState.lastSuccessMessage] for UI localization.
+abstract final class ProfileSuccessMessageKey {
+  static const profileUpdated = 'profileUpdatedSuccess';
+  static const publicAddressAdded = 'publicAddressAddedSuccess';
+  static const publicAddressLabelUpdated = 'publicAddressLabelUpdatedSuccess';
+  static const publicAddressRemoved = 'publicAddressRemovedSuccess';
+  static const telegramLinkCreated = 'profileTelegramLinkCreatedSuccess';
+}
+
 enum ProfileViewStatus { initial, loading, loaded, updating, error, unauthenticated }
 
 enum WalletsViewStatus { initial, loading, loaded, empty, adding, updating, deleting, error }
@@ -141,7 +150,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         state.copyWith(
           profileStatus: ProfileViewStatus.loaded,
           user: user,
-          lastSuccessMessage: 'Профиль обновлен',
+          lastSuccessMessage: ProfileSuccessMessageKey.profileUpdated,
         ),
       );
     } on Object catch (e) {
@@ -193,7 +202,7 @@ class ProfileCubit extends Cubit<ProfileState> {
         state.copyWith(
           walletsStatus: WalletsViewStatus.loaded,
           wallets: updated,
-          lastSuccessMessage: 'Кошелек добавлен',
+          lastSuccessMessage: ProfileSuccessMessageKey.publicAddressAdded,
         ),
       );
     } on Object catch (e) {
@@ -223,7 +232,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           walletsStatus: updated.isEmpty ? WalletsViewStatus.empty : WalletsViewStatus.loaded,
           wallets: updated,
           activeWalletId: null,
-          lastSuccessMessage: 'Метка кошелька обновлена',
+          lastSuccessMessage: ProfileSuccessMessageKey.publicAddressLabelUpdated,
         ),
       );
     } on Object catch (e) {
@@ -248,7 +257,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           walletsStatus: updated.isEmpty ? WalletsViewStatus.empty : WalletsViewStatus.loaded,
           wallets: updated,
           activeWalletId: null,
-          lastSuccessMessage: 'Кошелек удален',
+          lastSuccessMessage: ProfileSuccessMessageKey.publicAddressRemoved,
         ),
       );
     } on Object catch (e) {
@@ -271,7 +280,7 @@ class ProfileCubit extends Cubit<ProfileState> {
           profileStatus: ProfileViewStatus.loaded,
           telegramLink: out.telegramDeepLink,
           telegramLinkExpiresAt: out.expiresAt,
-          lastSuccessMessage: 'Ссылка для Telegram создана',
+          lastSuccessMessage: ProfileSuccessMessageKey.telegramLinkCreated,
         ),
       );
     } on Object catch (e) {

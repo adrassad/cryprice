@@ -16,6 +16,7 @@ Use this file when syncing or reviewing **what is included vs excluded** from th
 - **Token icon service** — routes, services, tests (no binary icon cache or `data/token-icons/` directory)
 - **Account link tokens** — repository and authenticated Telegram linking middleware
 - **Auth** — Google Sign-In, JWT, `/auth/link/telegram` deep-link flow (backend-generated link only; no public bot CTA in clients)
+- **Public trust surfaces** — `GET /` API identity, `GET /.well-known/security.txt`, `POST /public/contact` (Turnstile + email)
 - **Cron jobs** — protocol asset, portfolio, token icon, price, and Health Factor refresh (safe subsets)
 - **Documentation** — `docs/API_PORTFOLIO.md`, `docs/API_PORTFOLIO_FRONTEND_HANDOFF.md`, `docs/API_ALERT_RULES_FRONTEND_HANDOFF.md`
 

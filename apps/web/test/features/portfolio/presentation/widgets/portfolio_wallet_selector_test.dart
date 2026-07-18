@@ -21,7 +21,7 @@ void main() {
       ),
     );
 
-    expect(find.text('All wallets'), findsOneWidget);
+    expect(find.text('All addresses'), findsOneWidget);
     expect(find.text('Main'), findsOneWidget);
     expect(find.text('Secondary'), findsOneWidget);
   });

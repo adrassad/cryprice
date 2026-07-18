@@ -1,0 +1,14 @@
+# Serve prerendered HTML at canonical paths without trailing-slash 301 (Cloudflare Pages / Netlify).
+/about /about/index.html 200
+/privacy /privacy/index.html 200
+/security /security/index.html 200
+/trust /trust/index.html 200
+/transparency /transparency/index.html 200
+/terms /terms/index.html 200
+/faq /faq/index.html 200
+/contact /contact/index.html 200
+/cookies /cookies/index.html 200
+/docs /docs/index.html 200
+/supported-protocols /supported-protocols/index.html 200
+/changelog /changelog/index.html 200
+/status /status/index.html 200

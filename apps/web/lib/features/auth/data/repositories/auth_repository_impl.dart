@@ -77,11 +77,26 @@ class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
-  Future<void> logout() async {
+  Future<AuthUser> exchangeGoogleRedirectCode(String code) async {
+    final bundle = await _remote.postAuthGoogleExchange(code);
+    await _store.write(
+      access: bundle.accessToken,
+      refresh: bundle.refreshToken,
+      refreshExpiresAt: bundle.refreshExpiresAt,
+    );
+    return bundle.user;
+  }
+
+  @override
+  Future<void> prepareGoogleRedirectStart(String returnTo) =>
+      _remote.prepareGoogleRedirectStart(returnTo);
+
+  @override
+  Future<void> logout({String? pushToken}) async {
     final st = await _store.read();
     if (st.refresh != null && st.refresh!.isNotEmpty) {
       try {
-        await _remote.postLogout(st.refresh!);
+        await _remote.postLogout(st.refresh!, pushToken: pushToken);
       } on Object {
         // still clear local session
       }

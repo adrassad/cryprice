@@ -21,9 +21,15 @@ abstract class AuthRepository {
   /// [GET /auth/me] and [POST /auth/refresh] as per backend contract.
   Future<AuthRestoreResult> restoreSession();
 
-  /// [POST /auth/google] with Google ID token; stores tokens and returns user.
+  /// LEGACY / native mobile: [POST /auth/google] with Google ID token.
   Future<AuthUser> signInWithGoogleIdToken(String idToken);
 
+  /// [POST /auth/google/exchange] after Web OAuth redirect; stores tokens and returns user.
+  Future<AuthUser> exchangeGoogleRedirectCode(String code);
+
+  /// LEGACY GIS only: [GET /auth/google/redirect/start]. Not used by production Web login.
+  Future<void> prepareGoogleRedirectStart(String returnTo);
+
   /// [POST /auth/logout], clears local session, revokes server refresh when possible.
-  Future<void> logout();
+  Future<void> logout({String? pushToken});
 }

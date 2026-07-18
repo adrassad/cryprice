@@ -1,3 +1,6 @@
+/// Normalized backend rate-limit code (`429` / `{ error: { code: "RATE_LIMITED" } }`).
+const String kApiErrorCodeRateLimited = 'RATE_LIMITED';
+
 class ApiError implements Exception {
   const ApiError({
     required this.message,

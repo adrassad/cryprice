@@ -1,8 +1,12 @@
 import 'package:cryprice_frontend/core/widgets/token_icon.dart';
+import 'package:cryprice_frontend/core/widgets/token_icon_failure_cache.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {
+  setUp(TokenIconFailureCache.clearForTesting);
+
+  tearDown(TokenIconFailureCache.clearForTesting);
   group('tokenIconInitials', () {
     test('returns up to three uppercase letters', () {
       expect(tokenIconInitials('eth'), 'ETH');
@@ -107,14 +111,11 @@ void main() {
   group('TokenIcon', () {
     testWidgets('attempts network load for root-relative backend logo URL',
         (tester) async {
-      const path = '/static/token-icons/1/0xabc.png?v=hash1';
-      final expectedUrl = resolveTokenIconNetworkUrl(path)!;
-
       await tester.pumpWidget(
         const MaterialApp(
           home: Scaffold(
             body: TokenIcon(
-              logoUrl: path,
+              logoUrl: '/static/token-icons/1/0xabc.png?v=hash1',
               symbol: 'ETH',
               size: 36,
             ),
@@ -125,8 +126,13 @@ void main() {
       expect(find.byType(Image), findsOneWidget);
       final image = tester.widget<Image>(find.byType(Image));
       final networkImage = image.image as NetworkImage;
-      expect(networkImage.url, expectedUrl);
-      expect(image.key, ValueKey(expectedUrl));
+      expect(
+        networkImage.url,
+        'https://api.cryprice.dev/static/token-icons/1/0xabc.png?v=hash1',
+      );
+      expect(image.key, const ValueKey(
+        'https://api.cryprice.dev/static/token-icons/1/0xabc.png?v=hash1',
+      ));
     });
 
     testWidgets('shows fallback when logoUrl is null', (tester) async {
@@ -268,6 +274,89 @@ void main() {
 
       expect(find.text('ETH'), findsOneWidget);
       expect(find.byType(TokenIconFallback), findsOneWidget);
+      expect(tester.takeException(), isNull);
+    });
+
+    testWidgets('skips network load for session-failed URL', (tester) async {
+      const url = 'https://api.cryprice.dev/static/token-icons/1/eth.png?v=1';
+      TokenIconFailureCache.markFailed(url);
+
+      await tester.pumpWidget(
+        const MaterialApp(
+          home: Scaffold(
+            body: TokenIcon(
+              logoUrl: '/static/token-icons/1/eth.png?v=1',
+              symbol: 'ETH',
+              size: 36,
+            ),
+          ),
+        ),
+      );
+
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('ETH'), findsOneWidget);
+      expect(find.byType(TokenIconFallback), findsOneWidget);
+    });
+
+    testWidgets('rebuild after failure keeps fallback without second Image',
+        (tester) async {
+      const url = 'https://invalid.example.test/token-retry.png';
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TokenIcon(
+              logoUrl: url,
+              symbol: 'BTC',
+              size: 36,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+      TokenIconFailureCache.markFailed(url);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: TokenIcon(
+              logoUrl: url,
+              symbol: 'BTC',
+              size: 36,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+
+      expect(find.byType(Image), findsNothing);
+      expect(find.text('BTC'), findsOneWidget);
+    });
+
+    testWidgets('icon failure does not propagate as widget exception',
+        (tester) async {
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: Column(
+              children: [
+                TokenIcon(
+                  logoUrl: 'https://invalid.example.test/a.png',
+                  symbol: 'AAA',
+                  size: 24,
+                ),
+                const Text('portfolio-body-ok'),
+              ],
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      await tester.pump(const Duration(seconds: 1));
+
+      expect(find.text('portfolio-body-ok'), findsOneWidget);
+      expect(tester.takeException(), isNull);
     });
 
     testWidgets('renders fallback in dark theme', (tester) async {

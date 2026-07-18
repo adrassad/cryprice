@@ -26,6 +26,7 @@ class PortfolioPositionPriceCell extends StatelessWidget {
       valueUsd: priceUsd,
       priceStatus: priceStatus,
       unavailableLabel: loc.portfolioPriceUnavailable,
+      fractionDigits: 2,
     );
 
     return Column(

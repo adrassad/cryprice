@@ -118,10 +118,15 @@ PortfolioFilteredView buildFilteredPortfolioView(
     protocol,
     walletId,
   );
-  final visiblePositionsHealth = _filterPositionsHealth(
+  final scopedPositionsHealth = _filterPositionsHealth(
     portfolio.defiRisk.positionsHealth,
     protocol,
     walletId,
+  );
+  final visiblePositionsHealth = _filterPositionsHealthWithProtocolActivity(
+    scopedPositionsHealth,
+    visibleSuppliedPositions,
+    visibleBorrowedPositions,
   );
 
   final totals = _resolveScopeTotals(
@@ -202,7 +207,41 @@ List<PortfolioHolding> _filterWalletHoldings(
       filtered.add(scoped);
     }
   }
+  filtered.sort(_compareHoldingsByValueUsdDesc);
   return filtered;
+}
+
+int _compareHoldingsByValueUsdDesc(PortfolioHolding a, PortfolioHolding b) {
+  final aHasValue = _hasUsdValue(a.valueUsd);
+  final bHasValue = _hasUsdValue(b.valueUsd);
+  if (aHasValue && bHasValue) {
+    final byValue = _compareUsdValuesDesc(a.valueUsd!, b.valueUsd!);
+    if (byValue != 0) {
+      return byValue;
+    }
+  } else if (aHasValue != bHasValue) {
+    return aHasValue ? -1 : 1;
+  }
+
+  final bySymbol = a.symbol.compareTo(b.symbol);
+  if (bySymbol != 0) {
+    return bySymbol;
+  }
+  return a.assetId.compareTo(b.assetId);
+}
+
+bool _hasUsdValue(String? valueUsd) {
+  final trimmed = valueUsd?.trim();
+  return trimmed != null && trimmed.isNotEmpty;
+}
+
+int _compareUsdValuesDesc(String left, String right) {
+  final leftValue = double.tryParse(left.trim());
+  final rightValue = double.tryParse(right.trim());
+  if (leftValue != null && rightValue != null) {
+    return rightValue.compareTo(leftValue);
+  }
+  return right.trim().compareTo(left.trim());
 }
 
 List<PortfolioProtocolPosition> _filterProtocolPositions(
@@ -244,6 +283,116 @@ List<PortfolioPositionHealth> _filterPositionsHealth(
       )
       .toList(growable: false);
 }
+
+/// Keeps HF rows only when the same wallet has supplied or borrowed exposure.
+List<PortfolioPositionHealth> _filterPositionsHealthWithProtocolActivity(
+  List<PortfolioPositionHealth> positionsHealth,
+  List<PortfolioProtocolPosition> supplied,
+  List<PortfolioProtocolPosition> borrowed,
+) {
+  if (positionsHealth.isEmpty) {
+    return const <PortfolioPositionHealth>[];
+  }
+
+  final activityKeys = _protocolActivityKeys(supplied, borrowed);
+  if (activityKeys.isEmpty) {
+    return const <PortfolioPositionHealth>[];
+  }
+
+  return positionsHealth
+      .where((entry) => _healthRowHasProtocolActivity(entry, activityKeys))
+      .toList(growable: false);
+}
+
+Set<String> _protocolActivityKeys(
+  List<PortfolioProtocolPosition> supplied,
+  List<PortfolioProtocolPosition> borrowed,
+) {
+  final keys = <String>{};
+  for (final position in [...supplied, ...borrowed]) {
+    if (position.wallets.isEmpty) {
+      keys.add(_protocolNetworkActivityKey(position.protocol, position.networkId));
+      continue;
+    }
+    for (final wallet in position.wallets) {
+      final walletId = wallet.walletId.trim();
+      if (walletId.isNotEmpty) {
+        keys.add(
+          _protocolNetworkWalletIdActivityKey(
+            position.protocol,
+            position.networkId,
+            walletId,
+          ),
+        );
+      }
+      final address = wallet.walletAddress.trim().toLowerCase();
+      if (address.isNotEmpty) {
+        keys.add(
+          _protocolNetworkWalletAddressActivityKey(
+            position.protocol,
+            position.networkId,
+            address,
+          ),
+        );
+      }
+    }
+  }
+  return keys;
+}
+
+bool _healthRowHasProtocolActivity(
+  PortfolioPositionHealth health,
+  Set<String> activityKeys,
+) {
+  if (activityKeys.contains(
+    _protocolNetworkActivityKey(health.protocol, health.networkId),
+  )) {
+    return true;
+  }
+
+  final walletId = health.walletId.trim();
+  if (walletId.isNotEmpty &&
+      activityKeys.contains(
+        _protocolNetworkWalletIdActivityKey(
+          health.protocol,
+          health.networkId,
+          walletId,
+        ),
+      )) {
+    return true;
+  }
+
+  final address = health.walletAddress.trim().toLowerCase();
+  if (address.isNotEmpty &&
+      activityKeys.contains(
+        _protocolNetworkWalletAddressActivityKey(
+          health.protocol,
+          health.networkId,
+          address,
+        ),
+      )) {
+    return true;
+  }
+
+  return false;
+}
+
+String _protocolNetworkActivityKey(String protocol, int networkId) =>
+    '$protocol|$networkId|*';
+
+String _protocolNetworkWalletIdActivityKey(
+  String protocol,
+  int networkId,
+  String walletId,
+) =>
+    '$protocol|$networkId|id:$walletId';
+
+String _protocolNetworkWalletAddressActivityKey(
+  String protocol,
+  int networkId,
+  String walletAddress,
+) =>
+    '$protocol|$networkId|addr:$walletAddress';
 
 bool _showsWalletHoldings(String protocol) {
   return PortfolioFilter.isAllProtocols(protocol) ||

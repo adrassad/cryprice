@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="How CryPrice account access works on app.cryprice.dev: Google OAuth via api.cryprice.dev, official domains, and read-only dashboard scope.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://app.cryprice.dev/authentication/">
+  <title>Authentication — CryPrice</title>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <style>
+    body {
+      max-width: 52rem;
+      margin: 0 auto;
+      padding: 1.25rem;
+      font: 0.9375rem/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1e293b;
+      background: #f8fafc;
+    }
+    h1 { margin: 0 0 0.5rem; font-size: 1.5rem; }
+    h2 { margin: 1.5rem 0 0.5rem; font-size: 1.05rem; }
+    p, ul, ol, table { margin: 0 0 0.75rem; }
+    ul, ol { padding-left: 1.25rem; }
+    a { color: #4338ca; }
+    table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+    th, td { border: 1px solid #e2e8f0; padding: 0.5rem 0.65rem; text-align: left; vertical-align: top; }
+    th { background: #f1f5f9; }
+    footer { margin-top: 1.5rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.875rem; }
+    code { font-size: 0.85em; }
+  </style>
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebPage",
+    "name": "Authentication — CryPrice",
+    "url": "https://app.cryprice.dev/authentication/",
+    "description": "Technical documentation for CryPrice account access on app.cryprice.dev.",
+    "isPartOf": { "@id": "https://cryprice.dev/#organization" },
+    "about": { "@id": "https://cryprice.dev/#organization" }
+  }
+  </script>
+</head>
+<body>
+  <main>
+    <p><a href="/">← CryPrice dashboard</a></p>
+    <h1>Authentication at CryPrice</h1>
+    <p>
+      This page documents how account access works for the Flutter Web dashboard at
+      <strong>app.cryprice.dev</strong>. It describes the production Web flow implemented in the
+      CryPrice frontend and backend — not wallet connection.
+    </p>
+
+    <h2>Why account access is required</h2>
+    <p>
+      CryPrice uses authenticated sessions so users can access portfolio data, public address
+      configuration, and alert settings tied to their account. Per the project security model,
+      portfolio data and wallet configuration require authenticated sessions; the API uses bearer
+      token authentication (JWT) for protected routes.
+    </p>
+    <p>
+      Google OAuth is used solely for authentication into CryPrice and is not related to
+      blockchain wallet access. The public API identity at
+      <code>GET https://api.cryprice.dev/</code> states
+      <code>authentication.notWalletAccess: true</code>.
+    </p>
+
+    <h2>Official domains</h2>
+    <table>
+      <thead>
+        <tr><th>Domain</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><a href="https://cryprice.dev/">cryprice.dev</a></td>
+          <td>Product website and trust pages (privacy, terms, security, trust, transparency, contact), and documentation links referenced by the API.</td>
+        </tr>
+        <tr>
+          <td><a href="https://app.cryprice.dev/">app.cryprice.dev</a></td>
+          <td>Flutter Web dashboard — the authenticated product surface (this application).</td>
+        </tr>
+        <tr>
+          <td><a href="https://api.cryprice.dev/">api.cryprice.dev</a></td>
+          <td>REST API for portfolio, auth, and read-only DeFi risk data. <code>GET /</code> returns a public identity JSON payload.</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h2>Flutter Web account access (production)</h2>
+    <p>
+      On Web, the Flutter app navigates to the backend OAuth start URL built by
+      <code>buildGoogleOAuthStartUrl</code> in the frontend. Production Web login uses
+      <code>GET /auth/google/oauth/start</code> — not the legacy GIS redirect start path.
+    </p>
+    <ol>
+      <li>
+        Browser opens
+        <code>GET https://api.cryprice.dev/auth/google/oauth/start?return_to=&lt;app-url&gt;</code>.
+        The backend validates <code>return_to</code>, stores OAuth state, and redirects to Google.
+      </li>
+      <li>
+        After Google consent, the browser returns to
+        <code>GET https://api.cryprice.dev/auth/google/oauth/callback?code=...&amp;state=...</code>.
+        The backend validates the state cookie, exchanges the authorization code, verifies the
+        Google ID token, and creates a CryPrice session.
+      </li>
+      <li>
+        The backend redirects to <code>return_to</code> with a one-time query parameter
+        <code>gis_exchange=&lt;code&gt;</code>. Session tokens are not placed in the redirect URL.
+      </li>
+      <li>
+        The Flutter app calls
+        <code>POST https://api.cryprice.dev/auth/google/exchange</code> with
+        <code>{ "code": "&lt;gis_exchange&gt;" }</code> and receives
+        <code>accessToken</code>, <code>refreshToken</code>, and <code>user</code> — the same
+        payload shape as <code>POST /auth/google</code>.
+      </li>
+      <li>
+        Tokens are stored client-side via <code>flutter_secure_storage</code>. Subsequent API calls
+        use <code>Authorization: Bearer &lt;accessToken&gt;</code>.
+      </li>
+    </ol>
+    <p>
+      Native mobile builds use <code>POST /auth/google</code> with a Google ID token directly;
+      that path is separate from the Web OAuth redirect flow above.
+    </p>
+
+    <h2>API routes involved in login</h2>
+    <p>Public auth routes (no bearer token required) include:</p>
+    <ul>
+      <li><code>GET /auth/google/oauth/start</code></li>
+      <li><code>GET /auth/google/oauth/callback</code></li>
+      <li><code>POST /auth/google/exchange</code></li>
+      <li><code>POST /auth/google</code> (native / legacy ID token path)</li>
+      <li><code>POST /auth/refresh</code></li>
+    </ul>
+    <p>After sign-in, protected routes include <code>GET /auth/me</code> and <code>POST /auth/logout</code>.</p>
+
+    <h2>What you can do after sign-in</h2>
+    <p>Implemented features in the Flutter Web app include:</p>
+    <ul>
+      <li>Multi-wallet portfolio dashboard across supported networks</li>
+      <li>DeFi supplied and borrowed positions (primary implemented protocol: Aave V3)</li>
+      <li>Aave V3 Health Factor display via the portfolio API</li>
+      <li>Protocol and wallet filters; allocation charts from backend-provided series</li>
+      <li>PDF portfolio export (backend-generated)</li>
+      <li>Profile and public address management (add, edit label, remove)</li>
+      <li>Optional Telegram account linking from the profile for notifications</li>
+      <li>Price Calculator (CEX/DEX quotes from the backend)</li>
+    </ul>
+    <p>
+      Supported networks in the backend configuration include Ethereum, Arbitrum, Avalanche, and Base.
+    </p>
+
+    <h2>What CryPrice does not request</h2>
+    <p>CryPrice is designed as a read-only platform.</p>
+    <p>The platform does not require users to provide:</p>
+    <ul>
+      <li>recovery phrases (seed phrases);</li>
+      <li>private keys;</li>
+      <li>wallet signing credentials.</li>
+    </ul>
+    <p>
+      CryPrice does not execute blockchain transactions and does not take custody of user assets.
+    </p>
+    <p>
+      Authentication through Google OAuth is used only for CryPrice accounts and is unrelated to
+      blockchain wallet authentication. CryPrice does not require users to connect a wallet in
+      order to monitor public blockchain addresses.
+    </p>
+    <p>The public API identity documents these read-only security flags:</p>
+    <ul>
+      <li><code>noWalletConnection: true</code></li>
+      <li><code>noSeedPhrases: true</code></li>
+      <li><code>noPrivateKeys: true</code></li>
+      <li><code>noSignatures: true</code></li>
+      <li><code>noTransactionSigning: true</code></li>
+      <li><code>noTransactions: true</code></li>
+      <li><code>noCustody: true</code></li>
+    </ul>
+    <p>
+      Users add <strong>public addresses</strong> they want to monitor. The app does not integrate
+      WalletConnect or similar wallet provider packages; authentication uses Google Sign-In via the
+      backend, and addresses are entered as public EVM addresses (expected length 42 symbols,
+      starting with <code>0x</code>).
+    </p>
+
+    <h2>Trust &amp; transparency</h2>
+    <p>
+      Project trust documentation lives on the marketing site (not inside the Flutter app):
+    </p>
+    <ul>
+      <li><a href="https://cryprice.dev/trust/">Trust hub</a> — read-only architecture, disclosure, contacts</li>
+      <li><a href="https://cryprice.dev/transparency/">Transparency</a> — project stage, founder, funding context</li>
+      <li><a href="https://cryprice.dev/security/">Security model</a></li>
+      <li>
+        <a href="https://cryprice.dev/.well-known/security.txt">security.txt</a> —
+        <a href="mailto:security@cryprice.dev">security@cryprice.dev</a>
+      </li>
+    </ul>
+
+    <h2>Why there is no WalletConnect</h2>
+    <p>
+      CryPrice is a read-only monitoring dashboard, not a wallet. The Flutter app authenticates
+      with Google through the backend API and lets users add public blockchain addresses manually.
+      There is no WalletConnect or web3 wallet dependency in the frontend package configuration.
+    </p>
+
+    <footer>
+      <p>
+        <a href="https://cryprice.dev/privacy/">Privacy</a> ·
+        <a href="https://cryprice.dev/terms/">Terms</a> ·
+        <a href="https://cryprice.dev/security/">Security</a> ·
+        <a href="https://cryprice.dev/trust/">Trust</a> ·
+        <a href="https://cryprice.dev/transparency/">Transparency</a> ·
+        <a href="https://cryprice.dev/contact/">Contact</a> ·
+        <a href="https://cryprice.dev/faq/">FAQ</a> ·
+        <a href="/">Dashboard</a>
+      </p>
+    </footer>
+  </main>
+</body>
+</html>

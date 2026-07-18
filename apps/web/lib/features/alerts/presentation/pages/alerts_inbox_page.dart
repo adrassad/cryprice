@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_type.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
@@ -5,13 +7,73 @@ import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbo
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_state.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/widgets/alerts_inbox_alert_tile.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/widgets/health_factor_alert_card.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/widgets/risk_news_alert_card.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 /// Alerts inbox feed for the shell tab.
-class AlertsInboxPage extends StatelessWidget {
+class AlertsInboxPage extends StatefulWidget {
   const AlertsInboxPage({super.key});
+
+  @override
+  State<AlertsInboxPage> createState() => _AlertsInboxPageState();
+}
+
+class _AlertsInboxPageState extends State<AlertsInboxPage> {
+  final Map<String, GlobalKey> _tileKeys = <String, GlobalKey>{};
+  Timer? _highlightClearTimer;
+
+  @override
+  void dispose() {
+    _highlightClearTimer?.cancel();
+    super.dispose();
+  }
+
+  GlobalKey _keyForAlert(String alertId) {
+    return _tileKeys.putIfAbsent(alertId, GlobalKey.new);
+  }
+
+  void _scheduleHighlightClear() {
+    _highlightClearTimer?.cancel();
+    _highlightClearTimer = Timer(const Duration(seconds: 3), () {
+      if (!mounted) {
+        return;
+      }
+      context.read<AlertsInboxCubit>().clearHighlightedAlert();
+    });
+  }
+
+  void _tryScrollToPendingAlert(AlertsInboxState state) {
+    final alertId = state.pendingFocusAlertId?.trim();
+    if (alertId == null || alertId.isEmpty) {
+      return;
+    }
+    if (!state.alerts.any((alert) => alert.id == alertId)) {
+      return;
+    }
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+
+      final targetContext = _keyForAlert(alertId).currentContext;
+      if (targetContext == null) {
+        return;
+      }
+
+      Scrollable.ensureVisible(
+        targetContext,
+        alignment: 0.25,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      );
+
+      context.read<AlertsInboxCubit>().markFocusScrollCompleted(alertId);
+      _scheduleHighlightClear();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -29,12 +91,42 @@ class AlertsInboxPage extends StatelessWidget {
             context.read<AlertsInboxCubit>().clearMarkReadError();
           },
         ),
+        BlocListener<AlertsInboxCubit, AlertsInboxState>(
+          listenWhen: (AlertsInboxState previous, AlertsInboxState current) =>
+              previous.markAllReadErrorCode != current.markAllReadErrorCode &&
+              current.markAllReadErrorCode != null,
+          listener: (BuildContext context, AlertsInboxState state) {
+            final loc = AppLocalizations.of(context)!;
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(loc.alertsMarkAllReadFailed)),
+            );
+            context.read<AlertsInboxCubit>().clearMarkAllReadError();
+          },
+        ),
+        BlocListener<AlertsInboxCubit, AlertsInboxState>(
+          listenWhen: (AlertsInboxState previous, AlertsInboxState current) {
+            final pendingId = current.pendingFocusAlertId;
+            if (pendingId == null || pendingId.isEmpty) {
+              return false;
+            }
+            return previous.pendingFocusAlertId != current.pendingFocusAlertId ||
+                previous.alerts != current.alerts ||
+                previous.status != current.status;
+          },
+          listener: (BuildContext context, AlertsInboxState state) {
+            _tryScrollToPendingAlert(state);
+          },
+        ),
       ],
       child: BlocBuilder<AlertsInboxCubit, AlertsInboxState>(
         builder: (BuildContext context, AlertsInboxState state) {
           final loc = AppLocalizations.of(context)!;
 
-          if (state.isLoading || state.isInitial) {
+          if (state.isInitial) {
+            return const SizedBox.shrink();
+          }
+
+          if (state.isLoading) {
             return Center(
               key: const Key('alerts_inbox_loading'),
               child: Column(
@@ -96,6 +188,13 @@ class AlertsInboxPage extends StatelessWidget {
                   message: _inlineErrorMessage(loc, state),
                   onRetry: () => context.read<AlertsInboxCubit>().refresh(),
                 ),
+              if (_shouldShowMarkAllReadButton(state))
+                _MarkAllReadButton(
+                  isMarkingAllRead: state.isMarkingAllRead,
+                  onPressed: state.isMarkingAllRead
+                      ? null
+                      : () => context.read<AlertsInboxCubit>().markAllAsRead(),
+                ),
               Expanded(
                 child: RefreshIndicator(
                   key: const Key('alerts_inbox_refresh'),
@@ -107,7 +206,13 @@ class AlertsInboxPage extends StatelessWidget {
                     itemCount: state.alerts.length,
                     separatorBuilder: (_, __) => const SizedBox(height: 8),
                     itemBuilder: (BuildContext context, int index) {
-                      return _buildAlertItem(context, loc, state.alerts[index]);
+                      return _buildAlertItem(
+                        context,
+                        loc,
+                        state.alerts[index],
+                        isHighlighted: state.highlightedAlertId == state.alerts[index].id,
+                        tileKey: _keyForAlert(state.alerts[index].id),
+                      );
                     },
                   ),
                 ),
@@ -119,24 +224,41 @@ class AlertsInboxPage extends StatelessWidget {
     );
   }
 
-  Widget _buildAlertItem(BuildContext context, AppLocalizations loc, InboxAlert alert) {
+  Widget _buildAlertItem(
+    BuildContext context,
+    AppLocalizations loc,
+    InboxAlert alert, {
+    required bool isHighlighted,
+    required GlobalKey tileKey,
+  }) {
     final itemKey = Key('alerts_inbox_item_${alert.id}');
+    final theme = Theme.of(context);
+    final highlightDecoration = isHighlighted
+        ? BoxDecoration(
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: theme.colorScheme.primary,
+              width: 2,
+            ),
+            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.35),
+          )
+        : null;
 
-    if ((alert.type == InboxAlertType.healthFactorBreach ||
+    Widget tileChild;
+    if (alert.type == InboxAlertType.riskNews && alert.riskNewsPayload != null) {
+      tileChild = RiskNewsAlertCard(
+        key: itemKey,
+        alert: alert,
+      );
+    } else if ((alert.type == InboxAlertType.healthFactorBreach ||
             alert.type == InboxAlertType.healthFactorRecovery) &&
         alert.healthFactorPayload != null) {
-      return AlertsInboxAlertTile(
+      tileChild = HealthFactorAlertCard(
+        key: itemKey,
         alert: alert,
-        child: HealthFactorAlertCard(
-          key: itemKey,
-          alert: alert,
-        ),
       );
-    }
-
-    return AlertsInboxAlertTile(
-      alert: alert,
-      child: Card(
+    } else {
+      tileChild = Card(
         key: itemKey,
         child: ListTile(
           title: Text(alert.title),
@@ -146,9 +268,9 @@ class AlertsInboxPage extends StatelessWidget {
               if (alert.message.trim().isNotEmpty) Text(alert.message),
               Text(
                 loc.alertsUnsupportedType,
-                style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Theme.of(context).colorScheme.onSurfaceVariant,
-                    ),
+                style: theme.textTheme.labelSmall?.copyWith(
+                  color: theme.colorScheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),
@@ -157,9 +279,21 @@ class AlertsInboxPage extends StatelessWidget {
               : Icon(
                   Icons.circle,
                   size: 10,
-                  color: Theme.of(context).colorScheme.error,
+                  color: theme.colorScheme.error,
                 ),
         ),
+      );
+    }
+
+    return AnimatedContainer(
+      key: tileKey,
+      duration: const Duration(milliseconds: 250),
+      curve: Curves.easeInOut,
+      decoration: highlightDecoration,
+      padding: isHighlighted ? const EdgeInsets.all(2) : EdgeInsets.zero,
+      child: AlertsInboxAlertTile(
+        alert: alert,
+        child: tileChild,
       ),
     );
   }
@@ -184,6 +318,67 @@ class AlertsInboxPage extends StatelessWidget {
           ? errorMessage!.trim()
           : loc.alertsError,
     };
+  }
+
+  static bool _shouldShowMarkAllReadButton(AlertsInboxState state) {
+    if (state.unreadCount <= 0 || state.alerts.isEmpty) {
+      return false;
+    }
+    if (state.isInitial || state.isLoading) {
+      return false;
+    }
+    if (state.isFailure) {
+      return false;
+    }
+    return state.status == AlertsInboxStatus.loaded ||
+        state.status == AlertsInboxStatus.refreshing;
+  }
+}
+
+class _MarkAllReadButton extends StatelessWidget {
+  const _MarkAllReadButton({
+    required this.isMarkingAllRead,
+    required this.onPressed,
+  });
+
+  final bool isMarkingAllRead;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final label = isMarkingAllRead ? loc.alertsMarkingAllRead : loc.alertsMarkAllRead;
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(12, 8, 12, 0),
+      child: Align(
+        alignment: Alignment.centerRight,
+        child: Tooltip(
+          message: loc.alertsMarkAllReadTooltip,
+          child: Semantics(
+            button: true,
+            enabled: onPressed != null,
+            label: loc.alertsMarkAllReadTooltip,
+            child: TextButton.icon(
+              key: const Key('alerts_inbox_mark_all_read'),
+              onPressed: onPressed,
+              icon: isMarkingAllRead
+                  ? SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: theme.colorScheme.primary,
+                      ),
+                    )
+                  : const Icon(Icons.done_all_outlined, size: 20),
+              label: Text(label),
+            ),
+          ),
+        ),
+      ),
+    );
   }
 }
 

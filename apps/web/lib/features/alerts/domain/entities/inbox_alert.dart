@@ -1,6 +1,7 @@
 import 'package:cryprice_frontend/features/alerts/domain/entities/health_factor_alert_payload.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_payload.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_type.dart';
+import 'package:cryprice_frontend/features/alerts/domain/entities/risk_news_payload.dart';
 
 class InboxAlert {
   const InboxAlert({
@@ -29,6 +30,14 @@ class InboxAlert {
   }
 
   bool get hasSupportedType => InboxAlertType.isSupported(type);
+
+  RiskNewsPayload? get riskNewsPayload {
+    final payload = this.payload;
+    if (payload is InboxAlertRiskNewsPayload) {
+      return payload.data;
+    }
+    return null;
+  }
 
   HealthFactorAlertPayload? get healthFactorPayload {
     final payload = this.payload;

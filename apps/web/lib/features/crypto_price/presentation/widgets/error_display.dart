@@ -17,6 +17,9 @@ class ErrorDisplay extends StatelessWidget {
       case 'error_fetch_failed':
         errorMessage = loc.error_fetch_failed;
         break;
+      case 'error_rate_limited':
+        errorMessage = loc.error_rate_limited;
+        break;
       default:
         errorMessage = loc.error_unknown;
     }

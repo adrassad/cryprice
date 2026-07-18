@@ -23,7 +23,7 @@ void main() {
 
     expect(find.text('Protocols'), findsOneWidget);
     expect(find.text('All protocols'), findsOneWidget);
-    expect(find.text('Wallet'), findsWidgets);
+    expect(find.text('Address'), findsWidgets);
     expect(find.text('Aave V3'), findsWidgets);
   });
 }

@@ -160,6 +160,23 @@ void main() {
       expect(movement.trendIcon, '📉');
     });
 
+    test('includes network and protocol context in movement line', () {
+      final movement = getHealthFactorMovement(
+        previousRaw: '1.63',
+        currentRaw: '1.62',
+        loc: loc,
+      );
+
+      expect(
+        formatHealthFactorMovementLine(
+          movement,
+          networkId: 'avalanche',
+          protocol: 'benqi',
+        ),
+        'Avalanche · BENQI: 💛 1.63 → 💛 1.62',
+      );
+    });
+
     test('detects unchanged movement', () {
       final movement = getHealthFactorMovement(
         previousRaw: '1.52',

@@ -7,6 +7,10 @@ import 'package:cryprice_frontend/features/portfolio/presentation/widgets/portfo
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 
+/// Wallet holdings block for the portfolio tab.
+///
+/// For lazy icon loading inside the portfolio [CustomScrollView], use
+/// [buildScrollSlivers] instead of embedding this widget in a [Column].
 class PortfolioWalletHoldingsSection extends StatelessWidget {
   const PortfolioWalletHoldingsSection({
     super.key,
@@ -19,101 +23,132 @@ class PortfolioWalletHoldingsSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context)!;
-    final theme = Theme.of(context);
-
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              loc.portfolioWalletHoldings,
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w800,
-              ),
-            ),
+            PortfolioWalletHoldingsTitle(useTableLayout: useTableLayout),
             const SizedBox(height: 14),
             if (useTableLayout)
-              _WalletHoldingsTable(
-                holdings: holdings,
-                loc: loc,
-                theme: theme,
-              )
+              _WalletHoldingsTableBody(holdings: holdings)
             else
-              Column(
-                children: _holdingRows(
-                  holdings: holdings,
-                  compact: true,
-                ),
-              ),
+              _WalletHoldingsMobileBody(holdings: holdings),
           ],
         ),
       ),
     );
   }
 
-  List<Widget> _holdingRows({
+  /// Lazily built slivers for [CustomScrollView] (only visible rows mount).
+  static List<Widget> buildScrollSlivers({
+    required BuildContext context,
     required List<PortfolioHolding> holdings,
-    required bool compact,
+    required bool useTableLayout,
   }) {
-    final widgets = <Widget>[];
-    for (var i = 0; i < holdings.length; i++) {
-      if (i > 0) {
-        widgets.add(const SizedBox(height: 10));
-      }
-      widgets.add(
-        PortfolioWalletHoldingRow(
-          holding: holdings[i],
-          compact: compact,
-        ),
-      );
+    if (holdings.isEmpty) {
+      return const <Widget>[];
     }
-    return widgets;
+
+    final theme = Theme.of(context);
+    final cardColor = theme.cardColor;
+
+    return <Widget>[
+      SliverToBoxAdapter(
+        child: Card(
+          margin: EdgeInsets.zero,
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                PortfolioWalletHoldingsTitle(useTableLayout: useTableLayout),
+                const SizedBox(height: 14),
+                if (useTableLayout) const _WalletHoldingsTableHeader(),
+              ],
+            ),
+          ),
+        ),
+      ),
+      SliverList.builder(
+        itemCount: holdings.length,
+        itemBuilder: (BuildContext context, int index) {
+          return Material(
+            color: cardColor,
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                if (useTableLayout && index > 0)
+                  const Divider(height: 1, indent: 16, endIndent: 16),
+                PortfolioWalletHoldingRow(
+                  holding: holdings[index],
+                  compact: !useTableLayout,
+                ),
+                if (index == holdings.length - 1)
+                  const SizedBox(height: 16),
+              ],
+            ),
+          );
+        },
+      ),
+    ];
   }
 }
 
-class _WalletHoldingsTable extends StatelessWidget {
-  const _WalletHoldingsTable({
-    required this.holdings,
-    required this.loc,
-    required this.theme,
+class PortfolioWalletHoldingsTitle extends StatelessWidget {
+  const PortfolioWalletHoldingsTitle({
+    super.key,
+    required this.useTableLayout,
   });
 
-  final List<PortfolioHolding> holdings;
-  final AppLocalizations loc;
-  final ThemeData theme;
+  final bool useTableLayout;
 
   @override
   Widget build(BuildContext context) {
-    final headerStyle = theme.textTheme.labelMedium?.copyWith(
-      color: theme.colorScheme.onSurfaceVariant,
-      fontWeight: FontWeight.w700,
+    final loc = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    return Text(
+      loc.portfolioWalletHoldings,
+      style: theme.textTheme.titleLarge?.copyWith(
+        fontWeight: FontWeight.w800,
+      ),
     );
+  }
+}
 
+class _WalletHoldingsMobileBody extends StatelessWidget {
+  const _WalletHoldingsMobileBody({required this.holdings});
+
+  final List<PortfolioHolding> holdings;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: holdings.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 10),
+      itemBuilder: (context, index) {
+        return PortfolioWalletHoldingRow(
+          holding: holdings[index],
+          compact: true,
+        );
+      },
+    );
+  }
+}
+
+class _WalletHoldingsTableBody extends StatelessWidget {
+  const _WalletHoldingsTableBody({required this.holdings});
+
+  final List<PortfolioHolding> holdings;
+
+  @override
+  Widget build(BuildContext context) {
     return Column(
       children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-          child: Row(
-            children: [
-              Expanded(flex: 3, child: Text(loc.portfolioAssets, style: headerStyle)),
-              Expanded(
-                flex: 2,
-                child: Text(loc.portfolioTokenBalance, style: headerStyle),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(loc.portfolioCurrentPrice, style: headerStyle),
-              ),
-              Expanded(
-                flex: 2,
-                child: Text(loc.portfolioUsdValue, style: headerStyle),
-              ),
-            ],
-          ),
-        ),
+        const _WalletHoldingsTableHeader(),
         const Divider(height: 1),
         for (var i = 0; i < holdings.length; i++) ...[
           if (i > 0) const Divider(height: 1),
@@ -123,6 +158,41 @@ class _WalletHoldingsTable extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+class _WalletHoldingsTableHeader extends StatelessWidget {
+  const _WalletHoldingsTableHeader();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final headerStyle = theme.textTheme.labelMedium?.copyWith(
+      color: theme.colorScheme.onSurfaceVariant,
+      fontWeight: FontWeight.w700,
+    );
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      child: Row(
+        children: [
+          Expanded(flex: 3, child: Text(loc.portfolioAssets, style: headerStyle)),
+          Expanded(
+            flex: 2,
+            child: Text(loc.portfolioTokenBalance, style: headerStyle),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(loc.portfolioCurrentPrice, style: headerStyle),
+          ),
+          Expanded(
+            flex: 2,
+            child: Text(loc.portfolioUsdValue, style: headerStyle),
+          ),
+        ],
+      ),
     );
   }
 }

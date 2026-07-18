@@ -2,22 +2,83 @@ import 'package:cryprice_frontend/features/portfolio/domain/entities/portfolio_p
 
 // Display-only formatters: backend financial strings are never parsed as double.
 
-String formatPortfolioUsd(String? value, {required String unavailableLabel}) {
+String formatPortfolioUsd(
+  String? value, {
+  required String unavailableLabel,
+  int? fractionDigits,
+}) {
   if (value == null || value.trim().isEmpty) {
     return unavailableLabel;
   }
-  return '\$${value.trim()}';
+  final trimmed = value.trim();
+  final display = fractionDigits == null
+      ? trimmed
+      : roundFinancialDisplayToDecimalPlaces(trimmed, fractionDigits) ??
+            trimmed;
+  return '\$$display';
 }
 
 String formatPortfolioUsdForPriceStatus({
   required String? valueUsd,
   required PortfolioPriceStatus priceStatus,
   required String unavailableLabel,
+  int? fractionDigits,
 }) {
   if (priceStatus == PortfolioPriceStatus.missing) {
     return unavailableLabel;
   }
-  return formatPortfolioUsd(valueUsd, unavailableLabel: unavailableLabel);
+  return formatPortfolioUsd(
+    valueUsd,
+    unavailableLabel: unavailableLabel,
+    fractionDigits: fractionDigits,
+  );
+}
+
+/// Rounds a backend financial string to [fractionDigits] (half-up) without [double].
+String? roundFinancialDisplayToDecimalPlaces(
+  String? value,
+  int fractionDigits,
+) {
+  if (fractionDigits < 0) {
+    throw ArgumentError.value(fractionDigits, 'fractionDigits');
+  }
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) {
+    return null;
+  }
+
+  var negative = false;
+  var unsigned = trimmed;
+  if (unsigned.startsWith('-')) {
+    negative = true;
+    unsigned = unsigned.substring(1);
+  }
+  if (unsigned.isEmpty) {
+    return null;
+  }
+
+  final parts = unsigned.split('.');
+  final intPart = parts[0].isEmpty ? '0' : parts[0];
+  final fracPart = parts.length > 1 ? parts[1] : '';
+
+  final padded = fracPart.padRight(fractionDigits + 1, '0');
+  final keep = padded.substring(0, fractionDigits);
+  final roundDigit = padded[fractionDigits];
+
+  var fracBig = BigInt.parse(keep.isEmpty ? '0' : keep);
+  if (roundDigit.codeUnitAt(0) >= 0x35) {
+    fracBig += BigInt.one;
+  }
+  final scale = BigInt.from(10).pow(fractionDigits);
+  var intBig = BigInt.parse(intPart);
+  if (fracBig >= scale) {
+    fracBig -= scale;
+    intBig += BigInt.one;
+  }
+
+  final fracStr = fracBig.toString().padLeft(fractionDigits, '0');
+  final result = '$intBig.$fracStr';
+  return negative ? '-$result' : result;
 }
 
 /// USD value for a holding/position row; independent of [priceStatus].

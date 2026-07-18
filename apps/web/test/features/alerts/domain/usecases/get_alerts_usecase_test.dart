@@ -20,7 +20,7 @@ void main() {
     final alerts = <InboxAlert>[
       const InboxAlert(
         id: 'alert-1',
-        type: InboxAlertType.healthFactorBreach,
+        type: InboxAlertType.riskNews,
         severity: 'high',
         title: 'Risk',
         message: 'Body',

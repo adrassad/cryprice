@@ -55,6 +55,20 @@ class AlertsInboxRemoteDataSource {
     }
   }
 
+  Future<int> markAllAsRead() async {
+    try {
+      final response = await _sessionService.authorized(
+        (token) => _dio.patch<dynamic>(
+          '/alerts/read-all',
+          options: Options(headers: <String, Object?>{'Authorization': 'Bearer $token'}),
+        ),
+      );
+      return _parseUpdatedCount(response.data);
+    } on Object catch (e) {
+      throw parseApiError(e);
+    }
+  }
+
   List<InboxAlert> _parseAlertsList(Object? data) {
     if (data is Map<String, Object?>) {
       return AlertsListResponse.fromJson(data).alerts;
@@ -86,5 +100,26 @@ class AlertsInboxRemoteDataSource {
       return InboxAlertModel.fromJson(map).toEntity();
     }
     return InboxAlertModel.fromJson(const <String, Object?>{}).toEntity();
+  }
+
+  static int _parseUpdatedCount(Object? data) {
+    if (data is! Map) {
+      return 0;
+    }
+    final map = data.cast<String, Object?>();
+    final raw = map['updated_count'] ?? map['updatedCount'];
+    if (raw is int && raw >= 0) {
+      return raw;
+    }
+    if (raw is num && raw >= 0) {
+      return raw.toInt();
+    }
+    if (raw != null) {
+      final parsed = int.tryParse(raw.toString());
+      if (parsed != null && parsed >= 0) {
+        return parsed;
+      }
+    }
+    return 0;
   }
 }

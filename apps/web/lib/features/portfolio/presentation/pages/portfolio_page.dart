@@ -105,7 +105,7 @@ class PortfolioPage extends StatelessWidget {
                 ),
                 const SizedBox(height: 12),
                 switch (state.status) {
-                  PortfolioStatus.initial ||
+                  PortfolioStatus.initial => const SizedBox.shrink(),
                   PortfolioStatus.loading => const CircularProgressIndicator(),
                   PortfolioStatus.empty => _PortfolioEmptyState(
                       onRefresh: () => context.read<PortfolioCubit>().refresh(),
@@ -195,98 +195,163 @@ class _PortfolioLoadedView extends StatelessWidget {
 
     return RefreshIndicator(
       onRefresh: () => context.read<PortfolioCubit>().refresh(),
-      child: ListView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(16),
-        children: [
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final useCompactExport = constraints.maxWidth < 480;
-              return Wrap(
-                alignment: WrapAlignment.end,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                spacing: 8,
-                runSpacing: 8,
-                children: [
-                  PortfolioExportPdfButton(
-                    isExporting: isExportingPdf,
-                    compact: useCompactExport,
-                  ),
-                ],
-              );
-            },
-          ),
-          const SizedBox(height: 12),
-          PortfolioAllocationSection(
-            portfolio: portfolio,
-            selectedWalletId: selectedWalletId,
-            selectedProtocol: selectedProtocol,
-          ),
-          if (portfolio.hasAllocation) const SizedBox(height: 12),
-          LayoutBuilder(
-            builder: (context, constraints) {
-              final width = constraints.maxWidth;
-              final useCompactFilters = width < 600;
-              final useTableLayout = width >= 600;
-              final useStackedGroupHeader = width < 520;
+      child: LayoutBuilder(
+        builder: (context, constraints) {
+          final width = constraints.maxWidth;
+          final useCompactFilters = width < 600;
+          final useTableLayout = width >= 600;
+          final useStackedGroupHeader = width < 520;
 
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  PortfolioProtocolSummaryStrip(
-                    portfolio: portfolio,
-                    selectedProtocol: selectedProtocol,
-                    useCompactFilters: useCompactFilters,
+          return CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverPadding(
+                padding: const EdgeInsets.all(16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    <Widget>[
+                      LayoutBuilder(
+                        builder: (context, exportConstraints) {
+                          final useCompactExport =
+                              exportConstraints.maxWidth < 480;
+                          return Wrap(
+                            alignment: WrapAlignment.end,
+                            crossAxisAlignment: WrapCrossAlignment.center,
+                            spacing: 8,
+                            runSpacing: 8,
+                            children: [
+                              PortfolioExportPdfButton(
+                                isExporting: isExportingPdf,
+                                compact: useCompactExport,
+                              ),
+                            ],
+                          );
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      PortfolioAllocationSection(
+                        portfolio: portfolio,
+                        selectedWalletId: selectedWalletId,
+                        selectedProtocol: selectedProtocol,
+                      ),
+                      if (portfolio.hasAllocation) const SizedBox(height: 12),
+                      PortfolioProtocolSummaryStrip(
+                        portfolio: portfolio,
+                        selectedProtocol: selectedProtocol,
+                        useCompactFilters: useCompactFilters,
+                      ),
+                      const SizedBox(height: 12),
+                      PortfolioWalletSelector(
+                        portfolio: portfolio,
+                        selectedWalletId: selectedWalletId,
+                        useCompactFilters: useCompactFilters,
+                      ),
+                      const SizedBox(height: 12),
+                      PortfolioSummaryCard(
+                        summary: portfolio.summary,
+                        filteredView: filteredView,
+                        selectedProtocol: selectedProtocol,
+                        selectedWalletId: selectedWalletId,
+                        isRefreshing: isRefreshing,
+                      ),
+                      const SizedBox(height: 12),
+                    ],
                   ),
-                  const SizedBox(height: 12),
-                  PortfolioWalletSelector(
-                    portfolio: portfolio,
-                    selectedWalletId: selectedWalletId,
-                    useCompactFilters: useCompactFilters,
+                ),
+              ),
+              ..._walletHoldingsScrollSlivers(
+                context,
+                portfolio,
+                filteredView,
+                selectedWalletId,
+                selectedProtocol,
+                useTableLayout: useTableLayout,
+              ),
+              SliverPadding(
+                padding: const EdgeInsets.fromLTRB(16, 12, 16, 16),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate(
+                    _portfolioTailSections(
+                      portfolio,
+                      filteredView,
+                      selectedProtocol: selectedProtocol,
+                      selectedWalletId: selectedWalletId,
+                      useTableLayout: useTableLayout,
+                      useStackedGroupHeader: useStackedGroupHeader,
+                    ),
                   ),
-                  const SizedBox(height: 12),
-                  PortfolioSummaryCard(
-                    summary: portfolio.summary,
-                    filteredView: filteredView,
-                    selectedProtocol: selectedProtocol,
-                    selectedWalletId: selectedWalletId,
-                    isRefreshing: isRefreshing,
-                  ),
-                  const SizedBox(height: 12),
-                  ..._portfolioBodySections(
-                    portfolio,
-                    filteredView,
-                    useTableLayout: useTableLayout,
-                    useStackedGroupHeader: useStackedGroupHeader,
-                  ),
-                ],
-              );
-            },
-          ),
-        ],
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
-  List<Widget> _portfolioBodySections(
+  List<Widget> _walletHoldingsScrollSlivers(
+    BuildContext context,
+    Portfolio portfolio,
+    PortfolioFilteredView filteredView,
+    String selectedWalletId,
+    String selectedProtocol, {
+    required bool useTableLayout,
+  }) {
+    if (filteredView.hasVisibleWalletHoldings) {
+      return <Widget>[
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverMainAxisGroup(
+            slivers: PortfolioWalletHoldingsSection.buildScrollSlivers(
+              context: context,
+              holdings: filteredView.visibleWalletHoldings,
+              useTableLayout: useTableLayout,
+            ),
+          ),
+        ),
+      ];
+    }
+
+    if (portfolio.hasLegacyNetworkAssets &&
+        PortfolioFilter.isAllProtocols(selectedProtocol) &&
+        PortfolioFilter.isAllWallets(selectedWalletId)) {
+      return <Widget>[
+        SliverPadding(
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          sliver: SliverList(
+            delegate: SliverChildBuilderDelegate(
+              (BuildContext context, int index) {
+                return Padding(
+                  padding: EdgeInsets.only(top: index > 0 ? 12 : 0),
+                  child: PortfolioNetworkCard(network: portfolio.networks[index]),
+                );
+              },
+              childCount: portfolio.networks.length,
+            ),
+          ),
+        ),
+      ];
+    }
+
+    return <Widget>[
+      const SliverPadding(
+        padding: EdgeInsets.symmetric(horizontal: 16),
+        sliver: SliverToBoxAdapter(child: _NoWalletHoldingsCard()),
+      ),
+    ];
+  }
+
+  List<Widget> _portfolioTailSections(
     Portfolio portfolio,
     PortfolioFilteredView filteredView, {
+    required String selectedProtocol,
+    required String selectedWalletId,
     required bool useTableLayout,
     required bool useStackedGroupHeader,
   }) {
-    final sections = <Widget>[
-      ..._walletHoldingsOrLegacyNetworkCards(
-        portfolio,
-        filteredView,
-        selectedWalletId,
-        useTableLayout: useTableLayout,
-      ),
-    ];
+    final sections = <Widget>[];
 
     if (filteredView.hasVisibleDefiPositions) {
-      if (sections.isNotEmpty) {
-        sections.add(const SizedBox(height: 12));
-      }
       sections.add(
         PortfolioDefiPositionsSection(
           supplied: portfolio.protocolPositions.supplied,
@@ -301,9 +366,6 @@ class _PortfolioLoadedView extends StatelessWidget {
       );
     } else if (!PortfolioFilter.isWalletProtocol(selectedProtocol) &&
         !filteredView.hasVisibleDefiPositions) {
-      if (sections.isNotEmpty) {
-        sections.add(const SizedBox(height: 12));
-      }
       sections.add(const _NoDefiPositionsCard());
     }
 
@@ -333,43 +395,6 @@ class _PortfolioLoadedView extends StatelessWidget {
     }
 
     return const <Widget>[];
-  }
-
-  List<Widget> _walletHoldingsOrLegacyNetworkCards(
-    Portfolio portfolio,
-    PortfolioFilteredView filteredView,
-    String selectedWalletId, {
-    required bool useTableLayout,
-  }) {
-    if (filteredView.hasVisibleWalletHoldings) {
-      return [
-        PortfolioWalletHoldingsSection(
-          holdings: filteredView.visibleWalletHoldings,
-          useTableLayout: useTableLayout,
-        ),
-      ];
-    }
-
-    if (portfolio.hasLegacyNetworkAssets &&
-        PortfolioFilter.isAllProtocols(selectedProtocol) &&
-        PortfolioFilter.isAllWallets(selectedWalletId)) {
-      return _networkCards(portfolio.networks);
-    }
-
-    return [
-      const _NoWalletHoldingsCard(),
-    ];
-  }
-
-  List<Widget> _networkCards(List<PortfolioNetwork> networks) {
-    final widgets = <Widget>[];
-    for (var i = 0; i < networks.length; i++) {
-      if (i > 0) {
-        widgets.add(const SizedBox(height: 12));
-      }
-      widgets.add(PortfolioNetworkCard(network: networks[i]));
-    }
-    return widgets;
   }
 }
 

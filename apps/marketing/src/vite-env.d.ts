@@ -11,6 +11,8 @@ interface ImportMetaEnv {
   readonly VITE_PUBLIC_GITHUB_PROFILE_URL?: string
   readonly VITE_PUBLIC_LINKEDIN_URL?: string
   readonly VITE_PUBLIC_X_PROFILE_URL?: string
+  /** Cloudflare Turnstile site key (public). Required for the contact form. */
+  readonly VITE_TURNSTILE_SITE_KEY?: string
 }
 
 interface ImportMeta {

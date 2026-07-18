@@ -178,7 +178,7 @@ void main() {
       ),
     );
 
-    expect(find.textContaining('Wallet:'), findsNothing);
+    expect(find.textContaining('Address:'), findsNothing);
     expect(find.textContaining('💼'), findsNothing);
     expect(find.textContaining('🌐'), findsNothing);
     expect(find.textContaining('Liquidation'), findsWidgets);

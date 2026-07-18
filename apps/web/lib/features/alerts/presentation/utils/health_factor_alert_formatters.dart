@@ -98,6 +98,7 @@ const Map<String, String> _protocolLabels = <String, String>{
   'aave': 'Aave V3',
   'aave-v3': 'Aave V3',
   'aave_v3': 'Aave V3',
+  'benqi': 'BENQI',
   'compound': 'Compound V3',
   'compound-v3': 'Compound V3',
   'compound_v3': 'Compound V3',
@@ -364,11 +365,19 @@ String healthFactorMovementLabel(
   };
 }
 
-String formatHealthFactorMovementLine(HealthFactorMovement movement) {
-  if (!movement.showArrowLine) {
-    return movement.currentDisplay;
+String formatHealthFactorMovementLine(
+  HealthFactorMovement movement, {
+  String? networkId,
+  String? protocol,
+}) {
+  final valueLine = !movement.showArrowLine
+      ? movement.currentDisplay
+      : '${movement.previousDisplay} → ${movement.currentDisplay}';
+  final context = formatNetworkProtocolLine(networkId, protocol);
+  if (context != null && movement.showArrowLine) {
+    return '$context: $valueLine';
   }
-  return '${movement.previousDisplay} → ${movement.currentDisplay}';
+  return valueLine;
 }
 
 HealthFactorSeverityVisualStyle getSeverityVisualStyle(

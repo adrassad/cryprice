@@ -104,12 +104,18 @@ TELEGRAM_LINKS="$(git grep -n -F "t.me/" \
 if [[ -n "$TELEGRAM_LINKS" ]]; then
   echo "$TELEGRAM_LINKS"
 
-  DISALLOWED_TELEGRAM="$(echo "$TELEGRAM_LINKS" | grep -v "services/api/src/services/auth/auth.service.js" || true)"
+  # Allowed: authenticated backend deep-link generation + founder contact on marketing trust pages.
+  # Forbidden: public Telegram bot CTAs elsewhere (clients, docs that push a bot as the product entry).
+  DISALLOWED_TELEGRAM="$(echo "$TELEGRAM_LINKS" \
+    | grep -v "services/api/src/services/auth/auth.service.js" \
+    | grep -v "^apps/marketing/" \
+    | grep -v "^apps/web/web/" \
+    || true)"
   if [[ -n "$DISALLOWED_TELEGRAM" ]]; then
     echo "$DISALLOWED_TELEGRAM"
-    fail "Found public Telegram links outside authenticated backend deep-link generation"
+    fail "Found public Telegram links outside authenticated backend deep-link / founder contact surfaces"
   else
-    pass "Only authenticated backend Telegram deep-link remains"
+    pass "Telegram links limited to auth deep-link and founder contact surfaces"
   fi
 else
   pass "No t.me links found"
@@ -144,6 +150,7 @@ if [[ -n "$ACTIVE_PAYMENT_MATCHES" ]]; then
 
   REAL_ACTIVE_PAYMENT_MATCHES="$(echo "$ACTIVE_PAYMENT_MATCHES" | \
     grep -v "StreamSubscription" | \
+    grep -v "RefreshSubscription" | \
     grep -v "LastUpgradeCheck" | \
     grep -v "LastUpgradeVersion" | \
     grep -v "perform upgrades" | \
@@ -179,7 +186,7 @@ FRONTEND_PAYMENT_MATCHES="$(git grep -n -i -E "payment|billing|stripe|checkout|p
 if [[ -n "$FRONTEND_PAYMENT_MATCHES" ]]; then
   echo "$FRONTEND_PAYMENT_MATCHES"
 
-  FRONTEND_REAL_MATCHES="$(echo "$FRONTEND_PAYMENT_MATCHES" | grep -v "StreamSubscription" || true)"
+  FRONTEND_REAL_MATCHES="$(echo "$FRONTEND_PAYMENT_MATCHES" | grep -v -E "StreamSubscription|RefreshSubscription" || true)"
   if [[ -n "$FRONTEND_REAL_MATCHES" ]]; then
     fail "Found payment/billing/subscription terms in frontend active source"
   else

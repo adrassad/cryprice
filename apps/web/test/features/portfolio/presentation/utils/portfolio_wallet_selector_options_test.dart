@@ -19,7 +19,7 @@ void main() {
 
     expect(options, hasLength(3));
     expect(options.first.walletId, PortfolioFilter.allWallets);
-    expect(options.first.title, 'All wallets');
+    expect(options.first.title, 'All addresses');
     expect(options[1].title, 'Main');
     expect(options[1].netValueUsd, '100.00');
     expect(options[2].title, 'Secondary');

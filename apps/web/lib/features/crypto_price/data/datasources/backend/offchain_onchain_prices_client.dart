@@ -3,6 +3,8 @@
 import 'package:cryprice_frontend/core/config/cryprice_backend_config.dart';
 import 'package:cryprice_frontend/features/crypto_price/data/datasources/base_api_provider.dart';
 import 'package:cryprice_frontend/features/crypto_price/data/models/current_price_dto.dart';
+import 'package:cryprice_frontend/features/crypto_price/data/models/offchain_convert_dto.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/offchain_convert_result.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/exceptions/crypto_exception.dart';
@@ -40,6 +42,7 @@ class OffchainOnchainPricesClient extends BaseApiProvider {
   }
 
   static const _offchainPrefix = '/prices/current/offchain/';
+  static const _offchainConvertPath = '/prices/convert/offchain';
   static const _onchainPrefix = '/prices/current/onchain/';
 
   /// Normalized path segment (e.g. `btc`) for `/prices/.../onchain/{symbol}`.
@@ -95,6 +98,98 @@ class OffchainOnchainPricesClient extends BaseApiProvider {
       to: to,
       parseBody: parseOnchainPerNetworkMap,
     );
+  }
+
+  /// `POST /prices/convert/offchain` — backend-computed CEX conversion per venue.
+  Future<({OffchainConvertResult? result, BackendPathTrace trace})>
+  fetchOffchainConvertTraced({
+    required String coin1,
+    required String coin2,
+    required double count,
+  }) async {
+    final path = _offchainConvertPath;
+    final baseUrl = _resolvedBaseUrl(dio);
+    final fullUrl = _fullRequestUrl(dio, path);
+    final body = <String, dynamic>{
+      'coin1': coin1.trim().toUpperCase(),
+      'coin2': coin2.trim().toUpperCase(),
+      'count': count,
+    };
+
+    try {
+      final response = await dio.post<dynamic>(
+        path,
+        data: body,
+        options: Options(
+          validateStatus: (int? status) => status != null && status < 500,
+        ),
+      );
+      final status = response.statusCode ?? 0;
+      final raw = response.data;
+      final rawType = _runtimeTypeName(raw);
+      final preview = _rawPreview(raw);
+
+      if (status == 404) {
+        return (
+          result: null,
+          trace: BackendPathTrace(
+            path: path,
+            isOnchainEndpoint: false,
+            resolvedBaseUrl: baseUrl,
+            fullRequestUrl: fullUrl,
+            httpAttempted: true,
+            statusCode: status,
+            rawDataRuntimeType: rawType,
+            rawDataPreview: preview,
+            error: 'conversion_not_available',
+          ),
+        );
+      }
+
+      if (status == 429) {
+        throw CryptoException(CryptoErrorCode.rateLimited);
+      }
+
+      if (status != 200) {
+        throw CryptoException(CryptoErrorCode.fetchFailed);
+      }
+
+      final dto = OffchainConvertDto.fromDynamic(raw);
+      if (dto == null) {
+        throw CryptoException(CryptoErrorCode.fetchFailed);
+      }
+      final entity = dto.toEntity();
+
+      return (
+        result: entity,
+        trace: BackendPathTrace(
+          path: path,
+          isOnchainEndpoint: false,
+          resolvedBaseUrl: baseUrl,
+          fullRequestUrl: fullUrl,
+          httpAttempted: true,
+          statusCode: status,
+          rawDataRuntimeType: rawType,
+          rawDataPreview: preview,
+          parsedDtoCount: 1,
+          mappedResultCount: entity.hasAnyVenue ? 1 : 0,
+        ),
+      );
+    } on CryptoException {
+      rethrow;
+    } on DioException catch (e) {
+      if (e.type == DioExceptionType.connectionTimeout ||
+          e.type == DioExceptionType.receiveTimeout ||
+          e.type == DioExceptionType.connectionError) {
+        throw CryptoException(CryptoErrorCode.noInternet);
+      }
+      if (e.response?.statusCode == 429) {
+        throw CryptoException(CryptoErrorCode.rateLimited);
+      }
+      throw CryptoException(CryptoErrorCode.fetchFailed);
+    } catch (_) {
+      throw CryptoException(CryptoErrorCode.unknown);
+    }
   }
 
   static String _resolvedBaseUrl(Dio dio) {

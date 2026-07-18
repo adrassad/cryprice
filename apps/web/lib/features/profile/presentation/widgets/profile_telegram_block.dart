@@ -146,6 +146,13 @@ class _UnlinkedTelegramContent extends StatelessWidget {
             color: theme.colorScheme.onSurfaceVariant,
           ),
         ),
+        const SizedBox(height: 8),
+        Text(
+          loc.profileTelegramSafetyNote,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: theme.colorScheme.onSurfaceVariant,
+          ),
+        ),
         const SizedBox(height: 12),
         ElevatedButton(
           onPressed: isBusy ? null : onLinkPressed,

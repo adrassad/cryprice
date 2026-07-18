@@ -24,7 +24,6 @@ class UpsertGlobalHfAlertRuleUseCase {
       return _repository.createAlertRule(
         CreateAlertRuleRequest(
           type: kHealthFactorThresholdType,
-          protocol: 'aave',
           thresholdHf: thresholdHfText,
           direction: 'below',
           enabled: enabled,

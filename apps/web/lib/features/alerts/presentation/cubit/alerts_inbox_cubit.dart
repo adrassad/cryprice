@@ -3,6 +3,7 @@ import 'package:cryprice_frontend/core/network/api_error_parser.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alerts_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_alert_read_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_all_alerts_read_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_error_codes.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_state.dart';
 import 'package:dio/dio.dart';
@@ -15,18 +16,24 @@ class AlertsInboxCubit extends Cubit<AlertsInboxState> {
   AlertsInboxCubit({
     required GetAlertsUseCase getAlertsUseCase,
     required MarkAlertReadUseCase markAlertReadUseCase,
+    required MarkAllAlertsReadUseCase markAllAlertsReadUseCase,
     int pageSize = kAlertsInboxPageSize,
   })  : _getAlertsUseCase = getAlertsUseCase,
         _markAlertReadUseCase = markAlertReadUseCase,
+        _markAllAlertsReadUseCase = markAllAlertsReadUseCase,
         _pageSize = pageSize,
         super(const AlertsInboxState());
 
   final GetAlertsUseCase _getAlertsUseCase;
   final MarkAlertReadUseCase _markAlertReadUseCase;
+  final MarkAllAlertsReadUseCase _markAllAlertsReadUseCase;
   final int _pageSize;
 
   List<InboxAlert> _fullAlertsCache = const <InboxAlert>[];
   final Set<String> _markReadInFlight = <String>{};
+  bool _markAllReadInFlight = false;
+  String? _focusAlertIdInFlight;
+  bool _focusRefreshTriggered = false;
 
   Future<void> load() async {
     emit(
@@ -38,6 +45,8 @@ class AlertsInboxCubit extends Cubit<AlertsInboxState> {
         isLoadingMore: false,
         clearError: true,
         clearMarkReadError: true,
+        clearMarkAllReadError: true,
+        isMarkingAllRead: false,
       ),
     );
     await _fetchAlerts(resetPagination: true, preserveReadState: false);
@@ -52,6 +61,7 @@ class AlertsInboxCubit extends Cubit<AlertsInboxState> {
             : AlertsInboxStatus.loading,
         clearError: true,
         clearMarkReadError: true,
+        clearMarkAllReadError: true,
       ),
     );
     await _fetchAlerts(
@@ -86,6 +96,8 @@ class AlertsInboxCubit extends Cubit<AlertsInboxState> {
         isLoadingMore: false,
         clearError: true,
         clearMarkReadError: true,
+        clearMarkAllReadError: true,
+        isMarkingAllRead: false,
       ),
     );
     await _fetchAlerts(resetPagination: true, preserveReadState: true);
@@ -96,6 +108,146 @@ class AlertsInboxCubit extends Cubit<AlertsInboxState> {
       return;
     }
     emit(state.copyWith(clearMarkReadError: true));
+  }
+
+  void clearMarkAllReadError() {
+    if (state.markAllReadErrorCode == null && state.markAllReadErrorMessage == null) {
+      return;
+    }
+    emit(state.copyWith(clearMarkAllReadError: true));
+  }
+
+  Future<void> focusAlert(String alertId) async {
+    final trimmedId = alertId.trim();
+    if (trimmedId.isEmpty) {
+      return;
+    }
+
+    _focusAlertIdInFlight = trimmedId;
+    _focusRefreshTriggered = false;
+
+    emit(
+      state.copyWith(
+        pendingFocusAlertId: trimmedId,
+        highlightedAlertId: trimmedId,
+      ),
+    );
+
+    await _resolveFocusAlert(trimmedId);
+  }
+
+  void markFocusScrollCompleted(String alertId) {
+    final trimmedId = alertId.trim();
+    if (trimmedId.isEmpty || state.pendingFocusAlertId != trimmedId) {
+      return;
+    }
+
+    emit(state.copyWith(clearPendingFocusAlertId: true));
+    _focusAlertIdInFlight = null;
+    _focusRefreshTriggered = false;
+  }
+
+  void clearHighlightedAlert() {
+    if (state.highlightedAlertId == null) {
+      return;
+    }
+    emit(state.copyWith(clearHighlightedAlertId: true));
+  }
+
+  Future<void> _resolveFocusAlert(String alertId) async {
+    if (_focusAlertIdInFlight != alertId) {
+      return;
+    }
+
+    if (!_containsAlertInVisibleList(alertId)) {
+      if (!_containsAlertInCache(alertId) && !_focusRefreshTriggered) {
+        _focusRefreshTriggered = true;
+        if (state.status == AlertsInboxStatus.initial) {
+          await load();
+        } else if (state.status != AlertsInboxStatus.loading &&
+            state.status != AlertsInboxStatus.refreshing) {
+          await refresh();
+        } else {
+          await _waitForFetchToSettle();
+        }
+      } else if (state.status == AlertsInboxStatus.loading ||
+          state.status == AlertsInboxStatus.refreshing) {
+        await _waitForFetchToSettle();
+      }
+      while (_focusAlertIdInFlight == alertId &&
+          _containsAlertInCache(alertId) &&
+          !_containsAlertInVisibleList(alertId) &&
+          state.hasMore) {
+        await loadMore();
+      }
+    }
+
+    if (_focusAlertIdInFlight == alertId && _containsAlertInVisibleList(alertId)) {
+      emit(
+        state.copyWith(
+          pendingFocusAlertId: alertId,
+          highlightedAlertId: alertId,
+        ),
+      );
+    }
+  }
+
+  Future<void> _waitForFetchToSettle() async {
+    if (state.status != AlertsInboxStatus.loading &&
+        state.status != AlertsInboxStatus.refreshing) {
+      return;
+    }
+
+    await stream
+        .firstWhere(
+          (next) =>
+              next.status != AlertsInboxStatus.loading &&
+              next.status != AlertsInboxStatus.refreshing,
+        )
+        .timeout(const Duration(seconds: 30), onTimeout: () => state);
+  }
+
+  bool _containsAlertInCache(String alertId) {
+    return _fullAlertsCache.any((alert) => alert.id == alertId);
+  }
+
+  bool _containsAlertInVisibleList(String alertId) {
+    return state.alerts.any((alert) => alert.id == alertId);
+  }
+
+  Future<void> markAllAsRead() async {
+    if (state.unreadCount == 0 || _markAllReadInFlight) {
+      return;
+    }
+
+    final snapshot = state;
+    final fullCacheSnapshot = List<InboxAlert>.from(_fullAlertsCache);
+    final optimisticReadAt = DateTime.now().toUtc().toIso8601String();
+    _markAllReadInFlight = true;
+
+    emit(
+      _applyMarkAllReadLocally(
+        snapshot,
+        readAt: optimisticReadAt,
+        clearMarkAllReadError: true,
+      ).copyWith(isMarkingAllRead: true),
+    );
+
+    try {
+      await _markAllAlertsReadUseCase.execute();
+      emit(
+        state.copyWith(
+          isMarkingAllRead: false,
+          unreadCount: 0,
+          clearMarkAllReadError: true,
+        ),
+      );
+    } on Object catch (e) {
+      _fullAlertsCache = fullCacheSnapshot;
+      emit(_restoreMarkAllReadSnapshot(snapshot, e));
+    } finally {
+      _markAllReadInFlight = false;
+    }
   }
 
   Future<void> markAsRead(String alertId) async {
@@ -279,6 +431,51 @@ class AlertsInboxCubit extends Cubit<AlertsInboxState> {
       markReadErrorCode: markReadError.code,
       markReadErrorMessage: markReadError.message,
     );
+  }
+
+  AlertsInboxState _applyMarkAllReadLocally(
+    AlertsInboxState base, {
+    required String readAt,
+    bool clearMarkAllReadError = false,
+  }) {
+    _fullAlertsCache = _markAllUnreadInList(_fullAlertsCache, readAt);
+
+    final updatedVisible = _markAllUnreadInList(base.alerts, readAt);
+
+    final filtered = state.unreadOnly
+        ? updatedVisible.where((alert) => !alert.isRead).toList(growable: false)
+        : updatedVisible;
+
+    final status = filtered.isEmpty && state.unreadOnly
+        ? AlertsInboxStatus.empty
+        : base.status == AlertsInboxStatus.empty && filtered.isNotEmpty
+            ? AlertsInboxStatus.loaded
+            : base.status;
+
+    return base.copyWith(
+      status: status,
+      alerts: filtered,
+      unreadCount: 0,
+      hasMore: filtered.length < _filteredAlerts().length,
+      clearMarkAllReadError: clearMarkAllReadError,
+    );
+  }
+
+  AlertsInboxState _restoreMarkAllReadSnapshot(AlertsInboxState snapshot, Object error) {
+    final apiError = parseApiError(error);
+    final markAllReadError = _mapMarkReadError(apiError, error);
+
+    return snapshot.copyWith(
+      isMarkingAllRead: false,
+      markAllReadErrorCode: markAllReadError.code,
+      markAllReadErrorMessage: markAllReadError.message,
+    );
+  }
+
+  static List<InboxAlert> _markAllUnreadInList(List<InboxAlert> alerts, String readAt) {
+    return alerts
+        .map((alert) => alert.isRead ? alert : _withReadAt(alert, readAt))
+        .toList(growable: false);
   }
 
   void _emitFetchError(Object e, {required bool preserveExisting}) {

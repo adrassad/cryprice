@@ -27,8 +27,8 @@ class GoogleIdTokenProvider {
 
   /// Interactive sign-in and returns a Google **ID token** (JWT) for [POST /auth/google], or null if cancelled.
   ///
-  /// On web, uses GIS One Tap + [renderButton] (credential) flow; do not use [GoogleSignIn.signIn], which
-  /// follows the legacy OAuth2 token path and may omit [idToken].
+  /// Native mobile only in production. Web login uses backend OAuth redirect instead; this GIS popup path
+  /// remains for mobile and legacy tests.
   Future<String?> getIdToken() async {
     if (kIsWeb) {
       return _getIdTokenWeb();

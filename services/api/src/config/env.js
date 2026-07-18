@@ -6,6 +6,25 @@ function parseBoolFlag(value) {
   return value === "true" || value === "1";
 }
 
+function isBlank(value) {
+  return value === undefined || value === null || String(value).trim() === "";
+}
+
+/** Parse boolean env with an explicit default when unset/blank. */
+function parseBooleanEnv(value, defaultValue) {
+  if (isBlank(value)) {
+    return defaultValue;
+  }
+  const normalized = String(value).trim().toLowerCase();
+  if (normalized === "true" || normalized === "1") {
+    return true;
+  }
+  if (normalized === "false" || normalized === "0") {
+    return false;
+  }
+  return defaultValue;
+}
+
 function parsePort() {
   const raw = process.env.PORT_API ?? process.env.PORT ?? "3000";
   const n = Number(raw);
@@ -102,6 +121,18 @@ export const ENV = {
 
   /** Persisted HF alerts (v2) + disable legacy inline Telegram HF alerts when true. */
   ALERTS_V2_ENABLED: parseBoolFlag(process.env.ALERTS_V2_ENABLED ?? ""),
+
+  /** Public marketing contact form (Turnstile + email delivery). */
+  TURNSTILE_SECRET_KEY: process.env.TURNSTILE_SECRET_KEY?.trim() || "",
+  CONTACT_FORM_TO: process.env.CONTACT_FORM_TO?.trim() || "",
+  CONTACT_FORM_FROM:
+    process.env.CONTACT_FORM_FROM?.trim() || "noreply@cryprice.dev",
+  CONTACT_SENDMAIL_PATH:
+    process.env.CONTACT_SENDMAIL_PATH?.trim() || "/usr/sbin/sendmail",
+  CONTACT_FORM_DRY_RUN: parseBooleanEnv(
+    process.env.CONTACT_FORM_DRY_RUN,
+    NODE_ENV !== "production",
+  ),
 };
 
 export function shouldFlushRedisOnStart() {

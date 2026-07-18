@@ -3,6 +3,7 @@ import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_ty
 import 'package:cryprice_frontend/features/alerts/presentation/utils/alert_event_date.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/utils/alerts_inbox_labels.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/utils/health_factor_alert_visible_content.dart';
+import 'package:cryprice_frontend/features/alerts/presentation/utils/risk_news_alert_visible_content.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 
 /// Builds plain text that mirrors the visible alert card content.
@@ -13,6 +14,7 @@ String formatAlertClipboardText(InboxAlert alert, AppLocalizations loc) {
 
 List<String> buildAlertVisibleLines(InboxAlert alert, AppLocalizations loc) {
   return switch (alert.type) {
+    InboxAlertType.riskNews => buildRiskNewsAlertVisibleLines(alert, loc),
     InboxAlertType.healthFactorBreach ||
     InboxAlertType.healthFactorRecovery =>
       buildHealthFactorAlertVisibleLines(alert, loc),

@@ -1,25 +1,12 @@
 import 'package:cryprice_frontend/features/crypto_price/domain/conversion/price_row_display_enricher.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/offchain_convert_result.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
-import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/cex_result_card.dart';
+import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/cex_convert_card.dart';
 import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/cryprice_dex_result_section.dart';
 import 'package:cryprice_frontend/features/crypto_price/presentation/widgets/result_sections.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
-
-bool _cexRowShouldList(PriceRowViewModel vm) {
-  final r = vm.row;
-  if (!r.hasValue && r.status == PriceStatus.error) {
-    return true;
-  }
-  if (r.hasValue && r.price != null && vm.userConversion == null) {
-    return false;
-  }
-  if (vm.userConversion != null) {
-    return true;
-  }
-  return !r.hasValue;
-}
 
 bool _dexRowShouldList(PriceRowViewModel vm) {
   final r = vm.row;
@@ -46,6 +33,7 @@ class ResultPriceList extends StatelessWidget {
     required this.userTicker1,
     required this.userTicker2,
     required this.localizeError,
+    required this.offchainConvert,
   });
 
   final List<PriceRowViewModel> rows;
@@ -54,37 +42,15 @@ class ResultPriceList extends StatelessWidget {
   final String userTicker1;
   final String userTicker2;
   final String Function(String? code) localizeError;
+  final OffchainConvertResult offchainConvert;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    if (rows.isEmpty) {
-      return SingleChildScrollView(
-        padding: const EdgeInsets.fromLTRB(8, 8, 8, 20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            Text(
-              localizeError(null),
-              style: GoogleFonts.montserrat(
-                fontSize: 16,
-                color: theme.colorScheme.error,
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-      );
-    }
-
-    final cexBlock = rows
-        .where(
-          (vm) =>
-              vm.row.origin == PriceResultOrigin.cex ||
-              vm.row.origin == PriceResultOrigin.crypriceOffchain,
-        )
-        .where(_cexRowShouldList)
-        .toList();
+    final cexP = _CexConvertSectionColumn(
+      l10n: l10n,
+      convert: offchainConvert,
+      localizeError: localizeError,
+    );
     final dexBlockAll = rows
         .where((vm) => vm.row.origin == PriceResultOrigin.crypriceOnchain)
         .toList();
@@ -97,13 +63,6 @@ class ResultPriceList extends StatelessWidget {
         final hPad = bp.isMobile ? 4.0 : 10.0;
         final betweenSections = bp.isMobile ? 20.0 : 24.0;
 
-        final cexP = cexBlock.isNotEmpty
-            ? _CexSectionColumn(
-                l10n: l10n,
-                items: cexBlock,
-                localizeError: localizeError,
-              )
-            : null;
         final dexP = _DexSectionColumn(
           l10n: l10n,
           items: dexBlock,
@@ -114,7 +73,7 @@ class ResultPriceList extends StatelessWidget {
           localizeError: localizeError,
         );
 
-        final bool twoCol = bp.isDesktop && cexP != null;
+        final bool twoCol = bp.isDesktop;
 
         Widget content;
         if (twoCol) {
@@ -132,8 +91,8 @@ class ResultPriceList extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             mainAxisSize: MainAxisSize.min,
             children: [
-              if (cexP != null) cexP,
-              if (cexP != null) SizedBox(height: betweenSections),
+              cexP,
+              SizedBox(height: betweenSections),
               dexP,
             ],
           );
@@ -155,15 +114,15 @@ class ResultPriceList extends StatelessWidget {
   }
 }
 
-class _CexSectionColumn extends StatelessWidget {
-  const _CexSectionColumn({
+class _CexConvertSectionColumn extends StatelessWidget {
+  const _CexConvertSectionColumn({
     required this.l10n,
-    required this.items,
+    required this.convert,
     required this.localizeError,
   });
 
   final AppLocalizations l10n;
-  final List<PriceRowViewModel> items;
+  final OffchainConvertResult convert;
   final String Function(String? code) localizeError;
 
   @override
@@ -172,21 +131,30 @@ class _CexSectionColumn extends StatelessWidget {
       kind: PanelKind.cex,
       title: l10n.resultsSectionCexTitle,
       subtitle: l10n.resultsSectionCexSubtitle,
-      children: items
-          .map(
-            (vm) => CexResultCard(
-              key: ValueKey(
-                'cex_${vm.row.origin.name}_${vm.row.priceType.name}_${vm.row.source}_'
-                '${vm.row.network}_${vm.row.symbol}_${vm.row.quoteCurrency}_'
-                '${vm.row.tokenAddress ?? ''}',
-              ),
-              l10n: l10n,
-              vm: vm,
-              localizeError: localizeError,
-              embeddedInPanel: true,
-            ),
-          )
-          .toList(),
+      children: [
+        CexConvertCard(
+          key: const ValueKey('cex_convert_binance'),
+          l10n: l10n,
+          venue: 'binance',
+          coin1: convert.coin1,
+          coin2: convert.coin2,
+          count: convert.count,
+          venueResult: convert.binance,
+          localizeError: localizeError,
+          embeddedInPanel: true,
+        ),
+        CexConvertCard(
+          key: const ValueKey('cex_convert_bybit'),
+          l10n: l10n,
+          venue: 'bybit',
+          coin1: convert.coin1,
+          coin2: convert.coin2,
+          count: convert.count,
+          venueResult: convert.bybit,
+          localizeError: localizeError,
+          embeddedInPanel: true,
+        ),
+      ],
     );
   }
 }

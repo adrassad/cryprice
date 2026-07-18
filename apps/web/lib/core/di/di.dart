@@ -1,4 +1,5 @@
 import 'package:cryprice_frontend/core/config/cryprice_backend_config.dart';
+import 'package:cryprice_frontend/core/navigation/push_navigation_bridge.dart';
 import 'package:cryprice_frontend/features/alerts/data/datasources/alert_rules_remote_datasource.dart';
 import 'package:cryprice_frontend/features/alerts/data/datasources/alerts_inbox_remote_datasource.dart';
 import 'package:cryprice_frontend/features/alerts/data/repositories/alert_rules_repository_impl.dart';
@@ -8,6 +9,7 @@ import 'package:cryprice_frontend/features/alerts/domain/repositories/alerts_inb
 import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alert_rules_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alerts_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_alert_read_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_all_alerts_read_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/upsert_global_hf_alert_rule_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alert_rules_cubit.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
@@ -36,6 +38,20 @@ import 'package:cryprice_frontend/features/profile/domain/usecases/get_wallets_u
 import 'package:cryprice_frontend/features/profile/domain/usecases/update_profile_usecase.dart';
 import 'package:cryprice_frontend/features/profile/domain/usecases/update_wallet_label_usecase.dart';
 import 'package:cryprice_frontend/features/profile/presentation/cubit/profile_cubit.dart';
+import 'package:cryprice_frontend/features/health_factor/data/datasources/health_factor_remote_datasource.dart';
+import 'package:cryprice_frontend/features/health_factor/data/repositories/health_factor_repository_impl.dart';
+import 'package:cryprice_frontend/features/health_factor/domain/repositories/health_factor_repository.dart';
+import 'package:cryprice_frontend/features/health_factor/domain/usecases/calculate_health_factor_usecase.dart';
+import 'package:cryprice_frontend/features/health_factor/domain/usecases/get_health_factor_markets_usecase.dart';
+import 'package:cryprice_frontend/features/health_factor/domain/usecases/get_health_factor_networks_usecase.dart';
+import 'package:cryprice_frontend/features/health_factor/domain/usecases/get_health_factor_protocols_usecase.dart';
+import 'package:cryprice_frontend/features/health_factor/presentation/cubit/health_factor_calculator_cubit.dart';
+import 'package:cryprice_frontend/features/push_notifications/data/datasources/push_token_local_store.dart';
+import 'package:cryprice_frontend/features/push_notifications/data/datasources/push_token_remote_datasource.dart';
+import 'package:cryprice_frontend/features/push_notifications/data/platforms/push_messaging_platform.dart';
+import 'package:cryprice_frontend/features/push_notifications/data/repositories/push_token_repository_impl.dart';
+import 'package:cryprice_frontend/features/push_notifications/domain/repositories/push_token_repository.dart';
+import 'package:cryprice_frontend/features/push_notifications/presentation/push_notification_coordinator.dart';
 import 'package:cryprice_frontend/features/crypto_price/data/datasources/backend/offchain_onchain_prices_client.dart';
 import 'package:flutter/foundation.dart';
 import 'package:cryprice_frontend/features/crypto_price/data/repositories/crypto_repository_impl.dart';
@@ -163,10 +179,61 @@ void setupDependencies() {
   );
   di.registerLazySingleton(() => GetAlertsUseCase(di<AlertsInboxRepository>()));
   di.registerLazySingleton(() => MarkAlertReadUseCase(di<AlertsInboxRepository>()));
+  di.registerLazySingleton(() => MarkAllAlertsReadUseCase(di<AlertsInboxRepository>()));
   di.registerFactory(
     () => AlertsInboxCubit(
       getAlertsUseCase: di<GetAlertsUseCase>(),
       markAlertReadUseCase: di<MarkAlertReadUseCase>(),
+      markAllAlertsReadUseCase: di<MarkAllAlertsReadUseCase>(),
+    ),
+  );
+  di.registerLazySingleton<HealthFactorRemoteDataSource>(
+    HealthFactorRemoteDataSource.new,
+  );
+  di.registerLazySingleton<HealthFactorRepository>(
+    () => HealthFactorRepositoryImpl(remote: di<HealthFactorRemoteDataSource>()),
+  );
+  di.registerLazySingleton(
+    () => GetHealthFactorProtocolsUseCase(di<HealthFactorRepository>()),
+  );
+  di.registerLazySingleton(
+    () => GetHealthFactorNetworksUseCase(di<HealthFactorRepository>()),
+  );
+  di.registerLazySingleton(
+    () => GetHealthFactorMarketsUseCase(di<HealthFactorRepository>()),
+  );
+  di.registerLazySingleton(
+    () => CalculateHealthFactorUseCase(di<HealthFactorRepository>()),
+  );
+  di.registerFactory(
+    () => HealthFactorCalculatorCubit(
+      getProtocolsUseCase: di<GetHealthFactorProtocolsUseCase>(),
+      getNetworksUseCase: di<GetHealthFactorNetworksUseCase>(),
+      getMarketsUseCase: di<GetHealthFactorMarketsUseCase>(),
+      calculateHealthFactorUseCase: di<CalculateHealthFactorUseCase>(),
+    ),
+  );
+
+  di.registerLazySingleton(PushTokenLocalStore.new);
+  di.registerLazySingleton(
+    () => PushTokenRemoteDataSource(sessionService: di<AuthSessionService>()),
+  );
+  di.registerLazySingleton<PushTokenRepository>(
+    () => PushTokenRepositoryImpl(
+      remote: di<PushTokenRemoteDataSource>(),
+      localStore: di<PushTokenLocalStore>(),
+    ),
+  );
+  di.registerLazySingleton(MutablePushNavigationBridge.new);
+  di.registerLazySingleton<PushNavigationBridge>(
+    () => di<MutablePushNavigationBridge>(),
+  );
+  di.registerLazySingleton<PushMessagingPlatform>(createPushMessagingPlatform);
+  di.registerLazySingleton(
+    () => PushNotificationCoordinator(
+      messagingPlatform: di<PushMessagingPlatform>(),
+      tokenRepository: di<PushTokenRepository>(),
+      navigationBridge: di<PushNavigationBridge>(),
     ),
   );
 }

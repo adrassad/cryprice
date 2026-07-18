@@ -207,7 +207,6 @@ void main() {
         capturedData,
         <String, Object?>{
           'type': 'health_factor_threshold',
-          'protocol': 'aave',
           'threshold_hf': '1.50',
           'direction': 'below',
           'enabled': true,

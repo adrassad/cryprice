@@ -1,4 +1,5 @@
 import 'package:cryprice_frontend/features/crypto_price/domain/conversion/price_row_display_enricher.dart';
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/offchain_convert_result.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_fetch_outcome.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/exceptions/crypto_exception.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/usecases/get_crypto_price_usecase.dart';
@@ -13,7 +14,7 @@ class TitleInitial extends TitleState {}
 class TitleLoading extends TitleState {}
 
 class TitleLoaded extends TitleState {
-  /// Enriched rows: [PriceRowViewModel.userConversion] is computed in the domain layer.
+  /// Enriched DEX rows: [PriceRowViewModel.userConversion] is computed in the domain layer.
   final List<PriceRowViewModel> rows;
   final PriceFetchDebugSnapshot fetchDebug;
   /// Multiplier applied in the UI: displayed quote amount = unit price × this.
@@ -21,12 +22,14 @@ class TitleLoaded extends TitleState {
   /// User-entered tickers (trimmed), used for direct vs inverse conversion.
   final String userTicker1;
   final String userTicker2;
+  final OffchainConvertResult offchainConvert;
   TitleLoaded(
     this.rows, {
     required this.fetchDebug,
     required this.countMultiplier,
     required this.userTicker1,
     required this.userTicker2,
+    required this.offchainConvert,
   });
 }
 
@@ -49,6 +52,11 @@ class TitleCubit extends Cubit<TitleState> {
       emit(TitleInitial());
       return;
     }
+    final multiplier = parseDisplayCount(count);
+    if (multiplier <= 0) {
+      emit(TitleError('error_invalid_count'));
+      return;
+    }
     emit(TitleLoading());
     try {
       final outcome = await useCase.execute(ticker1, ticker2, count);
@@ -56,13 +64,18 @@ class TitleCubit extends Cubit<TitleState> {
         return;
       }
       logPriceFetchDebug(outcome.debug);
-      final multiplier = parseDisplayCount(count);
       final rows = PriceRowDisplayEnricher.build(
         results: outcome.results,
         userTicker1: ticker1.trim(),
         userTicker2: ticker2.trim(),
         countMultiplier: multiplier,
       );
+      final offchainConvert = outcome.offchainConvert ??
+          OffchainConvertResult(
+            coin1: ticker1.trim().toUpperCase(),
+            coin2: ticker2.trim().toUpperCase(),
+            count: multiplier,
+          );
       emit(
         TitleLoaded(
           rows,
@@ -70,6 +83,7 @@ class TitleCubit extends Cubit<TitleState> {
           countMultiplier: multiplier,
           userTicker1: ticker1.trim(),
           userTicker2: ticker2.trim(),
+          offchainConvert: offchainConvert,
         ),
       );
     } on CryptoException catch (e) {
@@ -91,7 +105,9 @@ class TitleCubit extends Cubit<TitleState> {
         return 'error_no_internet';
       case CryptoErrorCode.fetchFailed:
         return 'error_fetch_failed';
-      default:
+      case CryptoErrorCode.rateLimited:
+        return 'error_rate_limited';
+      case CryptoErrorCode.unknown:
         return 'error_unknown';
     }
   }

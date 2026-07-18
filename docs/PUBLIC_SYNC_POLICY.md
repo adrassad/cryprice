@@ -34,13 +34,14 @@ Public repository:
 ## Always excluded from export
 
 - `.env`, `.env.*` (real values)
+- `src/investor/` and `/invest` investor decks (marketing private only)
 - Payment, billing, subscription enforcement, premium plans
 - Admin tooling, admin bot commands, operator scripts
 - Production deployment scripts and infrastructure details
 - User/customer data, wallet data dumps, logs, backups
 - `node_modules`, `dist`, `build`, `.dart_tool`, coverage, caches
 - `android/local.properties`
-- Public Telegram bot CTAs (standalone marketing links to the bot)
+- Public Telegram **bot** CTAs (standalone product-entry links to the bot). Founder personal contact links on marketing trust/contact pages are allowed.
 
 ## Allowed in public export
 

@@ -64,7 +64,13 @@ List<String> buildHealthFactorAlertVisibleLines(
     if (movementLabel.isNotEmpty) {
       lines.add('${movement.trendIcon} $movementLabel');
     }
-    lines.add(formatHealthFactorMovementLine(movement));
+    lines.add(
+      formatHealthFactorMovementLine(
+        movement,
+        networkId: payload.networkId,
+        protocol: payload.protocol,
+      ),
+    );
   }
 
   lines.add(loc.alertsHfThresholdLabel);

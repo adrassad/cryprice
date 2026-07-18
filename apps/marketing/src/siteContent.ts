@@ -2,34 +2,83 @@
 
 import authorPhoto from './assets/author.jpg'
 
-/** Defaults when `VITE_PUBLIC_*` variables from `.env` are not set. */
-const LINK_DEFAULTS = {
+export const ROUTES = {
+  about: '/about',
+  privacy: '/privacy',
+  terms: '/terms',
+  security: '/security',
+  trust: '/trust',
+  transparency: '/transparency',
+  faq: '/faq',
+  contact: '/contact',
+  cookies: '/cookies',
+  docs: '/docs',
+  supportedProtocols: '/supported-protocols',
+  changelog: '/changelog',
+  status: '/status',
+} as const
+
+export const LINKS = {
   app: 'https://app.cryprice.dev',
-  apiHost: 'api.cryprice.dev',
+  api: 'https://api.cryprice.dev',
+  /** Cryprice monorepository (API, web, marketing, docs) */
   monoRepo: 'https://github.com/adrassad/cryprice',
   webAppPath: 'https://github.com/adrassad/cryprice/tree/main/apps/web',
   backendPath: 'https://github.com/adrassad/cryprice/tree/main/services/api',
+  /** General GitHub profile or org — adjust if you prefer a different landing URL */
   githubProfile: 'https://github.com/adrassad',
+  /** Replace with your real LinkedIn URL */
   linkedIn: 'https://www.linkedin.com/in/adrassad',
   xProfile: 'https://x.com/AdrasSad',
+  telegram: 'https://t.me/adrassad',
 } as const
 
-function fromEnv(name: keyof ImportMetaEnv, fallback: string): string {
-  const raw = import.meta.env[name]
-  return typeof raw === 'string' && raw.trim() !== '' ? raw.trim() : fallback
-}
+export const OFFICIAL_DOMAINS = [
+  { label: 'cryprice.dev', href: 'https://cryprice.dev/' },
+  { label: 'app.cryprice.dev', href: `${LINKS.app}/` },
+  { label: 'api.cryprice.dev', href: 'https://api.cryprice.dev/' },
+] as const
 
-export const LINKS = {
-  app: fromEnv('VITE_PUBLIC_APP_URL', LINK_DEFAULTS.app),
-  monoRepo: fromEnv('VITE_PUBLIC_MONOREPO_URL', LINK_DEFAULTS.monoRepo),
-  webAppPath: fromEnv('VITE_PUBLIC_WEB_APP_PATH_URL', LINK_DEFAULTS.webAppPath),
-  backendPath: fromEnv('VITE_PUBLIC_BACKEND_PATH_URL', LINK_DEFAULTS.backendPath),
-  githubProfile: fromEnv('VITE_PUBLIC_GITHUB_PROFILE_URL', LINK_DEFAULTS.githubProfile),
-  linkedIn: fromEnv('VITE_PUBLIC_LINKEDIN_URL', LINK_DEFAULTS.linkedIn),
-  xProfile: fromEnv('VITE_PUBLIC_X_PROFILE_URL', LINK_DEFAULTS.xProfile),
+/** Open app.cryprice.dev in a new tab from the marketing site. */
+export const APP_LINK_PROPS = {
+  target: '_blank',
+  rel: 'noopener noreferrer',
 } as const
 
-export const PUBLIC_API_HOST = fromEnv('VITE_PUBLIC_API_HOST', LINK_DEFAULTS.apiHost)
+/** Public contact details for legal and security pages */
+export const CONTACT = {
+  supportEmail: 'support@cryprice.dev',
+  supportMailto: 'mailto:support@cryprice.dev',
+  securityEmail: 'security@cryprice.dev',
+  securityMailto: 'mailto:security@cryprice.dev',
+  legalEmail: 'legal@cryprice.dev',
+  legalMailto: 'mailto:legal@cryprice.dev',
+  privacyEmail: 'privacy@cryprice.dev',
+  privacyMailto: 'mailto:privacy@cryprice.dev',
+  pressEmail: 'press@cryprice.dev',
+  pressMailto: 'mailto:press@cryprice.dev',
+  founderEmail: 'founder@cryprice.dev',
+  founderMailto: 'mailto:founder@cryprice.dev',
+  /** General public inquiries */
+  publicContactEmail: 'support@cryprice.dev',
+  publicContactMailto: 'mailto:support@cryprice.dev',
+  securityTxtUrl: 'https://cryprice.dev/.well-known/security.txt',
+  securityPolicyUrl: 'https://cryprice.dev/security',
+  trustUrl: 'https://cryprice.dev/trust',
+  transparencyUrl: 'https://cryprice.dev/transparency',
+  contactPageUrl: 'https://cryprice.dev/contact',
+  githubSecurityPolicyUrl: 'https://github.com/adrassad/cryprice/blob/main/SECURITY.md',
+  xProfile: LINKS.xProfile,
+} as const
+
+/** Read-only trust guarantees for reuse across trust pages */
+export const TRUST_GUARANTEES = [
+  'Never requests seed phrases',
+  'Never stores private keys',
+  'Never signs transactions',
+  'Never executes blockchain transactions',
+  'Never takes custody of assets',
+] as const
 
 /** Static files from /public */
 export const ASSETS = {
@@ -37,42 +86,59 @@ export const ASSETS = {
   logoMark: '/assets/cryprice-logo-mark.png',
 } as const
 
+export const HOME_META = {
+  title: 'CryPrice — Read-Only DeFi Risk Intelligence',
+  description:
+    'CryPrice is a read-only DeFi risk intelligence project for public address monitoring, portfolio visibility, and market risk context.',
+  path: '/',
+} as const
+
 export const HERO = {
-  eyebrow: 'Read-only · multi-chain · DeFi risk monitoring',
-  title: 'Multi-Chain DeFi Risk Monitoring Infrastructure',
+  eyebrow: 'Read-only · Non-custodial · Public address monitoring',
+  title: 'Read-Only DeFi Risk Monitoring',
   subheadline:
-    'Track wallets, Aave positions, Health Factor, protocol exposure, and portfolio allocation across multiple networks — without giving up custody or private keys.',
-  primaryCta: 'Open App',
-  secondaryCta: 'Monitor DeFi Risk Early',
+    'Monitor Aave Health Factor, protocol exposure, and portfolio risk across Ethereum, Arbitrum, Avalanche, and Base using public addresses you choose to track.',
+  primaryCta: 'Use CryPrice',
+  secondaryCta: 'Read Security Model',
 } as const
 
 export const TRUST_STRIP = [
-  'Read-only monitoring',
-  'No private keys',
-  'Multi-wallet visibility',
-  'Aave V3 Health Factor',
-  'Authenticated Telegram alerts',
+  'Read-only',
+  'Non-custodial',
+  'Public address monitoring',
 ] as const
+
+export const SAFETY_MODEL = {
+  title: 'Read-only by design',
+  lead: 'CryPrice is built for monitoring and risk visibility using public on-chain data. The detailed security model is documented separately.',
+  bullets: [
+    'Public address monitoring',
+    'Non-custodial risk visibility',
+    'Optional notifications',
+  ] as const,
+  ctaLabel: 'Read the Security Model',
+  ctaPath: ROUTES.security,
+} as const
 
 export const PROBLEM = {
   title: 'DeFi risk is fragmented',
-  lead: 'Borrowing and lending exposure is spread across wallets, protocols, networks, dashboards, and alert channels. Users often see liquidation risk too late — after collateral moves, Health Factor drops, or market conditions shift overnight.',
+  lead: 'Borrowing and lending exposure is spread across public addresses, protocols, networks, dashboards, and notification channels. Users often see liquidation risk too late — after collateral moves, Health Factor drops, or market conditions shift overnight.',
   points: [
-    'Wallet balances live in one place; Aave supplied and borrowed positions in another.',
+    'On-chain balances live in one place; Aave supplied and borrowed positions in another.',
     'Health Factor and liquidation proximity are easy to miss until thresholds are breached.',
-    'Protocol and network allocation require manual reconciliation across explorers and apps.',
-    'Price and risk alerts are scattered across exchanges, bots, and notification settings.',
+    'Protocol and network allocation require manual reconciliation across explorers and dashboards.',
+    'Price and risk notifications are scattered across exchanges, bots, and notification settings.',
   ] as const,
 } as const
 
 export const SOLUTION = {
   title: 'One read-only monitoring layer',
-  lead: 'CryPrice brings portfolio visibility, Aave V3 position tracking, Health Factor monitoring, protocol exposure, allocation views, prices, PDF reports, and Telegram alerts into a single infrastructure stack — without executing transactions or storing private keys.',
+  lead: 'CryPrice brings portfolio visibility, Aave V3 position tracking, Health Factor monitoring, protocol exposure, allocation views, prices, PDF reports, and optional Telegram notifications into a single infrastructure stack — without executing transactions or storing private keys.',
   points: [
-    'Aggregate multi-wallet holdings and DeFi positions across Ethereum, Arbitrum, Avalanche, and Base.',
+    'Aggregate multi-address holdings and DeFi positions across Ethereum, Arbitrum, Avalanche, and Base.',
     'Monitor stored Aave V3 Health Factor data and review supplied and borrowed exposure.',
-    'Understand allocation by asset, debt, protocol, network, and wallet from backend-calculated views.',
-    'Receive Telegram alerts for Health Factor thresholds and price movements.',
+    'Understand allocation by asset, debt, protocol, network, and public address from backend-calculated views.',
+    'Receive optional Telegram notifications for Health Factor thresholds and price movements.',
   ] as const,
 } as const
 
@@ -81,9 +147,9 @@ export const FEATURES = {
   lead: 'Portfolio intelligence and risk monitoring across supported networks — with a price calculator as a supporting utility.',
   cards: [
     {
-      title: 'Multi-wallet portfolio dashboard',
+      title: 'Multi-address portfolio dashboard',
       detail:
-        'Portfolio visibility: see wallet holdings and DeFi positions across supported networks.',
+        'Portfolio visibility: see holdings and DeFi positions across supported networks for public addresses you track.',
     },
     {
       title: 'Aave V3 Health Factor monitoring',
@@ -93,7 +159,7 @@ export const FEATURES = {
     {
       title: 'Supplied and borrowed positions',
       detail:
-        'Track Aave V3 supplied collateral and borrowed debt alongside wallet-level balances.',
+        'Track Aave V3 supplied collateral and borrowed debt alongside address-level balances.',
     },
     {
       title: 'Protocol and network exposure',
@@ -103,12 +169,11 @@ export const FEATURES = {
     {
       title: 'Allocation intelligence',
       detail:
-        'Allocation intelligence: review backend-calculated allocation by asset, debt, protocol, network, and wallet.',
+        'Allocation intelligence: review backend-calculated allocation by asset, debt, protocol, network, and public address.',
     },
     {
-      title: 'Telegram risk alerts',
-      detail:
-        'Telegram alerts are available after signing in and linking your Telegram account in the CryPrice app.',
+      title: 'Optional Telegram notifications',
+      detail: 'Optional Telegram notifications after account setup.',
     },
     {
       title: 'PDF portfolio reports',
@@ -118,7 +183,7 @@ export const FEATURES = {
     {
       title: 'CEX/DEX price calculator',
       detail:
-        'Supporting utility for cross-venue price comparison — not the core product, but available in the app.',
+        'Supporting utility for cross-venue price comparison — not the core product, but available in the product dashboard.',
     },
   ] as const,
   scopeNote:
@@ -127,15 +192,16 @@ export const FEATURES = {
 
 export const HOW_IT_WORKS = {
   title: 'How it works',
-  lead: 'Connect, add wallets, and review risk — read-only from end to end.',
+  lead: 'Set up read-only monitoring in four steps — no wallet connection required.',
   steps: [
     {
-      title: 'Connect with Google',
-      detail: 'Sign in to the CryPrice web app with Google authentication.',
+      title: 'Use Google for account access',
+      detail:
+        'Use Google OAuth for CryPrice account access only. CryPrice never connects to your wallet.',
     },
     {
-      title: 'Add wallet addresses',
-      detail: 'Add the wallet addresses you want to monitor — no private keys required.',
+      title: 'Add public addresses',
+      detail: 'Add the public addresses you want to monitor — no private keys required.',
     },
     {
       title: 'CryPrice syncs your data',
@@ -143,9 +209,9 @@ export const HOW_IT_WORKS = {
         'The backend aggregates balances, Aave V3 positions, prices, and Health Factor across supported networks.',
     },
     {
-      title: 'Review risk and get alerts',
+      title: 'Review risk and optional notifications',
       detail:
-        'Review portfolio allocation and exposure in the app, link Telegram, and receive threshold alerts.',
+        'Review portfolio allocation and exposure in the dashboard, link Telegram for optional notifications, and receive threshold alerts.',
     },
   ] as const,
 } as const
@@ -165,34 +231,16 @@ export const ROADMAP = {
 
 export const AUTHOR = {
   name: 'Andrei Sharapov',
-  sectionTitle: 'Built by an independent DeFi infrastructure builder',
-  /** Shown directly under the name on the landing page */
-  title: 'Systems Architect & Full-Stack Developer',
-  lead: 'CryPrice is built by Andrei Sharapov, a Systems Architect & Full-Stack Developer focused on DeFi risk infrastructure, portfolio intelligence, and blockchain data systems.',
-  supportingCopy:
-    'The project combines backend architecture, blockchain data aggregation, risk monitoring, Telegram alerting, and Flutter-based product delivery into a single read-only DeFi monitoring stack.',
+  sectionTitle: 'Founder / Builder',
+  subtitle: 'CryPrice is built in public by Andrei Sharapov.',
+  body: 'Andrei is a backend/Web3 developer focused on DeFi risk monitoring, Aave Health Factor analytics, portfolio visibility, and market-event risk intelligence. CryPrice is a founder-led project built to help users understand portfolio and protocol risk before market stress turns into forced liquidations.',
   /** X (Twitter) handle without URL */
   xHandle: '@AdrasSad',
   /** LinkedIn link label in the author social row */
   linkedInLabel: 'LinkedIn',
-  bioParagraphs: [
-    'Independent builder of read-only DeFi monitoring systems — from multi-chain portfolio aggregation and Aave V3 risk tracking to alerting and server-side reporting.',
-  ] as const,
   /** Resolved by Vite from `src/assets/author.jpg` */
   photoSrc: authorPhoto,
   photoAlt: 'Portrait of Andrei Sharapov',
-  techTags: [
-    'Backend Architecture',
-    'DeFi Risk Monitoring',
-    'Aave V3',
-    'Multi-Chain',
-    'Node.js',
-    'Express',
-    'PostgreSQL',
-    'Redis',
-    'Flutter',
-    'Google Sign-In',
-  ] as const,
 } as const
 
 export const TECHNICAL_CONTRIBUTIONS = {
@@ -200,7 +248,7 @@ export const TECHNICAL_CONTRIBUTIONS = {
   lead: 'Core engineering areas implemented in the CryPrice stack.',
   items: [
     {
-      title: 'Multi-wallet, multi-chain portfolio aggregation',
+      title: 'Multi-address, multi-chain portfolio aggregation',
       detail: 'Read-only portfolio data across Ethereum, Arbitrum, Avalanche, and Base.',
     },
     {
@@ -213,15 +261,16 @@ export const TECHNICAL_CONTRIBUTIONS = {
     },
     {
       title: 'Backend-calculated allocation intelligence',
-      detail: 'Allocation views by asset, debt, protocol, network, and wallet.',
+      detail: 'Allocation views by asset, debt, protocol, network, and public address.',
     },
     {
       title: 'Server-side PDF portfolio reports',
       detail: 'Portfolio snapshots exported via backend PDF generation.',
     },
     {
-      title: 'Authenticated Telegram alert flow after Google sign-in',
-      detail: 'Telegram linking and alerts configured from the user profile after authentication.',
+      title: 'Optional Telegram notifications after Google account access',
+      detail:
+        'Link Telegram for optional notifications configured from the user profile after account access is set up.',
     },
     {
       title: 'Protocol-adapter architecture for future DeFi integrations',
@@ -243,7 +292,7 @@ export const MILESTONES = {
       detail: 'Cross-venue price comparison as a supporting utility.',
     },
     {
-      title: 'Multi-wallet portfolio dashboard',
+      title: 'Multi-address portfolio dashboard',
       detail: 'Flutter web dashboard for holdings and positions across networks.',
     },
     {
@@ -251,8 +300,8 @@ export const MILESTONES = {
       detail: 'Health Factor tracking and risk visibility for Aave V3 positions.',
     },
     {
-      title: 'Telegram account linking and risk alerts',
-      detail: 'In-app Telegram linking with Health Factor and price alerts.',
+      title: 'Optional Telegram notifications',
+      detail: 'Link Telegram for optional Health Factor and price notifications.',
     },
     {
       title: 'PDF portfolio reporting',
@@ -277,13 +326,13 @@ export const PUBLIC_WORK = {
 
 export const ARCHITECTURE_SNAPSHOT = {
   title: 'Architecture Snapshot',
-  lead: 'CryPrice combines a Flutter Web frontend, Node.js backend, PostgreSQL persistence, Redis caching, scheduled blockchain data sync, protocol adapters, and Telegram alerting into a read-only DeFi monitoring stack.',
+  lead: 'CryPrice combines a Flutter Web frontend, Node.js backend, PostgreSQL persistence, Redis caching, scheduled blockchain data sync, protocol adapters, and optional Telegram notifications into a read-only DeFi monitoring stack.',
   flow: [
-    'Wallets',
+    'Public addresses',
     'Blockchain adapters',
     'Portfolio aggregation',
     'Risk classification',
-    'Web dashboard / Telegram alerts / PDF reports',
+    'Web dashboard / optional notifications / PDF reports',
   ] as const,
 } as const
 
@@ -317,7 +366,7 @@ export const INFRASTRUCTURE_OVERVIEW = {
     {
       title: 'PostgreSQL storage',
       detail:
-        'Durable storage for accounts, wallet configuration, Health Factor history, and application state.',
+        'Durable storage for accounts, public address configuration, Health Factor history, and application state.',
     },
     {
       title: 'Redis caching',
@@ -326,16 +375,16 @@ export const INFRASTRUCTURE_OVERVIEW = {
     {
       title: 'Alerting system',
       detail:
-        'Authenticated Telegram alert linking after Google sign-in for Health Factor threshold notifications.',
+        'Telegram bot integration for Health Factor threshold and price movement notifications.',
     },
     {
       title: 'Flutter web frontend',
       detail:
-        'Portfolio dashboard, allocation charts, wallet management, EN/RU localization, and dark/light theme.',
+        'Portfolio dashboard, allocation charts, public address management, EN/RU localization, and dark/light theme.',
     },
   ] as const,
   flow: [
-    'Flutter Web / authenticated alerts',
+    'Flutter Web / Telegram',
     'REST API',
     'Monitoring Engine',
     'Blockchain & Market Data',
@@ -346,10 +395,10 @@ export const INFRASTRUCTURE_OVERVIEW = {
 
 export const PROJECT_LINK_CARDS = [
   {
-    title: 'Open App',
+    title: 'Use CryPrice',
     href: LINKS.app,
     url: 'app.cryprice.dev',
-    external: false,
+    external: true,
   },
   {
     title: 'Public Repository',
@@ -378,4 +427,4 @@ export const PROJECT_LINK_CARDS = [
 ] as const
 
 export const DISCLAIMER =
-  'CryPrice is a read-only monitoring tool. It does not execute transactions, store private keys, or provide financial advice.' as const
+  'CryPrice is a read-only monitoring tool. It does not connect wallets, execute transactions, store private keys, or provide financial advice.' as const

@@ -1,4 +1,5 @@
 import 'package:cryprice_frontend/features/alerts/data/models/health_factor_alert_payload_model.dart';
+import 'package:cryprice_frontend/features/alerts/data/models/risk_news_payload_model.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_payload.dart';
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_type.dart';
@@ -73,6 +74,7 @@ class InboxAlertModel {
         : const <String, Object?>{};
 
     return switch (type) {
+      InboxAlertType.riskNews => RiskNewsPayloadModel.fromJson(map).toInboxPayload(),
       InboxAlertType.healthFactorBreach ||
       InboxAlertType.healthFactorRecovery =>
         HealthFactorAlertPayloadModel.fromAlertJson(alertJson, map).toInboxPayload(),

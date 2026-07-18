@@ -1,14 +1,15 @@
 import 'package:cryprice_frontend/core/shell/shell_visuals.dart';
 import 'package:cryprice_frontend/core/shell/widgets/shell_left_command_menu.dart';
+import 'package:cryprice_frontend/features/auth/presentation/auth_error_messages.dart';
 import 'package:cryprice_frontend/features/auth/presentation/cubit/auth_cubit.dart';
 import 'package:cryprice_frontend/features/auth/presentation/widgets/login_google_cta.dart';
+import 'package:cryprice_frontend/features/auth/presentation/widgets/login_trust_block.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Restricted unauthenticated screen: theme, locale, and Google sign-in only.
+/// Full-screen account access (modal/route). Guest mode uses [AppShell] instead.
 class LoginPage extends StatelessWidget {
   const LoginPage({super.key});
 
@@ -26,9 +27,13 @@ class LoginPage extends StatelessWidget {
           return;
         }
         if (state.errorMessage != null) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(state.errorMessage!)),
-          );
+          final loc = AppLocalizations.of(context)!;
+          final message = resolveAuthErrorMessage(loc, state.errorMessage);
+          if (message != null) {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text(message)),
+            );
+          }
         }
       },
       child: const _Body(),
@@ -36,26 +41,8 @@ class LoginPage extends StatelessWidget {
   }
 }
 
-class _Body extends StatefulWidget {
+class _Body extends StatelessWidget {
   const _Body();
-
-  @override
-  State<_Body> createState() => _BodyState();
-}
-
-class _BodyState extends State<_Body> {
-  @override
-  void initState() {
-    super.initState();
-    if (kIsWeb) {
-      WidgetsBinding.instance.addPostFrameCallback((Duration _) {
-        if (!mounted) {
-          return;
-        }
-        context.read<AuthCubit>().signInWithGoogle();
-      });
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -118,14 +105,9 @@ class _BodyState extends State<_Body> {
                             mainAxisSize: MainAxisSize.min,
                             crossAxisAlignment: CrossAxisAlignment.stretch,
                             children: <Widget>[
-                              Text(
-                                loc.authScreenSubtitle,
-                                textAlign: TextAlign.center,
-                                style: GoogleFonts.montserrat(
-                                  fontSize: size.width < 400 ? 14 : 15,
-                                  height: 1.45,
-                                  color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                ),
+                              LoginTrustBlock(
+                                loc: loc,
+                                compact: size.width < 400,
                               ),
                               SizedBox(height: size.width < 400 ? 24 : 32),
                               buildLoginGoogleCta(

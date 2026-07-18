@@ -67,7 +67,7 @@ void main() {
     expect(find.text('Save'), findsOneWidget);
   });
 
-  testWidgets('shows telegram warning when not linked', (tester) async {
+  testWidgets('shows optional telegram warning when not linked', (tester) async {
     await tester.pumpWidget(
       buildSubject(
         state: const AlertRulesState(
@@ -79,6 +79,10 @@ void main() {
     );
 
     expect(find.byIcon(Icons.info_outline), findsOneWidget);
+    expect(
+      find.textContaining('optional Telegram notifications require linking'),
+      findsOneWidget,
+    );
   });
 
   testWidgets('disables save button while saving', (tester) async {

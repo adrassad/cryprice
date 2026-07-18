@@ -1,0 +1,32 @@
+# Static hosting security headers (example)
+#
+# This repository builds a static site (dist/) but does not control production
+# deployment. Apply these headers at your CDN, reverse proxy, or static host.
+#
+# Verify after deploy:
+#   curl -I https://cryprice.dev/
+
+# --- Cloudflare Workers / Transform Rules (conceptual) ---
+# Content-Security-Policy: default-src 'self'; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data:; script-src 'self'; connect-src 'self'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'
+# X-Content-Type-Options: nosniff
+# Referrer-Policy: strict-origin-when-cross-origin
+# Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+# Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+# X-Frame-Options: DENY
+
+# --- Netlify (_headers in publish directory) ---
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=()
+  Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+
+# --- nginx (server block snippet) ---
+# add_header X-Frame-Options "DENY" always;
+# add_header X-Content-Type-Options "nosniff" always;
+# add_header Referrer-Policy "strict-origin-when-cross-origin" always;
+# add_header Permissions-Policy "camera=(), microphone=(), geolocation=(), payment=()" always;
+# add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+
+# Note: tighten Content-Security-Policy after self-hosting fonts (remove fonts.googleapis.com / fonts.gstatic.com).

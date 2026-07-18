@@ -74,7 +74,7 @@ void main() {
       ),
     );
 
-    expect(find.text('Wallet value'), findsOneWidget);
+    expect(find.text('On-chain value'), findsOneWidget);
     expect(find.text('\$100.00'), findsOneWidget);
     expect(find.text('Supplied value'), findsNothing);
     expect(find.text('Borrowed / debt'), findsNothing);

@@ -5,7 +5,7 @@ class AlertRuleModel {
     required this.id,
     required this.userId,
     required this.type,
-    required this.protocol,
+    this.protocol,
     this.walletId,
     this.networkId,
     required this.thresholdHf,
@@ -20,7 +20,7 @@ class AlertRuleModel {
   final String id;
   final String userId;
   final String type;
-  final String protocol;
+  final String? protocol;
   final String? walletId;
   final String? networkId;
   final String thresholdHf;
@@ -53,7 +53,7 @@ class AlertRuleModel {
       id: asString(json['id']),
       userId: asString(json['user_id'] ?? json['userId']),
       type: asString(json['type']),
-      protocol: asString(json['protocol']),
+      protocol: asNullableString(json['protocol']),
       walletId: asNullableString(json['wallet_id'] ?? json['walletId']),
       networkId: asNullableString(json['network_id'] ?? json['networkId']),
       thresholdHf: asString(json['threshold_hf'] ?? json['thresholdHf']),

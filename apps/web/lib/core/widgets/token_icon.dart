@@ -1,10 +1,13 @@
 import 'package:cryprice_frontend/core/config/cryprice_backend_config.dart';
+import 'package:cryprice_frontend/core/widgets/token_icon_failure_cache.dart';
 import 'package:flutter/foundation.dart' show debugPrint, kDebugMode;
 import 'package:flutter/material.dart';
 
 /// Reusable token icon with backend-provided [logoUrl] and symbol-based fallback.
 ///
 /// Uses [Image.network] only — no hardcoded token logos and no symbol lookup.
+/// Failed URLs are remembered for the current app session so rebuilds do not
+/// re-fetch icons that returned 404, 429, or other errors.
 class TokenIcon extends StatelessWidget {
   const TokenIcon({
     super.key,
@@ -28,7 +31,6 @@ class TokenIcon extends StatelessWidget {
       resolved: resolvedUrl,
       loadable: loadable,
     );
-    final canLoadImage = loadable;
     final semanticsLabel = _tokenIconSemanticsLabel(symbol);
 
     return Semantics(
@@ -36,33 +38,58 @@ class TokenIcon extends StatelessWidget {
       child: SizedBox(
         width: size,
         height: size,
-        child: canLoadImage
-            ? ClipOval(
-                child: Image.network(
-                  resolvedUrl,
-                  key: ValueKey(resolvedUrl),
-                  width: size,
-                  height: size,
-                  fit: BoxFit.cover,
-                  gaplessPlayback: true,
-                  filterQuality: FilterQuality.medium,
-                  errorBuilder: (context, error, stackTrace) {
-                    _logTokenIconNetworkErrorOnce(
-                      symbol: symbol,
-                      url: resolvedUrl,
-                      error: error,
-                    );
-                    return TokenIconFallback(symbol: symbol, size: size);
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) {
-                      return child;
-                    }
-                    return TokenIconFallback(symbol: symbol, size: size);
-                  },
-                ),
-              )
-            : TokenIconFallback(symbol: symbol, size: size),
+        child: _TokenIconBody(
+          resolvedUrl: loadable ? resolvedUrl : null,
+          symbol: symbol,
+          size: size,
+        ),
+      ),
+    );
+  }
+}
+
+class _TokenIconBody extends StatelessWidget {
+  const _TokenIconBody({
+    required this.resolvedUrl,
+    required this.symbol,
+    required this.size,
+  });
+
+  final String? resolvedUrl;
+  final String symbol;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final url = resolvedUrl;
+    if (url == null || TokenIconFailureCache.isFailed(url)) {
+      return TokenIconFallback(symbol: symbol, size: size);
+    }
+
+    return ClipOval(
+      child: Image.network(
+        url,
+        key: ValueKey<String>(url),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        filterQuality: FilterQuality.medium,
+        errorBuilder: (context, error, stackTrace) {
+          TokenIconFailureCache.markFailed(url);
+          _logTokenIconNetworkErrorOnce(
+            symbol: symbol,
+            url: url,
+            error: error,
+          );
+          return TokenIconFallback(symbol: symbol, size: size);
+        },
+        loadingBuilder: (context, child, loadingProgress) {
+          if (loadingProgress == null) {
+            return child;
+          }
+          return TokenIconFallback(symbol: symbol, size: size);
+        },
       ),
     );
   }

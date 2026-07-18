@@ -24,6 +24,7 @@ void main() {
   late MockPortfolioRepository repository;
 
   setUpAll(() {
+    TestWidgetsFlutterBinding.ensureInitialized();
     GoogleFonts.config.allowRuntimeFetching = false;
   });
 
@@ -41,7 +42,7 @@ void main() {
   testWidgets('shows summary for loaded portfolio', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Net value'), findsWidgets);
     expect(find.text('\$5240.75'), findsWidgets);
@@ -68,15 +69,15 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('Wallet Holdings'), findsOneWidget);
+    expect(find.text('On-chain holdings'), findsOneWidget);
     expect(find.byType(TokenIcon), findsOneWidget);
     expect(find.text('DAI'), findsWidgets);
     expect(find.text('Polygon'), findsOneWidget);
     expect(find.text('42.5 DAI'), findsOneWidget);
     expect(find.text('Current Price'), findsOneWidget);
-    expect(find.text('\$1.0000'), findsOneWidget);
+    expect(find.text('\$1.00'), findsOneWidget);
     expect(find.text('\$42.50'), findsOneWidget);
     expect(find.text('Ethereum'), findsNothing);
 
@@ -86,9 +87,9 @@ void main() {
   testWidgets('falls back to legacy networks when wallet holdings are empty', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('Wallet Holdings'), findsNothing);
+    expect(find.text('On-chain holdings'), findsNothing);
     expect(find.text('Ethereum'), findsOneWidget);
     expect(find.text('USDC'), findsOneWidget);
 
@@ -108,9 +109,9 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('No wallet holdings'), findsOneWidget);
+    expect(find.text('No on-chain holdings'), findsOneWidget);
     expect(find.text('DeFi Positions'), findsOneWidget);
     expect(find.text('Supplied'), findsOneWidget);
     expect(find.text('Aave V3'), findsWidgets);
@@ -136,7 +137,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('DeFi Positions'), findsOneWidget);
     expect(find.text('Supplied'), findsOneWidget);
@@ -169,7 +170,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Borrowed'), findsOneWidget);
     expect(find.text('Debt'), findsOneWidget);
@@ -199,7 +200,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Supplied'), findsOneWidget);
     expect(find.text('Borrowed'), findsOneWidget);
@@ -215,7 +216,7 @@ void main() {
   ) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('No DeFi positions yet'), findsOneWidget);
     expect(find.text('Supplied'), findsNothing);
@@ -242,7 +243,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Price unavailable'), findsWidgets);
     expect(find.text('Value unavailable'), findsWidgets);
@@ -263,7 +264,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit, themeMode: ThemeMode.dark));
+    await _pumpPortfolio(tester, _app(cubit, themeMode: ThemeMode.dark));
 
     expect(find.text('DeFi Positions'), findsOneWidget);
     expect(find.text('Supplied'), findsOneWidget);
@@ -287,7 +288,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit, locale: const Locale('ru')));
+    await _pumpPortfolio(tester, _app(cubit, locale: const Locale('ru')));
 
     expect(find.text('DeFi-позиции'), findsOneWidget);
     expect(find.text('Заем'), findsOneWidget);
@@ -302,7 +303,7 @@ void main() {
   ) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Risk Details'), findsNothing);
 
@@ -324,7 +325,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Risk Details'), findsNothing);
     expect(find.text('Health Factor unavailable'), findsWidgets);
@@ -333,30 +334,30 @@ void main() {
   });
 
   testWidgets('shows one safe risk details row', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        healthFactor: '2.1400',
+        status: PortfolioHealthFactorStatus.safe,
+        threshold: '1.5000',
+      ),
+    ];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [
-            _positionHealth(
-              healthFactor: '2.1400',
-              status: PortfolioHealthFactorStatus.safe,
-              threshold: '1.5000',
-            ),
-          ],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Risk Details'), findsOneWidget);
     expect(find.text('Aave V3'), findsWidgets);
     expect(find.text('Ethereum'), findsWidgets);
     expect(find.text('0x1234...5678'), findsWidgets);
-    expect(find.text('2.14'), findsOneWidget);
-    expect(find.text('Safe'), findsOneWidget);
+    expect(find.text('2.14'), findsWidgets);
+    expect(find.text('Safe'), findsWidgets);
     expect(find.text('Threshold'), findsOneWidget);
     expect(find.text('1.5'), findsOneWidget);
 
@@ -364,50 +365,52 @@ void main() {
   });
 
   testWidgets('shows at risk risk details row', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        healthFactor: '1.0500',
+        status: PortfolioHealthFactorStatus.atRisk,
+      ),
+    ];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [
-            _positionHealth(
-              healthFactor: '1.0500',
-              status: PortfolioHealthFactorStatus.atRisk,
-            ),
-          ],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('1.05'), findsOneWidget);
-    expect(find.text('At risk'), findsOneWidget);
+    expect(find.text('1.05'), findsWidgets);
+    expect(find.text('At risk'), findsWidgets);
 
     await cubit.close();
   });
 
   testWidgets('shows multiple risk details rows for different wallets', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        networkName: 'Ethereum',
+        walletAddress: '0x1111111111111111111111111111111111111111',
+      ),
+      _positionHealth(
+        networkId: 137,
+        network: 'polygon',
+        networkName: 'Polygon',
+        walletAddress: '0x2222222222222222222222222222222222222222',
+      ),
+    ];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [
-            _positionHealth(
-              networkName: 'Ethereum',
-              walletAddress: '0x1111111111111111111111111111111111111111',
-            ),
-            _positionHealth(
-              networkName: 'Polygon',
-              walletAddress: '0x2222222222222222222222222222222222222222',
-            ),
-          ],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Risk Details'), findsOneWidget);
     expect(find.text('Ethereum'), findsWidgets);
@@ -419,25 +422,25 @@ void main() {
   });
 
   testWidgets('shows stale risk details row without hiding value', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        healthFactor: '1.8000',
+        status: PortfolioHealthFactorStatus.safe,
+        stale: true,
+      ),
+    ];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [
-            _positionHealth(
-              healthFactor: '1.8000',
-              status: PortfolioHealthFactorStatus.safe,
-              stale: true,
-            ),
-          ],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('1.8'), findsOneWidget);
+    expect(find.text('1.8'), findsWidgets);
     expect(find.textContaining('HF updated:'), findsWidgets);
     expect(find.text('Stale data'), findsNothing);
 
@@ -445,22 +448,22 @@ void main() {
   });
 
   testWidgets('shows missing health factor in risk details row', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        healthFactor: null,
+        status: PortfolioHealthFactorStatus.missing,
+      ),
+    ];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [
-            _positionHealth(
-              healthFactor: null,
-              status: PortfolioHealthFactorStatus.missing,
-            ),
-          ],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Health Factor unavailable'), findsWidgets);
 
@@ -468,6 +471,31 @@ void main() {
   });
 
   testWidgets('shows no borrow risk in risk details row', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        healthFactor: null,
+        status: PortfolioHealthFactorStatus.noDebt,
+      ),
+    ];
+    final cubit = await _loadedCubit(
+      repository,
+      _portfolio(
+        assets: const <PortfolioAsset>[],
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
+      ),
+    );
+
+    await _pumpPortfolio(tester, _app(cubit));
+
+    expect(find.text('No borrow risk'), findsWidgets);
+
+    await cubit.close();
+  });
+
+  testWidgets('hides risk details when health exists without protocol positions', (
+    tester,
+  ) async {
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
@@ -483,53 +511,54 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('No borrow risk'), findsWidgets);
+    expect(find.text('Risk Details'), findsNothing);
+    expect(find.text('No borrow risk'), findsNothing);
 
     await cubit.close();
   });
 
   testWidgets('renders risk details in dark theme', (tester) async {
+    final healthRows = [_positionHealth()];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [_positionHealth()],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit, themeMode: ThemeMode.dark));
+    await _pumpPortfolio(tester, _app(cubit, themeMode: ThemeMode.dark));
 
     expect(find.text('Risk Details'), findsOneWidget);
-    expect(find.text('2.14'), findsOneWidget);
+    expect(find.text('2.14'), findsWidgets);
 
     await cubit.close();
   });
 
   testWidgets('shows Russian risk details localization', (tester) async {
+    final healthRows = [
+      _positionHealth(
+        status: PortfolioHealthFactorStatus.atRisk,
+        threshold: '1.10',
+      ),
+    ];
     final cubit = await _loadedCubit(
       repository,
       _portfolio(
         assets: const <PortfolioAsset>[],
-        defiRisk: PortfolioDefiRisk(
-          positionsHealth: [
-            _positionHealth(
-              status: PortfolioHealthFactorStatus.atRisk,
-              threshold: '1.10',
-            ),
-          ],
-        ),
+        protocolPositions: _suppliedPositionsBackingHealth(healthRows),
+        defiRisk: PortfolioDefiRisk(positionsHealth: healthRows),
       ),
     );
 
-    await tester.pumpWidget(_app(cubit, locale: const Locale('ru')));
+    await _pumpPortfolio(tester, _app(cubit, locale: const Locale('ru')));
 
     expect(find.text('Детали риска'), findsOneWidget);
     expect(find.text('Порог'), findsOneWidget);
-    expect(find.text('В зоне риска'), findsOneWidget);
+    expect(find.text('В зоне риска'), findsWidgets);
 
     await cubit.close();
   });
@@ -548,7 +577,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Price unavailable'), findsWidgets);
     expect(find.text('Value unavailable'), findsWidgets);
@@ -575,7 +604,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Health Factor'), findsOneWidget);
     expect(find.text('No borrow risk'), findsWidgets);
@@ -589,27 +618,27 @@ void main() {
       _portfolio(walletHoldings: [_holding()]),
     );
 
-    await tester.pumpWidget(_app(cubit, themeMode: ThemeMode.dark));
+    await _pumpPortfolio(tester, _app(cubit, themeMode: ThemeMode.dark));
 
-    expect(find.text('Wallet Holdings'), findsOneWidget);
+    expect(find.text('On-chain holdings'), findsOneWidget);
     expect(find.text('USDC'), findsOneWidget);
 
     await cubit.close();
   });
 
   testWidgets('renders wallet holdings on mobile width', (tester) async {
-    tester.view.physicalSize = const Size(390, 844);
-    tester.view.devicePixelRatio = 1;
-    addTearDown(tester.view.resetPhysicalSize);
-    addTearDown(tester.view.resetDevicePixelRatio);
     final cubit = await _loadedCubit(
       repository,
       _portfolio(walletHoldings: [_holding()]),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(
+      tester,
+      _app(cubit),
+      viewport: const Size(390, 5000),
+    );
 
-    expect(find.text('Wallet Holdings'), findsOneWidget);
+    expect(find.text('On-chain holdings'), findsOneWidget);
     expect(find.text('USDC'), findsOneWidget);
     expect(find.text('Current Price'), findsOneWidget);
 
@@ -617,14 +646,16 @@ void main() {
   });
 
   testWidgets('wallet holdings desktop table shows column headers', (tester) async {
-    addTearDown(tester.view.resetPhysicalSize);
-    await tester.binding.setSurfaceSize(const Size(900, 700));
     final cubit = await _loadedCubit(
       repository,
       _portfolio(walletHoldings: [_holding()]),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(
+      tester,
+      _app(cubit),
+      viewport: const Size(900, 700),
+    );
 
     expect(find.text('USD Value'), findsOneWidget);
     expect(find.text('Assets'), findsOneWidget);
@@ -646,7 +677,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('\$1.00'), findsOneWidget);
     expect(find.text('Stale data'), findsOneWidget);
@@ -684,11 +715,11 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Net value'), findsWidgets);
     expect(find.text('\$1200.00'), findsWidgets);
-    expect(find.text('Wallet value'), findsWidgets);
+    expect(find.text('On-chain value'), findsWidgets);
     expect(find.text('\$600.00'), findsOneWidget);
     expect(find.text('Supplied value'), findsOneWidget);
     expect(find.text('\$700.00'), findsOneWidget);
@@ -697,8 +728,8 @@ void main() {
     expect(find.text('Gross value'), findsOneWidget);
     expect(find.text('\$1300.00'), findsOneWidget);
     expect(find.text('Health Factor'), findsOneWidget);
-    expect(find.text('2.14'), findsOneWidget);
-    expect(find.text('Safe'), findsOneWidget);
+    expect(find.text('2.14'), findsWidgets);
+    expect(find.text('Safe'), findsWidgets);
 
     await cubit.close();
   });
@@ -718,7 +749,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('No borrow risk'), findsWidgets);
 
@@ -743,10 +774,10 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('1.05'), findsOneWidget);
-    expect(find.text('At risk'), findsOneWidget);
+    expect(find.text('1.05'), findsWidgets);
+    expect(find.text('At risk'), findsWidgets);
 
     await cubit.close();
   });
@@ -769,9 +800,9 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
-    expect(find.text('1.8'), findsOneWidget);
+    expect(find.text('1.8'), findsWidgets);
     expect(find.textContaining('HF updated:'), findsOneWidget);
     expect(find.text('Stale data'), findsNothing);
 
@@ -781,7 +812,7 @@ void main() {
   testWidgets('shows Russian summary localization', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit, locale: const Locale('ru')));
+    await _pumpPortfolio(tester, _app(cubit, locale: const Locale('ru')));
 
     expect(find.text('Чистая стоимость'), findsWidgets);
     expect(find.text('Health Factor недоступен'), findsWidgets);
@@ -804,7 +835,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Price unavailable'), findsWidgets);
 
@@ -824,7 +855,7 @@ void main() {
       ),
     );
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Price stale'), findsOneWidget);
 
@@ -834,7 +865,7 @@ void main() {
   testWidgets('shows empty state', (tester) async {
     final cubit = await _loadedCubit(repository, _emptyPortfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('No portfolio assets yet'), findsOneWidget);
     expect(find.text('Pull to refresh'), findsOneWidget);
@@ -896,7 +927,7 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
       expect(cubit.state.filteredView?.scopeNetValueUsd, '300.00');
       expect(find.text('\$300.00'), findsWidgets);
@@ -914,7 +945,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-protocol-wallet')));
       await tester.pump();
 
@@ -929,7 +960,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-protocol-aave-v3')));
       await tester.pump();
 
@@ -948,7 +979,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-wallet-1')));
       await tester.pump();
 
@@ -965,7 +996,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit, themeMode: ThemeMode.dark));
+      await _pumpPortfolio(tester, _app(cubit, themeMode: ThemeMode.dark));
 
       expect(find.text('Net value'), findsWidgets);
       expect(find.textContaining('Last updated'), findsWidgets);
@@ -978,9 +1009,9 @@ void main() {
     testWidgets('hides selector when no wallets are available', (tester) async {
       final cubit = await _loadedCubit(repository, _portfolio());
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
-      expect(find.text('All wallets'), findsNothing);
+      expect(find.text('All addresses'), findsNothing);
       expect(cubit.state.selectedWalletId, PortfolioFilter.allWallets);
 
       await cubit.close();
@@ -1013,9 +1044,9 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
-      expect(find.text('All wallets'), findsOneWidget);
+      expect(find.text('All addresses'), findsOneWidget);
       expect(find.text('Primary'), findsOneWidget);
       expect(
         find.descendant(
@@ -1034,9 +1065,9 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
-      expect(find.text('All wallets'), findsOneWidget);
+      expect(find.text('All addresses'), findsOneWidget);
       expect(
         find.byKey(const ValueKey<String>('portfolio-wallet-1')),
         findsOneWidget,
@@ -1087,7 +1118,7 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
       expect(
         find.byKey(const ValueKey<String>('portfolio-wallet-wallet-2')),
@@ -1103,7 +1134,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-wallet-1')));
       await tester.pump();
 
@@ -1118,7 +1149,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-wallet-1')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-wallet-all')));
@@ -1135,7 +1166,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-protocol-aave-v3')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-wallet-1')));
@@ -1147,7 +1178,7 @@ void main() {
       expect(cubit.state.filteredView!.hasVisibleDefiPositions, isTrue);
       expect(cubit.state.filteredView!.visibleSuppliedPositions, hasLength(1));
       expect(cubit.state.filteredView!.visibleBorrowedPositions, hasLength(1));
-      expect(find.text('Wallet Holdings'), findsNothing);
+      expect(find.text('On-chain holdings'), findsNothing);
 
       await cubit.close();
     });
@@ -1160,7 +1191,7 @@ void main() {
         _portfolioWithWalletSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-protocol-wallet')));
       await tester.pump();
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-wallet-1')));
@@ -1168,7 +1199,7 @@ void main() {
 
       expect(cubit.state.selectedProtocol, PortfolioFilter.walletProtocol);
       expect(cubit.state.selectedWalletId, '1');
-      expect(find.text('Wallet Holdings'), findsOneWidget);
+      expect(find.text('On-chain holdings'), findsOneWidget);
       expect(find.text('Main scoped USDC'), findsOneWidget);
       expect(find.text('Secondary scoped USDC'), findsNothing);
 
@@ -1182,13 +1213,14 @@ void main() {
         repository,
         _portfolioWithWalletSummaries(),
       );
-      addTearDown(tester.view.resetPhysicalSize);
-
-      await tester.binding.setSurfaceSize(const Size(390, 844));
-      await tester.pumpWidget(_app(cubit, themeMode: ThemeMode.dark));
+      await _pumpPortfolio(
+        tester,
+        _app(cubit, themeMode: ThemeMode.dark),
+        viewport: const Size(390, 844),
+      );
       await tester.pumpAndSettle();
 
-      expect(find.text('All wallets'), findsOneWidget);
+      expect(find.text('All addresses'), findsOneWidget);
       expect(find.text('Main'), findsWidgets);
       expect(
         find.byWidgetPredicate(
@@ -1210,11 +1242,11 @@ void main() {
         _portfolioWithProtocolSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
       expect(find.text('Protocols'), findsOneWidget);
       expect(find.text('All protocols'), findsOneWidget);
-      expect(find.text('Wallet'), findsWidgets);
+      expect(find.text('Address'), findsWidgets);
       expect(find.text('Aave V3'), findsWidgets);
       expect(find.text('\$300.00'), findsWidgets);
       expect(find.text('\$100.00'), findsWidgets);
@@ -1245,10 +1277,10 @@ void main() {
         ),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
 
       expect(find.text('All protocols'), findsOneWidget);
-      expect(find.text('Wallet'), findsWidgets);
+      expect(find.text('Address'), findsWidgets);
       expect(find.text('Aave V3'), findsWidgets);
       expect(
         find.descendant(
@@ -1267,32 +1299,33 @@ void main() {
         _portfolioWithProtocolSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(tester, _app(cubit));
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-protocol-wallet')));
       await tester.pump();
 
       expect(cubit.state.selectedProtocol, PortfolioFilter.walletProtocol);
       expect(find.text('DeFi Positions'), findsNothing);
-      expect(find.text('Wallet Holdings'), findsOneWidget);
+      expect(find.text('On-chain holdings'), findsOneWidget);
 
       await cubit.close();
     });
 
     testWidgets('selects aave protocol without reloading', (tester) async {
-      addTearDown(tester.view.resetPhysicalSize);
-      await tester.binding.setSurfaceSize(const Size(800, 600));
-
       final cubit = await _loadedCubit(
         repository,
         _portfolioWithProtocolSummaries(),
       );
 
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(
+        tester,
+        _app(cubit),
+        viewport: const Size(800, 600),
+      );
       await tester.tap(find.byKey(const ValueKey<String>('portfolio-protocol-aave-v3')));
       await tester.pump();
 
       expect(cubit.state.selectedProtocol, 'aave-v3');
-      expect(find.text('Wallet Holdings'), findsNothing);
+      expect(find.text('On-chain holdings'), findsNothing);
       expect(find.text('DeFi Positions'), findsOneWidget);
 
       await cubit.close();
@@ -1304,7 +1337,8 @@ void main() {
         _portfolioWithProtocolSummaries(),
       );
 
-      await tester.pumpWidget(
+      await _pumpPortfolio(
+        tester,
         _app(cubit, themeMode: ThemeMode.dark),
       );
 
@@ -1319,10 +1353,11 @@ void main() {
         repository,
         _portfolioWithProtocolSummaries(),
       );
-      addTearDown(tester.view.resetPhysicalSize);
-
-      await tester.binding.setSurfaceSize(const Size(390, 844));
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(
+        tester,
+        _app(cubit),
+        viewport: const Size(390, 844),
+      );
       await tester.pumpAndSettle();
 
       expect(
@@ -1342,10 +1377,12 @@ void main() {
         repository,
         _portfolioWithProtocolSummaries(),
       );
-      addTearDown(tester.view.resetPhysicalSize);
 
-      await tester.binding.setSurfaceSize(const Size(1280, 800));
-      await tester.pumpWidget(_app(cubit));
+      await _pumpPortfolio(
+        tester,
+        _app(cubit),
+        viewport: const Size(1280, 800),
+      );
       await tester.pumpAndSettle();
 
       expect(find.byType(Wrap), findsWidgets);
@@ -1365,7 +1402,7 @@ void main() {
   testWidgets('shows Export PDF button for loaded portfolio', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Export PDF'), findsOneWidget);
     expect(find.byKey(PortfolioExportPdfButton.buttonKey), findsOneWidget);
@@ -1376,7 +1413,7 @@ void main() {
   testWidgets('tapping Export PDF triggers repository export', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
     await tester.tap(find.text('Export PDF'));
     await tester.pumpAndSettle();
 
@@ -1396,7 +1433,7 @@ void main() {
     });
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
     await tester.tap(find.text('Export PDF'));
     await tester.pump();
 
@@ -1422,11 +1459,11 @@ void main() {
     );
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
     await tester.tap(find.text('Export PDF'));
     await tester.pumpAndSettle();
 
-    expect(find.text('Login required'), findsOneWidget);
+    expect(find.text('Account access required'), findsOneWidget);
     expect(find.text('Export PDF'), findsOneWidget);
     expect(find.text('PDF export failed'), findsNothing);
 
@@ -1443,7 +1480,7 @@ void main() {
     );
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
     await tester.tap(find.text('Export PDF'));
     await tester.pumpAndSettle();
 
@@ -1456,7 +1493,7 @@ void main() {
   testWidgets('shows success snackbar after PDF export', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
     await tester.tap(find.text('Export PDF'));
     await tester.pumpAndSettle();
 
@@ -1468,10 +1505,11 @@ void main() {
   testWidgets('shows compact tonal export button on narrow width', (tester) async {
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.binding.setSurfaceSize(const Size(390, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(
+      tester,
+      _app(cubit),
+      viewport: const Size(390, 800),
+    );
 
     expect(find.byKey(PortfolioExportPdfButton.buttonKey), findsOneWidget);
     expect(find.text('PDF'), findsOneWidget);
@@ -1492,10 +1530,11 @@ void main() {
     });
     final cubit = await _loadedCubit(repository, _portfolio());
 
-    await tester.binding.setSurfaceSize(const Size(390, 800));
-    addTearDown(() => tester.binding.setSurfaceSize(null));
-
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(
+      tester,
+      _app(cubit),
+      viewport: const Size(390, 800),
+    );
     await tester.tap(find.text('PDF'));
     await tester.pump();
 
@@ -1521,13 +1560,23 @@ void main() {
     final cubit = _portfolioCubit(repository);
     await cubit.load();
 
-    await tester.pumpWidget(_app(cubit));
+    await _pumpPortfolio(tester, _app(cubit));
 
     expect(find.text('Failed to load portfolio'), findsOneWidget);
     expect(find.text('Retry'), findsOneWidget);
 
     await cubit.close();
   });
+}
+
+Future<void> _pumpPortfolio(
+  WidgetTester tester,
+  Widget app, {
+  Size viewport = const Size(900, 5000),
+}) async {
+  await tester.binding.setSurfaceSize(viewport);
+  addTearDown(() => tester.binding.setSurfaceSize(null));
+  await tester.pumpWidget(app);
 }
 
 Future<PortfolioCubit> _loadedCubit(
@@ -1856,6 +1905,39 @@ PortfolioHolding _holding({
   );
 }
 
+PortfolioWalletBreakdown _walletBreakdownForHealth(PortfolioPositionHealth health) {
+  return PortfolioWalletBreakdown(
+    walletId: health.walletId,
+    address: health.walletAddress,
+    label: health.walletLabel,
+    walletAddress: health.walletAddress,
+    walletLabel: health.walletLabel,
+    amount: '1',
+    balanceRaw: '0',
+    balance: '1',
+    valueUsd: '1.00',
+    syncedAt: null,
+    blockNumber: null,
+  );
+}
+
+PortfolioProtocolPositions _suppliedPositionsBackingHealth(
+  List<PortfolioPositionHealth> healthRows,
+) {
+  return PortfolioProtocolPositions(
+    supplied: healthRows
+        .map(
+          (health) => _protocolPosition(
+            networkId: health.networkId,
+            network: health.network,
+            networkName: health.networkName,
+            wallets: [_walletBreakdownForHealth(health)],
+          ),
+        )
+        .toList(growable: false),
+  );
+}
+
 PortfolioPositionHealth _positionHealth({
   String protocol = 'aave-v3',
   String protocolName = 'Aave V3',
@@ -1898,14 +1980,17 @@ PortfolioProtocolPosition _protocolPosition({
   String? valueUsd = '1.00',
   PortfolioPriceStatus priceStatus = PortfolioPriceStatus.ok,
   List<PortfolioWalletBreakdown> wallets = const <PortfolioWalletBreakdown>[],
+  int networkId = 1,
+  String network = 'ethereum',
+  String networkName = 'Ethereum',
 }) {
   return PortfolioProtocolPosition(
     kind: 'protocol',
     protocol: 'aave-v3',
     protocolName: 'Aave V3',
-    networkId: 1,
-    network: 'ethereum',
-    networkName: 'Ethereum',
+    networkId: networkId,
+    network: network,
+    networkName: networkName,
     chainId: 1,
     positionSide: positionSide,
     tokenRole: positionSide == PortfolioPositionSide.borrowed

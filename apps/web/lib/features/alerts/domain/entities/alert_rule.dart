@@ -3,7 +3,7 @@ class AlertRule {
     required this.id,
     required this.userId,
     required this.type,
-    required this.protocol,
+    this.protocol,
     this.walletId,
     this.networkId,
     required this.thresholdHf,
@@ -18,7 +18,7 @@ class AlertRule {
   final String id;
   final String userId;
   final String type;
-  final String protocol;
+  final String? protocol;
   final String? walletId;
   final String? networkId;
   final String thresholdHf;

@@ -37,6 +37,15 @@ void main() {
     verify(() => remote.markAlertRead('alert-1')).called(1);
   });
 
+  test('markAllAsRead delegates to remote data source', () async {
+    when(() => remote.markAllAsRead()).thenAnswer((_) async => 12);
+
+    final result = await repository.markAllAsRead();
+
+    expect(result, 12);
+    verify(() => remote.markAllAsRead()).called(1);
+  });
+
   test('getAlerts propagates remote errors', () async {
     const error = ApiError(
       message: 'Alerts unavailable',
@@ -61,7 +70,7 @@ void main() {
 InboxAlert _sampleAlert({String? readAt}) {
   return InboxAlert(
     id: 'alert-1',
-    type: InboxAlertType.healthFactorBreach,
+    type: InboxAlertType.riskNews,
     severity: 'high',
     title: 'Risk',
     message: 'Body',

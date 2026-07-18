@@ -22,6 +22,11 @@ class AlertsInboxState {
     this.errorMessage,
     this.markReadErrorCode,
     this.markReadErrorMessage,
+    this.isMarkingAllRead = false,
+    this.markAllReadErrorCode,
+    this.markAllReadErrorMessage,
+    this.pendingFocusAlertId,
+    this.highlightedAlertId,
   });
 
   final AlertsInboxStatus status;
@@ -36,6 +41,11 @@ class AlertsInboxState {
   final String? errorMessage;
   final String? markReadErrorCode;
   final String? markReadErrorMessage;
+  final bool isMarkingAllRead;
+  final String? markAllReadErrorCode;
+  final String? markAllReadErrorMessage;
+  final String? pendingFocusAlertId;
+  final String? highlightedAlertId;
 
   bool get isInitial => status == AlertsInboxStatus.initial;
 
@@ -60,8 +70,16 @@ class AlertsInboxState {
     String? errorMessage,
     String? markReadErrorCode,
     String? markReadErrorMessage,
+    bool? isMarkingAllRead,
+    String? markAllReadErrorCode,
+    String? markAllReadErrorMessage,
+    String? pendingFocusAlertId,
+    String? highlightedAlertId,
     bool clearError = false,
     bool clearMarkReadError = false,
+    bool clearMarkAllReadError = false,
+    bool clearPendingFocusAlertId = false,
+    bool clearHighlightedAlertId = false,
   }) {
     return AlertsInboxState(
       status: status ?? this.status,
@@ -76,6 +94,17 @@ class AlertsInboxState {
           clearMarkReadError ? null : (markReadErrorCode ?? this.markReadErrorCode),
       markReadErrorMessage:
           clearMarkReadError ? null : (markReadErrorMessage ?? this.markReadErrorMessage),
+      isMarkingAllRead: isMarkingAllRead ?? this.isMarkingAllRead,
+      markAllReadErrorCode:
+          clearMarkAllReadError ? null : (markAllReadErrorCode ?? this.markAllReadErrorCode),
+      markAllReadErrorMessage:
+          clearMarkAllReadError ? null : (markAllReadErrorMessage ?? this.markAllReadErrorMessage),
+      pendingFocusAlertId: clearPendingFocusAlertId
+          ? null
+          : (pendingFocusAlertId ?? this.pendingFocusAlertId),
+      highlightedAlertId: clearHighlightedAlertId
+          ? null
+          : (highlightedAlertId ?? this.highlightedAlertId),
     );
   }
 }

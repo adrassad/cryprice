@@ -1,3 +1,4 @@
+import 'package:cryprice_frontend/features/crypto_price/domain/entities/offchain_convert_result.dart';
 import 'package:cryprice_frontend/features/crypto_price/domain/entities/price_result.dart';
 
 /// One HTTP call to `/prices/current/offchain/` or `/onchain/`.
@@ -68,8 +69,10 @@ class PriceFetchOutcome {
   const PriceFetchOutcome({
     required this.results,
     required this.debug,
+    this.offchainConvert,
   });
 
   final List<PriceResult> results;
   final PriceFetchDebugSnapshot debug;
+  final OffchainConvertResult? offchainConvert;
 }

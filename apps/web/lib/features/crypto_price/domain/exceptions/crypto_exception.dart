@@ -1,4 +1,4 @@
-enum CryptoErrorCode { noInternet, fetchFailed, unknown }
+enum CryptoErrorCode { noInternet, fetchFailed, rateLimited, unknown }
 
 class CryptoException implements Exception {
   final CryptoErrorCode code;

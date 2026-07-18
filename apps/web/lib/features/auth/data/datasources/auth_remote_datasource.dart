@@ -1,4 +1,5 @@
 import 'package:cryprice_frontend/core/config/auth_backend_config.dart';
+import 'package:cryprice_frontend/core/config/google_auth_redirect_urls.dart';
 import 'package:cryprice_frontend/features/auth/domain/entities/auth_user.dart';
 import 'package:cryprice_frontend/features/auth/domain/exceptions/auth_api_exception.dart';
 import 'package:dio/dio.dart';
@@ -24,11 +25,43 @@ class AuthRemoteDataSource {
     );
   }
 
-  /// `POST /auth/google` with `{ "idToken": "..." }`.
+  /// LEGACY / native mobile: `POST /auth/google` with `{ "idToken": "..." }`.
+  /// Production Flutter Web login does not call this.
   Future<AuthTokenBundle> postAuthGoogle(String idToken) async {
     try {
       final r = await _dio.post<dynamic>('/auth/google', data: <String, dynamic>{'idToken': idToken});
       return _parseTokenResponse(r.data, expectIsNewUser: true);
+    } on DioException catch (e) {
+      throw _mapDio(e);
+    }
+  }
+
+  /// `POST /auth/google/exchange` with `{ "code": "..." }` after OAuth redirect return.
+  ///
+  /// Backend returns the same token payload as [postAuthGoogle]; tokens never appear in the URL.
+  Future<AuthTokenBundle> postAuthGoogleExchange(String code) async {
+    try {
+      final r = await _dio.post<dynamic>(
+        '/auth/google/exchange',
+        data: <String, dynamic>{'code': code},
+      );
+      return _parseTokenResponse(r.data, expectIsNewUser: true);
+    } on DioException catch (e) {
+      throw _mapDio(e);
+    }
+  }
+
+  /// LEGACY GIS only: primes `g_csrf_token` via `GET /auth/google/redirect/start`.
+  /// Production Flutter Web login does not call this.
+  Future<void> prepareGoogleRedirectStart(String returnTo) async {
+    try {
+      await _dio.get<void>(
+        '/auth/google/redirect/start',
+        queryParameters: <String, dynamic>{kGoogleAuthReturnToQueryKey: returnTo},
+        options: Options(
+          extra: const <String, dynamic>{'withCredentials': true},
+        ),
+      );
     } on DioException catch (e) {
       throw _mapDio(e);
     }
@@ -61,9 +94,15 @@ class AuthRemoteDataSource {
   }
 
   /// `POST /auth/logout`
-  Future<void> postLogout(String refreshToken) async {
+  Future<void> postLogout(String refreshToken, {String? pushToken}) async {
     try {
-      await _dio.post<dynamic>('/auth/logout', data: <String, dynamic>{'refreshToken': refreshToken});
+      await _dio.post<dynamic>(
+        '/auth/logout',
+        data: <String, dynamic>{
+          'refreshToken': refreshToken,
+          if (pushToken != null && pushToken.isNotEmpty) 'push_token': pushToken,
+        },
+      );
     } on DioException catch (e) {
       throw _mapDio(e);
     }

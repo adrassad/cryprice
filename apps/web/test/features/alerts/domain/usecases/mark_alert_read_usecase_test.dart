@@ -19,7 +19,7 @@ void main() {
   test('execute delegates to repository', () async {
     const alert = InboxAlert(
       id: 'alert-1',
-        type: InboxAlertType.healthFactorBreach,
+      type: InboxAlertType.riskNews,
       severity: 'high',
       title: 'Risk',
       message: 'Body',

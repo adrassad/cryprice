@@ -21,10 +21,12 @@ void logPriceFetchDebug(PriceFetchDebugSnapshot fetchDebug) {
   line('--- cryprice http snapshot ---');
   line('1) backend baseUrl (dio): $base');
   line('2) offchain full URL: ${offchain.fullRequestUrl.isNotEmpty ? offchain.fullRequestUrl : offchain.path}');
+  line('2b) offchain convert path: /prices/convert/offchain');
   line('3) onchain full URL: ${onchain.fullRequestUrl.isNotEmpty ? onchain.fullRequestUrl : onchain.path}');
   line('4) offchain HTTP: ${offchain.httpAttempted ? on : off}');
   line('5) onchain HTTP: ${onchain.httpAttempted ? on : off}');
   line('6) offchain status: ${offchain.statusCode?.toString() ?? 'n/a'}');
+  line('6b) offchain convert status: ${offchain.statusCode?.toString() ?? 'n/a'}');
   line('7) onchain status: ${onchain.statusCode?.toString() ?? 'n/a'}');
   line('8) offchain raw type: ${offchain.rawDataRuntimeType}');
   line('9) onchain raw type: ${onchain.rawDataRuntimeType}');

@@ -6,6 +6,7 @@ import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert.da
 import 'package:cryprice_frontend/features/alerts/domain/entities/inbox_alert_type.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alerts_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_alert_read_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_all_alerts_read_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_state.dart';
 import 'package:cryprice_frontend/gen_l10n/app_localizations.dart';
@@ -19,6 +20,8 @@ import 'package:mocktail/mocktail.dart';
 class MockGetAlertsUseCase extends Mock implements GetAlertsUseCase {}
 
 class MockMarkAlertReadUseCase extends Mock implements MarkAlertReadUseCase {}
+
+class MockMarkAllAlertsReadUseCase extends Mock implements MarkAllAlertsReadUseCase {}
 
 void main() {
   setUpAll(() {
@@ -100,11 +103,12 @@ void main() {
 AlertsInboxCubit _alertsCubitWithUnread({required int count}) {
   final getAlertsUseCase = MockGetAlertsUseCase();
   final markAlertReadUseCase = MockMarkAlertReadUseCase();
+  final markAllAlertsReadUseCase = MockMarkAllAlertsReadUseCase();
   final alerts = List<InboxAlert>.generate(
     count,
     (index) => InboxAlert(
       id: 'alert-$index',
-      type: InboxAlertType.healthFactorBreach,
+      type: InboxAlertType.riskNews,
       severity: 'high',
       title: 'Alert $index',
       message: 'Message $index',
@@ -117,6 +121,7 @@ AlertsInboxCubit _alertsCubitWithUnread({required int count}) {
   final cubit = AlertsInboxCubit(
     getAlertsUseCase: getAlertsUseCase,
     markAlertReadUseCase: markAlertReadUseCase,
+    markAllAlertsReadUseCase: markAllAlertsReadUseCase,
   );
   cubit.emit(
     AlertsInboxState(

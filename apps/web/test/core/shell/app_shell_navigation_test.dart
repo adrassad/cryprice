@@ -5,6 +5,7 @@ import 'package:cryprice_frontend/core/shell/widgets/shell_alerts_nav_icon.dart'
 import 'package:cryprice_frontend/core/shell/widgets/shell_section_nav.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/get_alerts_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_alert_read_usecase.dart';
+import 'package:cryprice_frontend/features/alerts/domain/usecases/mark_all_alerts_read_usecase.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_cubit.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/cubit/alerts_inbox_state.dart';
 import 'package:cryprice_frontend/features/alerts/presentation/pages/alerts_inbox_page.dart';
@@ -19,6 +20,8 @@ import 'package:mocktail/mocktail.dart';
 class MockGetAlertsUseCase extends Mock implements GetAlertsUseCase {}
 
 class MockMarkAlertReadUseCase extends Mock implements MarkAlertReadUseCase {}
+
+class MockMarkAllAlertsReadUseCase extends Mock implements MarkAllAlertsReadUseCase {}
 
 void main() {
   setUpAll(() {
@@ -115,11 +118,13 @@ AlertsInboxCubit _stubAlertsCubit({
 }) {
   final getAlertsUseCase = MockGetAlertsUseCase();
   final markAlertReadUseCase = MockMarkAlertReadUseCase();
+  final markAllAlertsReadUseCase = MockMarkAllAlertsReadUseCase();
   when(() => getAlertsUseCase.execute()).thenAnswer((_) async => const []);
 
   final cubit = AlertsInboxCubit(
     getAlertsUseCase: getAlertsUseCase,
     markAlertReadUseCase: markAlertReadUseCase,
+    markAllAlertsReadUseCase: markAllAlertsReadUseCase,
   );
   cubit.emit(AlertsInboxState(status: status, unreadCount: unreadCount));
   return cubit;

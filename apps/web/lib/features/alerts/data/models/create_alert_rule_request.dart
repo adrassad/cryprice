@@ -1,7 +1,7 @@
 class CreateAlertRuleRequest {
   const CreateAlertRuleRequest({
     required this.type,
-    required this.protocol,
+    this.protocol,
     required this.thresholdHf,
     required this.direction,
     required this.enabled,
@@ -11,7 +11,7 @@ class CreateAlertRuleRequest {
   });
 
   final String type;
-  final String protocol;
+  final String? protocol;
   final String thresholdHf;
   final String direction;
   final bool enabled;
@@ -21,7 +21,7 @@ class CreateAlertRuleRequest {
 
   Map<String, Object?> toJson() => <String, Object?>{
         'type': type,
-        'protocol': protocol,
+        if (protocol != null && protocol!.trim().isNotEmpty) 'protocol': protocol,
         'threshold_hf': thresholdHf,
         'direction': direction,
         'enabled': enabled,
@@ -30,7 +30,7 @@ class CreateAlertRuleRequest {
         'network_id': networkId,
       };
 
-  /// Global Health Factor threshold rule for Aave (simple v1 mode).
+  /// Global Health Factor threshold rule for all protocols (legacy v1 targeted Aave only).
   factory CreateAlertRuleRequest.globalHealthFactor({
     required String thresholdHf,
     bool enabled = true,
@@ -38,7 +38,6 @@ class CreateAlertRuleRequest {
   }) {
     return CreateAlertRuleRequest(
       type: 'health_factor_threshold',
-      protocol: 'aave',
       thresholdHf: thresholdHf,
       direction: 'below',
       enabled: enabled,

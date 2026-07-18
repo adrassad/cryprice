@@ -1,5 +1,5 @@
 {
-  "name": "cryprice-marketing",
+  "name": "cryprice-landing",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -8,7 +8,8 @@
   },
   "scripts": {
     "dev": "vite",
-    "build": "tsc -b && vite build",
+    "build": "tsc -b && vite build && vite build --ssr && node scripts/prerender.mjs",
+    "test": "node scripts/verify-static-routes.mjs",
     "lint": "eslint .",
     "preview": "vite preview",
     "generate:logo-gif": "node scripts/spin-logo-gif.mjs",
@@ -16,7 +17,9 @@
   },
   "dependencies": {
     "react": "^19.2.5",
-    "react-dom": "^19.2.5"
+    "react-dom": "^19.2.5",
+    "react-helmet-async": "^3.0.0",
+    "react-router-dom": "^7.15.1"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

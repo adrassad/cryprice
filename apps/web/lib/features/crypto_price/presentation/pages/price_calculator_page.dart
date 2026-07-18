@@ -178,6 +178,7 @@ class _PriceCalculatorPageState extends State<PriceCalculatorPage> {
                               userTicker1: state.userTicker1,
                               userTicker2: state.userTicker2,
                               localizeError: (code) => _localizeError(code, loc),
+                              offchainConvert: state.offchainConvert,
                             );
                           } else if (state is TitleError) {
                             return Center(
@@ -491,6 +492,10 @@ class _PriceCalculatorPageState extends State<PriceCalculatorPage> {
         return loc.error_no_internet;
       case 'error_fetch_failed':
         return loc.error_fetch_failed;
+      case 'error_rate_limited':
+        return loc.error_rate_limited;
+      case 'error_invalid_count':
+        return loc.error_invalid_count;
       case 'error_unknown':
         return loc.error_unknown;
       default:

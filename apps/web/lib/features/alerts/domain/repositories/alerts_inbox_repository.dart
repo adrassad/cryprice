@@ -4,4 +4,6 @@ abstract class AlertsInboxRepository {
   Future<List<InboxAlert>> getAlerts();
 
   Future<InboxAlert> markAlertRead(String id);
+
+  Future<int> markAllAsRead();
 }

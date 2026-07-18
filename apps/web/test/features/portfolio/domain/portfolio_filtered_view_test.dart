@@ -137,6 +137,49 @@ void main() {
       expect(view.visibleWalletHoldings, hasLength(1));
     });
 
+    test('filters orphan positions health without protocol positions', () {
+      final portfolio = Portfolio(
+        summary: const PortfolioSummary(
+          totalValueUsd: '0',
+          walletsCount: 1,
+          assetsCount: 0,
+          networksCount: 0,
+          updatedAt: '2026-05-19T13:30:00.000Z',
+        ),
+        totals: const PortfolioTotals(),
+        defiRisk: const PortfolioDefiRisk(
+          positionsHealth: <PortfolioPositionHealth>[
+            PortfolioPositionHealth(
+              protocol: 'aave-v3',
+              protocolName: 'Aave V3',
+              networkId: 42161,
+              network: 'arbitrum',
+              networkName: 'Arbitrum',
+              walletId: '1',
+              walletAddress: '0xwallet1',
+              walletLabel: 'Main',
+              healthFactor: null,
+              status: PortfolioHealthFactorStatus.noDebt,
+              statusLabel: 'No borrow risk',
+              threshold: '1.0',
+              updatedAt: '2026-05-19T13:30:00.000Z',
+              stale: false,
+            ),
+          ],
+        ),
+        protocolPositions: const PortfolioProtocolPositions(),
+        networks: const <PortfolioNetwork>[],
+      );
+
+      final view = buildFilteredPortfolioView(
+        portfolio,
+        PortfolioFilter.allProtocols,
+        PortfolioFilter.allWallets,
+      );
+
+      expect(view.visiblePositionsHealth, isEmpty);
+    });
+
     test('positions health respects protocol and wallet filters', () {
       final view = buildFilteredPortfolioView(
         _filterablePortfolio(),
@@ -239,6 +282,69 @@ void main() {
       expect(
         view.overviewHealthFactorSource,
         PortfolioFilteredHealthFactorSource.walletSummary,
+      );
+    });
+
+    test('wallet holdings sort by valueUsd desc after filtering', () {
+      final portfolio = Portfolio(
+        summary: PortfolioSummary(
+          totalValueUsd: '2100.00',
+          walletsCount: 1,
+          assetsCount: 2,
+          networksCount: 2,
+          updatedAt: '2026-05-19T13:30:00.000Z',
+          netValueUsd: '2100.00',
+        ),
+        networks: const <PortfolioNetwork>[],
+        walletHoldings: const <PortfolioHolding>[
+          PortfolioHolding(
+            kind: 'wallet',
+            networkId: 1,
+            network: 'ethereum',
+            networkName: 'Ethereum',
+            chainId: 1,
+            assetId: '10',
+            assetSymbol: 'USDC',
+            assetAddress: '0xusdc',
+            symbol: 'USDC',
+            address: '0xusdc',
+            amount: '100.0',
+            balanceRaw: '100000000',
+            decimals: 6,
+            priceUsd: '1.00',
+            valueUsd: '100.00',
+            priceStatus: PortfolioPriceStatus.ok,
+          ),
+          PortfolioHolding(
+            kind: 'wallet',
+            networkId: 2,
+            network: 'arbitrum',
+            networkName: 'Arbitrum',
+            chainId: 42161,
+            assetId: '20',
+            assetSymbol: 'WETH',
+            assetAddress: '0xweth',
+            symbol: 'WETH',
+            address: '0xweth',
+            amount: '1.0',
+            balanceRaw: '1000000000000000000',
+            decimals: 18,
+            priceUsd: '2000.00',
+            valueUsd: '2000.00',
+            priceStatus: PortfolioPriceStatus.ok,
+          ),
+        ],
+      );
+
+      final view = buildFilteredPortfolioView(
+        portfolio,
+        PortfolioFilter.allProtocols,
+        PortfolioFilter.allWallets,
+      );
+
+      expect(
+        view.visibleWalletHoldings.map((holding) => holding.symbol).toList(),
+        ['WETH', 'USDC'],
       );
     });
   });

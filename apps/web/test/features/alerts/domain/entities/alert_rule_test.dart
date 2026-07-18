@@ -36,6 +36,16 @@ void main() {
       expect(rule.isGlobalRule, isFalse);
     });
 
+    test('fromJson parses null protocol for global all-protocols rule', () {
+      final rule = AlertRuleModel.fromJson(<String, Object?>{
+        ..._sampleRuleJson(),
+        'protocol': null,
+      }).toEntity();
+
+      expect(rule.protocol, isNull);
+      expect(rule.isGlobalRule, isTrue);
+    });
+
     test('fromJson parses camelCase aliases', () {
       final rule = AlertRuleModel.fromJson(<String, Object?>{
         'id': 'rule-2',
@@ -101,7 +111,6 @@ void main() {
         request.toJson(),
         <String, Object?>{
           'type': 'health_factor_threshold',
-          'protocol': 'aave',
           'threshold_hf': '1.50',
           'direction': 'below',
           'enabled': true,

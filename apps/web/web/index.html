@@ -1,11 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <base href="$FLUTTER_BASE_HREF">
 
   <meta charset="UTF-8">
   <meta content="IE=Edge" http-equiv="X-UA-Compatible">
-  <meta name="description" content="CryPrice — multi-chain DeFi risk monitoring.">
+  <meta name="description" content="Read-only DeFi portfolio monitoring and risk intelligence platform for public blockchain addresses.">
+  <meta name="robots" content="index, follow">
+  <link rel="canonical" href="https://app.cryprice.dev/">
+
+  <!-- Open Graph -->
+  <meta property="og:site_name" content="CryPrice">
+  <meta property="og:title" content="CryPrice — Read-Only DeFi Dashboard">
+  <meta property="og:description" content="Read-only DeFi portfolio monitoring and risk intelligence platform for public blockchain addresses.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://app.cryprice.dev/">
+  <meta property="og:image" content="https://app.cryprice.dev/icons/Icon-512.png">
+
+  <!-- Twitter / X -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="CryPrice — Read-Only DeFi Dashboard">
+  <meta name="twitter:description" content="Read-only DeFi portfolio monitoring and risk intelligence platform for public blockchain addresses.">
+  <meta name="twitter:image" content="https://app.cryprice.dev/icons/Icon-512.png">
 
   <!-- iOS meta tags & icons -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -16,10 +32,308 @@
   <!-- Favicon -->
   <link rel="icon" type="image/png" href="favicon.png"/>
 
-  <title>CryPrice</title>
+  <title>CryPrice — Read-Only DeFi Dashboard</title>
   <link rel="manifest" href="manifest.json">
+
+  <style>
+    /* Keep shell in DOM for crawlers; never show it to users (avoids pre-Flutter flash). */
+    #cryprice-app-static-shell {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+    #cryprice-app-loading {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fef7ff;
+    }
+    @media (prefers-color-scheme: dark) {
+      #cryprice-app-loading {
+        background: #141218;
+      }
+    }
+    #cryprice-app-loading img {
+      width: 120px;
+      height: 120px;
+      object-fit: contain;
+    }
+    body.cryprice-app-mounted #cryprice-app-loading {
+      display: none;
+    }
+    #cryprice-noscript-fallback {
+      max-width: 52rem;
+      margin: 1rem auto;
+      padding: 0 1.25rem 1.5rem;
+      font: 0.9375rem/1.55 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
+      color: #1e293b;
+    }
+    #cryprice-noscript-fallback h1 {
+      margin: 0 0 0.5rem;
+      font-size: 1.25rem;
+    }
+    #cryprice-noscript-fallback ul {
+      margin: 0 0 0.75rem;
+      padding-left: 1.25rem;
+    }
+  </style>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@graph": [
+      {
+        "@type": "WebApplication",
+        "@id": "https://app.cryprice.dev/#app",
+        "name": "CryPrice Dashboard",
+        "url": "https://app.cryprice.dev/",
+        "applicationCategory": "FinanceApplication",
+        "operatingSystem": "Web",
+        "description": "Read-only DeFi portfolio monitoring and risk intelligence platform for public blockchain addresses.",
+        "isAccessibleForFree": true,
+        "browserRequirements": "Requires JavaScript",
+        "provider": { "@id": "https://cryprice.dev/#organization" }
+      },
+      {
+        "@type": "Organization",
+        "@id": "https://cryprice.dev/#organization",
+        "name": "CryPrice",
+        "url": "https://cryprice.dev",
+        "email": "support@cryprice.dev",
+        "description": "Read-only DeFi risk intelligence and public address monitoring.",
+        "contactPoint": [
+          {
+            "@type": "ContactPoint",
+            "contactType": "customer support",
+            "email": "support@cryprice.dev",
+            "url": "https://cryprice.dev/contact/"
+          },
+          {
+            "@type": "ContactPoint",
+            "contactType": "security",
+            "email": "security@cryprice.dev",
+            "url": "https://cryprice.dev/security/"
+          }
+        ],
+        "knowsAbout": [
+          "https://cryprice.dev/trust/",
+          "https://cryprice.dev/transparency/",
+          "https://cryprice.dev/security/"
+        ],
+        "sameAs": [
+          "https://github.com/adrassad/cryprice",
+          "https://github.com/adrassad",
+          "https://x.com/AdrasSad",
+          "https://t.me/adrassad",
+          "https://www.linkedin.com/in/adrassad"
+        ]
+      }
+    ]
+  }
+  </script>
 </head>
 <body>
+  <div id="cryprice-app-loading" aria-hidden="true">
+    <img
+      src="assets/assets/gifs/loading.gif"
+      alt=""
+      width="120"
+      height="120"
+      decoding="async"
+    >
+  </div>
+
+  <main id="cryprice-app-static-shell">
+    <p class="domain-badge">Official application: app.cryprice.dev · Marketing site: cryprice.dev</p>
+    <h1>CryPrice — Read-Only DeFi Dashboard</h1>
+    <p>
+      CryPrice is a read-only DeFi risk intelligence dashboard for public address monitoring,
+      portfolio visibility, and Aave Health Factor context across Ethereum, Arbitrum, Avalanche,
+      and Base. This web application is the authenticated product surface for CryPrice — not a
+      wallet, exchange, or transaction service.
+    </p>
+
+    <h2>What this application does</h2>
+    <p>
+      After account access is set up, you can add public blockchain addresses to monitor,
+      review multi-address portfolio allocation, track Aave V3 supplied and borrowed positions,
+      monitor Health Factor and liquidation proximity, export server-side PDF portfolio reports,
+      and configure optional notification channels from your profile.
+    </p>
+    <ul>
+      <li>Multi-address portfolio dashboard across supported networks</li>
+      <li>Aave V3 Health Factor monitoring and protocol exposure views</li>
+      <li>Backend-calculated allocation by asset, debt, protocol, network, and public address</li>
+      <li>Read-only market and position data — no on-chain transaction execution</li>
+    </ul>
+
+    <h2>How account access works</h2>
+    <p>
+      <a href="/authentication/">How account access works</a> — technical documentation for
+      the Flutter Web sign-in flow and official CryPrice domains.
+    </p>
+    <ol>
+      <li>Open this official app at app.cryprice.dev (linked from cryprice.dev).</li>
+      <li>Use Google for CryPrice account access only — not wallet access.</li>
+      <li>Add the public addresses you want to monitor.</li>
+      <li>Review portfolio risk, Health Factor context, and optional alerts in the dashboard.</li>
+    </ol>
+
+    <h2>Read-only by design</h2>
+    <p>
+      Monitoring uses public on-chain and protocol data for addresses you choose to track.
+      See the <a href="https://cryprice.dev/security/">security model</a> on cryprice.dev
+      for data handling and scope.
+    </p>
+
+    <h2>Security Model</h2>
+    <p>CryPrice is designed as a read-only platform.</p>
+    <p>The platform does not require users to provide:</p>
+    <ul>
+      <li>recovery phrases (seed phrases);</li>
+      <li>private keys;</li>
+      <li>wallet signing credentials.</li>
+    </ul>
+    <p>
+      CryPrice does not execute blockchain transactions and does not take custody of user assets.
+    </p>
+    <p>
+      Authentication through Google OAuth is used only for CryPrice accounts and is unrelated to
+      blockchain wallet authentication.
+    </p>
+    <p>
+      CryPrice does not require users to connect a wallet in order to monitor public blockchain
+      addresses. Full trust documentation:
+      <a href="https://cryprice.dev/trust/">Trust</a> ·
+      <a href="https://cryprice.dev/transparency/">Transparency</a> ·
+      <a href="https://cryprice.dev/.well-known/security.txt">security.txt</a>
+      (security contact:
+      <a href="mailto:security@cryprice.dev">security@cryprice.dev</a>).
+    </p>
+
+    <footer id="cryprice-app-static-footer">
+      <nav class="footer-nav" aria-label="Legal and trust">
+        <a href="https://cryprice.dev/privacy/">Privacy</a> ·
+        <a href="https://cryprice.dev/terms/">Terms</a> ·
+        <a href="https://cryprice.dev/security/">Security</a> ·
+        <a href="https://cryprice.dev/trust/">Trust</a> ·
+        <a href="https://cryprice.dev/transparency/">Transparency</a> ·
+        <a href="https://cryprice.dev/contact/">Contact</a> ·
+        <a href="/authentication/">Authentication</a> ·
+        <a href="https://cryprice.dev/faq/">FAQ</a>
+      </nav>
+      <div class="official-domains" aria-label="Official domains">
+        <p class="official-domains-title">Official Domains</p>
+        <ul class="official-domains-list">
+          <li><a href="https://cryprice.dev/">cryprice.dev</a></li>
+          <li><a href="https://app.cryprice.dev/">app.cryprice.dev</a></li>
+          <li><a href="https://api.cryprice.dev/">api.cryprice.dev</a></li>
+        </ul>
+      </div>
+    </footer>
+  </main>
+
+  <noscript>
+    <div id="cryprice-noscript-fallback">
+      <h1>CryPrice — Read-Only DeFi Dashboard</h1>
+      <p>
+        Read-only DeFi portfolio monitoring and risk intelligence platform for public blockchain
+        addresses. JavaScript is required to run the interactive dashboard.
+      </p>
+      <h2>Security Model</h2>
+      <p>CryPrice is designed as a read-only platform.</p>
+      <p>The platform does not require users to provide:</p>
+      <ul>
+        <li>recovery phrases (seed phrases);</li>
+        <li>private keys;</li>
+        <li>wallet signing credentials.</li>
+      </ul>
+      <p>
+        CryPrice does not execute blockchain transactions and does not take custody of user assets.
+        Authentication through Google OAuth is used only for CryPrice accounts and is unrelated to
+        blockchain wallet authentication.
+      </p>
+      <p><strong>Official Domains</strong></p>
+      <ul>
+        <li><a href="https://cryprice.dev/">cryprice.dev</a> — product website and trust pages</li>
+        <li><a href="https://app.cryprice.dev/">app.cryprice.dev</a> — this web dashboard</li>
+        <li><a href="https://api.cryprice.dev/">api.cryprice.dev</a> — REST API</li>
+      </ul>
+      <p>
+        <a href="/authentication/">How account access works</a> ·
+        <a href="https://cryprice.dev/trust/">Trust</a> ·
+        <a href="https://cryprice.dev/transparency/">Transparency</a> ·
+        <a href="https://cryprice.dev/privacy/">Privacy</a> ·
+        <a href="https://cryprice.dev/terms/">Terms</a> ·
+        <a href="https://cryprice.dev/security/">Security</a> ·
+        <a href="https://cryprice.dev/contact/">Contact</a>
+      </p>
+    </div>
+  </noscript>
+
+  <script>
+    (function () {
+      if (!('serviceWorker' in navigator)) return;
+
+      var AUTH_FLAG = 'cryprice_auth_flow_in_progress';
+      var AUTH_STARTED = 'cryprice_auth_flow_started_at';
+      var RELOAD_PENDING = 'cryprice_sw_reload_pending';
+      var AUTH_TIMEOUT_MS = 120000;
+      var refreshing = false;
+
+      function authFlowActive() {
+        if (sessionStorage.getItem(AUTH_FLAG) !== 'true') return false;
+        var startedRaw = sessionStorage.getItem(AUTH_STARTED);
+        if (!startedRaw) return true;
+        var started = parseInt(startedRaw, 10);
+        if (!started) return true;
+        if (Date.now() - started >= AUTH_TIMEOUT_MS) {
+          sessionStorage.removeItem(AUTH_FLAG);
+          sessionStorage.removeItem(AUTH_STARTED);
+          return false;
+        }
+        return true;
+      }
+
+      navigator.serviceWorker.addEventListener('controllerchange', function () {
+        if (refreshing) return;
+        if (authFlowActive()) {
+          sessionStorage.setItem(RELOAD_PENDING, '1');
+          return;
+        }
+        refreshing = true;
+        window.location.reload();
+      });
+    })();
+  </script>
+  <script>
+    (function () {
+      function markAppMounted() {
+        document.body.classList.add('cryprice-app-mounted');
+      }
+      if (document.querySelector('flt-glass-pane') || document.querySelector('flutter-view')) {
+        markAppMounted();
+        return;
+      }
+      var observer = new MutationObserver(function () {
+        if (document.querySelector('flt-glass-pane') || document.querySelector('flutter-view')) {
+          markAppMounted();
+          observer.disconnect();
+        }
+      });
+      observer.observe(document.body, { childList: true, subtree: true });
+      window.addEventListener('flutter-first-frame', markAppMounted, { once: true });
+    })();
+  </script>
   <script src="flutter_bootstrap.js" async></script>
 </body>
 </html>

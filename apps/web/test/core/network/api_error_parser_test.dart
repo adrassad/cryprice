@@ -36,4 +36,41 @@ void main() {
     expect(parsed.message, 'Price not found');
     expect(parsed.statusCode, 404);
   });
+
+  test('parses normalized RATE_LIMITED object format', () {
+    final dioError = DioException(
+      requestOptions: RequestOptions(path: '/users/me'),
+      response: Response<dynamic>(
+        requestOptions: RequestOptions(path: '/users/me'),
+        statusCode: 429,
+        data: <String, Object?>{
+          'error': <String, Object?>{
+            'code': 'RATE_LIMITED',
+            'message': 'Too many requests, please try again later.',
+          },
+        },
+      ),
+    );
+    final parsed = parseApiError(dioError);
+    expect(parsed.code, 'RATE_LIMITED');
+    expect(parsed.statusCode, 429);
+    expect(parsed.message, contains('Too many requests'));
+  });
+
+  test('parses legacy 429 string error format', () {
+    final dioError = DioException(
+      requestOptions: RequestOptions(path: '/users/me'),
+      response: Response<dynamic>(
+        requestOptions: RequestOptions(path: '/users/me'),
+        statusCode: 429,
+        data: <String, Object?>{
+          'error': 'Too many requests, please try again later.',
+        },
+      ),
+    );
+    final parsed = parseApiError(dioError);
+    expect(parsed.code, 'RATE_LIMITED');
+    expect(parsed.statusCode, 429);
+    expect(parsed.message, contains('Too many requests'));
+  });
 }

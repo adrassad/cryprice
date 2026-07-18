@@ -1,27 +1,5 @@
 # Local development
 
-## API base URL (compile-time)
-
-The app defaults to **`http://127.0.0.1:3000`** so OSS clone-and-run does not hit production.
-
-Pass at build/run time:
-
-```text
---dart-define=CRYPRICE_BACKEND_BASE_URL=http://127.0.0.1:3000
-```
-
-Auth and prices use the same host (`lib/core/config/cryprice_backend_config.dart`).
-
-**Production / staging builds** must set the deployed API explicitly, for example:
-
-```bash
-flutter build web \
-  --dart-define=CRYPRICE_BACKEND_BASE_URL=https://api.cryprice.dev \
-  --dart-define=GOOGLE_WEB_CLIENT_ID=<WEB_CLIENT_ID>.apps.googleusercontent.com
-```
-
-See [`.env.example`](.env.example) for a full list of dart-define keys.
-
 ## Web: Google Sign-In (OAuth 2.0)
 
 The app reads the **Web** OAuth 2.0 client id at **compile time** via `--dart-define` (it is not hardcoded in source).
@@ -60,9 +38,7 @@ You may add multiple origins (e.g. both `http://localhost:5000` and `http://127.
 ### 5. Local run command (example)
 
 ```bash
-flutter run -d chrome --web-port=5000 \
-  --dart-define=CRYPRICE_BACKEND_BASE_URL=http://127.0.0.1:3000 \
-  --dart-define=GOOGLE_WEB_CLIENT_ID=<WEB_CLIENT_ID>.apps.googleusercontent.com
+flutter run -d chrome --web-port=5000 --dart-define=GOOGLE_WEB_CLIENT_ID=<WEB_CLIENT_ID>.apps.googleusercontent.com
 ```
 
 Replace `<WEB_CLIENT_ID>.apps.googleusercontent.com` with the full **Client ID** string from the **Web application** client (not a client secret; the id is safe to pass via `--dart-define` locally, but do not commit secrets).
